@@ -1,0 +1,23 @@
+language: generic
+env:
+  global:
+    - IDE_VERSION=1.8.7
+  matrix:
+    - BOARD="arduino:samd:mkrwifi1010"
+before_install:
+  - wget http://downloads.arduino.cc/arduino-$IDE_VERSION-linux64.tar.xz
+  - tar xf arduino-$IDE_VERSION-linux64.tar.xz
+  - mv arduino-$IDE_VERSION $HOME/arduino-ide
+  - export PATH=$PATH:$HOME/arduino-ide
+  - if [[ "$BOARD" =~ "arduino:samd:" ]]; then
+      arduino --install-boards arduino:samd;
+    fi
+  - buildExamplePeripheralSketch() { arduino --verbose-build --verify --board $BOARD $PWD/examples/Peripheral/$1/$1.ino; }
+install:
+  - mkdir -p $HOME/Arduino/libraries
+  - ln -s $PWD $HOME/Arduino/libraries/.
+script:
+  - buildExamplePeripheralSketch BatteryMonitor
+  - buildExamplePeripheralSketch ButtonLED
+  - buildExamplePeripheralSketch CallbackLED
+  - buildExamplePeripheralSketch LED

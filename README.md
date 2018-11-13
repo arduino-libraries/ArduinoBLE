@@ -1,5 +1,7 @@
 # ArduinoBLE
 
+[![Build Status](https://travis-ci.org/arduino-libraries/ArduinoBLE.svg?branch=master)](https://travis-ci.org/arduino-libraries/ArduinoBLE)
+
 Enables BLE connectivity on the Arduino MKR WiFi 1010 and Arduino UNO WiFi Rev.2.
 
 This library currently supports creating a BLE peripheral.
