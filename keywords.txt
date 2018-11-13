@@ -1,0 +1,95 @@
+#######################################
+# Syntax Coloring Map For ArduinoBLE
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ArduinoBLE	KEYWORD1
+BLE	KEYWORD1
+
+BLE	KEYWORD1
+BLECharacteristic	KEYWORD1
+BLEDescriptor	KEYWORD1
+BLEService	KEYWORD1
+
+BLEBoolCharacteristic	KEYWORD1
+BLEBooleanCharacteristic	KEYWORD1
+BLECharCharacteristic	KEYWORD1
+BLEUnsignedCharCharacteristic	KEYWORD1
+BLEByteCharacteristic	KEYWORD1
+BLEShortCharacteristic	KEYWORD1
+BLEUnsignedShortCharacteristic	KEYWORD1
+BLEWordCharacteristic	KEYWORD1
+BLEIntCharacteristic	KEYWORD1
+BLEUnsignedIntCharacteristic	KEYWORD1
+BLELongCharacteristic	KEYWORD1
+BLEUnsignedLongCharacteristic	KEYWORD1
+BLEFloatCharacteristic	KEYWORD1
+BLEDoubleCharacteristic	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+poll	KEYWORD2
+end	KEYWORD2
+
+connected	KEYWORD2
+disconnect	KEYWORD
+address	KEYWORD2
+rssi	KEYWORD
+
+setAdvertisedServiceUuid	KEYWORD
+setManufacturerData	KEYWORD
+setLocalName	KEYWORD
+setDeviceName	KEYWORD
+setAppearance	KEYWORD
+addService	KEYWORD
+advertise	KEYWORD
+stopAdvertise	KEYWORD
+central	KEYWORD
+setEventHandler	KEYWORD
+setAdvertisingInterval	KEYWORD
+setConnectionInterval	KEYWORD
+setConnectable	KEYWORD
+debug	KEYWORD
+noDebug	KEYWORD
+
+properties	KEYWORD
+valueSize	KEYWORD
+value	KEYWORD
+valueLength	KEYWORD
+writeValue	KEYWORD
+setValue	KEYWORD
+broadcast	KEYWORD
+written	KEYWORD
+subscribed	KEYWORD
+addDescriptor	KEYWORD
+writeValueLE	KEYWORD
+setValueLE	KEYWORD
+valueLE	KEYWORD
+writeValueBE	KEYWORD
+setValueBE	KEYWORD
+valueBE	KEYWORD
+
+uuid	KEYWORD
+addCharacteristic	KEYWORD
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BLEBroadcast	LITERAL1
+BLERead	LITERAL1
+BLEWriteWithoutResponse	LITERAL1
+BLEWrite	LITERAL1
+BLENotify	LITERAL1
+BLEIndicate	LITERAL1
+
+BLESubscribed	LITERAL1
+BLEUnsubscribed	LITERAL1
+BLEWritten	LITERAL1
+
