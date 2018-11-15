@@ -7,6 +7,10 @@
   The circuit:
   - Arduino MKR WiFi 1010 or Arduino Uno WiFi Rev2 board
 
+  You can use a generic BLE central app, like LightBlue (iOS and Android) or
+  nRF Connect (Android), to interact with the services and characteristics
+  created in this sketch.
+
   This example code is in the public domain.
 */
 
