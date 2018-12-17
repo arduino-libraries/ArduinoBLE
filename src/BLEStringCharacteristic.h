@@ -17,12 +17,23 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_BLE_H_
-#define _ARDUINO_BLE_H_
+#ifndef _BLE_STRING_CHARACTERISTIC_H_
+#define _BLE_STRING_CHARACTERISTIC_H_
 
-#include "local/BLELocalDevice.h"
-#include "BLEProperty.h"
-#include "BLEStringCharacteristic.h"
-#include "BLETypedCharacteristics.h"
+#include <Arduino.h>
+
+#include "BLECharacteristic.h"
+
+class BLEStringCharacteristic : public BLECharacteristic
+{
+public:
+  BLEStringCharacteristic(const char* uuid, unsigned char properties, int valueSize);
+
+  int writeValue(const String& value);
+  int setValue(const String& value) { return writeValue(value); }
+  String value(void);
+
+private:
+};
 
 #endif

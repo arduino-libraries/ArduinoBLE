@@ -17,12 +17,29 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_BLE_H_
-#define _ARDUINO_BLE_H_
-
-#include "local/BLELocalDevice.h"
-#include "BLEProperty.h"
 #include "BLEStringCharacteristic.h"
-#include "BLETypedCharacteristics.h"
 
-#endif
+BLEStringCharacteristic::BLEStringCharacteristic(const char* uuid, unsigned char properties, int valueSize) :
+  BLECharacteristic(uuid, properties, valueSize)
+{
+}
+
+int BLEStringCharacteristic::writeValue(const String& value)
+{
+  return BLECharacteristic::writeValue(value.c_str());
+}
+
+String BLEStringCharacteristic::value(void)
+{
+  String str;
+  int length = BLECharacteristic::valueLength();
+  const uint8_t* val = BLECharacteristic::value();
+
+  str.reserve(length);
+
+  for (int i = 0; i < length; i++) {
+    str += (char)val[i];
+  }
+
+  return str;
+}

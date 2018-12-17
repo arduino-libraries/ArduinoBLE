@@ -28,6 +28,7 @@ BLELongCharacteristic	KEYWORD1
 BLEUnsignedLongCharacteristic	KEYWORD1
 BLEFloatCharacteristic	KEYWORD1
 BLEDoubleCharacteristic	KEYWORD1
+BLEStringCharacteristic	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
