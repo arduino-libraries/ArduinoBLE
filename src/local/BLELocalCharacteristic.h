@@ -76,7 +76,7 @@ private:
   uint8_t  _properties;
   int      _valueSize;
   uint8_t* _value;
-  uint8_t  _valueLength;
+  uint16_t  _valueLength;
   bool _fixedLength;
 
   uint16_t _handle;
