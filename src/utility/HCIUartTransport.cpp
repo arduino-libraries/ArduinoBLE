@@ -17,6 +17,8 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#ifndef ARDUINO_ARCH_MBED
+
 #include "HCIUartTransport.h"
 
 #if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
@@ -93,3 +95,5 @@ HCIUartTransportClass HCIUartTransport(SerialHCI, 119600);
 HCIUartTransportClass HCIUartTransport(SerialHCI, 912600);
 #endif
 HCITransportInterface& HCITransport = HCIUartTransport;
+
+#endif
