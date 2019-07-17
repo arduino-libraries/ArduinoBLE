@@ -17,6 +17,9 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#ifndef _HCI_UART_TRANSPORT_H_
+#define _HCI_UART_TRANSPORT_H_
+
 #include "HCITransport.h"
 
 class HCIUartTransportClass : public HCITransportInterface {
@@ -39,3 +42,5 @@ private:
   HardwareSerial* _uart;
   unsigned long _baudrate;
 };
+
+#endif

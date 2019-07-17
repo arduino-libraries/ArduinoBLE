@@ -17,6 +17,9 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#ifndef _HCI_TRANSPORT_INTERFACE_H_
+#define _HCI_TRANSPORT_INTERFACE_H_
+
 #include <Arduino.h>
 
 class HCITransportInterface {
@@ -34,3 +37,5 @@ public:
 };
 
 extern HCITransportInterface& HCITransport;
+
+#endif

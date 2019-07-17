@@ -18,7 +18,7 @@
 */
 
 #include "ATT.h"
-#include "HCIUartTransport.h"
+#include "HCITransport.h"
 #include "L2CAPSignaling.h"
 
 #include "HCI.h"
