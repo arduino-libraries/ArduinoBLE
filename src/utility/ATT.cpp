@@ -22,9 +22,13 @@
 #include "HCI.h"
 #include "GATT.h"
 
+#include "local/BLELocalAttribute.h"
 #include "local/BLELocalCharacteristic.h"
 #include "local/BLELocalDescriptor.h"
 #include "local/BLELocalService.h"
+
+#include "remote/BLERemoteDevice.h"
+#include "remote/BLERemoteService.h"
 
 #include "BLEProperty.h"
 
@@ -79,13 +83,20 @@
 
 ATTClass::ATTClass() :
   _maxMtu(23),
-  _connectionHandle(0xffff),
-  _mtu(23),
+  _timeout(5000),
   _longWriteHandle(0x0000),
   _longWriteValue(NULL),
   _longWriteValueLength(0)
 {
-  memset(_peerAddress, 0x00, sizeof(_peerAddress));
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    _peers[i].connectionHandle = 0xffff;
+    _peers[i].role = 0x00;
+    _peers[i].addressType = 0x00;
+    memset(_peers[i].address, 0x00, sizeof(_peers[i].address));
+    _peers[i].mtu = 23;
+    _peers[i].device = NULL;
+  }
+
   memset(_eventHandlers, 0x00, sizeof(_eventHandlers));
 }
 
@@ -96,24 +107,154 @@ ATTClass::~ATTClass()
   }
 }
 
+bool ATTClass::connect(uint8_t peerBdaddrType, uint8_t peerBdaddr[6])
+{
+  if (HCI.leCreateConn(0x0060, 0x0030, 0x00, peerBdaddrType, peerBdaddr, 0x00,
+                        0x0006, 0x000c, 0x0000, 0x00c8, 0x0004, 0x0006) != 0) {
+    return false;
+  }
+
+  bool isConnected = false;
+
+  for (unsigned long start = millis(); (millis() - start) < _timeout;) {
+    HCI.poll();
+
+    isConnected = connected(peerBdaddrType, peerBdaddr);
+
+    if (isConnected) {
+      break;
+    }
+  }
+
+  if (!isConnected) {
+    HCI.leCancelConn();
+  }
+
+  return isConnected;
+}
+
+bool ATTClass::disconnect(uint8_t peerBdaddrType, uint8_t peerBdaddr[6])
+{
+  uint16_t connHandle = connectionHandle(peerBdaddrType, peerBdaddr);
+  if (connHandle == 0xffff) {
+    return false;
+  }
+
+  HCI.disconnect(connHandle);
+
+  for (unsigned long start = millis(); (millis() - start) < _timeout;) {
+    HCI.poll();
+
+    if (!connected(connHandle)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool ATTClass::discoverAttributes(uint8_t peerBdaddrType, uint8_t peerBdaddr[6], const char* serviceUuidFilter)
+{
+  uint16_t connHandle = connectionHandle(peerBdaddrType, peerBdaddr);
+  if (connHandle == 0xffff) {
+    return false;
+  }
+
+  // send MTU request
+  if (!exchangeMtu(connHandle)) {
+    return false;
+  }
+
+  // find the device entry for the peeer
+  BLERemoteDevice* device = NULL;
+
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == connHandle) {
+      if (_peers[i].device == NULL) {
+        _peers[i].device = new BLERemoteDevice();
+      }
+
+      device = _peers[i].device;
+
+      break;
+    }
+  }
+
+  if (device == NULL) {
+    return false;
+  }
+
+  if (serviceUuidFilter == NULL) {
+    // clear existing services
+    device->clearServices();
+  } else {
+    int serviceCount = device->serviceCount();
+  
+    for (int i = 0; i < serviceCount; i++) {
+      BLERemoteService* service = device->service(i);
+
+      if (strcmp(service->uuid(), serviceUuidFilter) == 0) {
+        // found an existing service with same UUID
+        return true;
+      }
+    }
+  }
+
+  // discover services
+  if (!discoverServices(connHandle, device, serviceUuidFilter)) {
+    return false;
+  }
+
+  // discover characteristics
+  if (!discoverCharacteristics(connHandle, device)) {
+    return false;
+  }
+
+  // discover descriptors
+  if (!discoverDescriptors(connHandle, device)) {
+    return false;
+  }
+
+  return true;
+}
+
 void ATTClass::setMaxMtu(uint16_t maxMtu)
 {
   _maxMtu = maxMtu;
 }
 
-void ATTClass::addConnection(uint16_t handle, uint8_t role, uint8_t /*peerBdaddrType*/,
+void ATTClass::setTimeout(unsigned long timeout)
+{
+  _timeout = timeout;
+}
+
+void ATTClass::addConnection(uint16_t handle, uint8_t role, uint8_t peerBdaddrType,
                               uint8_t peerBdaddr[6], uint16_t /*interval*/,
                               uint16_t /*latency*/, uint16_t /*supervisionTimeout*/,
                               uint8_t /*masterClockAccuracy*/)
 {
-  if (role == 1) {
-    _connectionHandle = handle;
-    _mtu = 23;
-    memcpy(_peerAddress, peerBdaddr, sizeof(_peerAddress));
+  int peerIndex = -1;
 
-    if (_eventHandlers[BLEConnected]) {
-      _eventHandlers[BLEConnected](BLEDevice(_connectionHandle, _peerAddress));
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff) {
+      peerIndex = i;
+      break;
     }
+  }
+
+  if (peerIndex == -1) {
+    // bail, no space
+    return;
+  }
+
+  _peers[peerIndex].connectionHandle = handle;
+  _peers[peerIndex].role = role;
+  _peers[peerIndex].mtu = 23;
+  _peers[peerIndex].addressType = peerBdaddrType;
+  memcpy(_peers[peerIndex].address, peerBdaddr, sizeof(_peers[peerIndex].address));
+
+  if (_eventHandlers[BLEConnected]) {
+    _eventHandlers[BLEConnected](BLEDevice(peerBdaddrType, peerBdaddr));
   }
 }
 
@@ -124,43 +265,78 @@ void ATTClass::handleData(uint16_t connectionHandle, uint8_t dlen, uint8_t data[
   dlen--;
   data++;
 
+  uint16_t mtu = this->mtu(connectionHandle);
+
   switch (opcode) {
+    case ATT_OP_ERROR:
+      error(connectionHandle, dlen, data);
+      break;
+
     case ATT_OP_MTU_REQ:
       mtuReq(connectionHandle, dlen, data);
       break;
 
+    case ATT_OP_MTU_RESP:
+      mtuResp(connectionHandle, dlen, data);
+      break;
+
     case ATT_OP_FIND_INFO_REQ:
-      findInfoReq(connectionHandle, dlen, data);
+      findInfoReq(connectionHandle, mtu, dlen, data);
+      break;
+
+    case ATT_OP_FIND_INFO_RESP:
+      findInfoResp(connectionHandle, dlen, data);
       break;
 
     case ATT_OP_FIND_BY_TYPE_REQ:
-      findByTypeReq(connectionHandle, dlen, data);
+      findByTypeReq(connectionHandle, mtu, dlen, data);
       break;
 
     case ATT_OP_READ_BY_TYPE_REQ:
-      readByTypeReq(connectionHandle, dlen, data);
+      readByTypeReq(connectionHandle, mtu, dlen, data);
+      break;
+
+    case ATT_OP_READ_BY_TYPE_RESP:
+      readByTypeResp(connectionHandle, dlen, data);
       break;
 
     case ATT_OP_READ_BY_GROUP_REQ:
-      readByGroupReq(connectionHandle, dlen, data);
+      readByGroupReq(connectionHandle, mtu, dlen, data);
+      break;
+
+    case ATT_OP_READ_BY_GROUP_RESP:
+      readByGroupResp(connectionHandle, dlen, data);
       break;
 
     case ATT_OP_READ_REQ:
     case ATT_OP_READ_BLOB_REQ:
-      readOrReadBlobReq(connectionHandle, opcode, dlen, data);
+      readOrReadBlobReq(connectionHandle, mtu, opcode, dlen, data);
+      break;
+
+    case ATT_OP_READ_RESP:
+      readResp(connectionHandle, dlen, data);
       break;
 
     case ATT_OP_WRITE_REQ:
     case ATT_OP_WRITE_CMD:
-      writeReqOrCmd(connectionHandle, opcode, dlen, data);
+      writeReqOrCmd(connectionHandle, mtu, opcode, dlen, data);
+      break;
+
+    case ATT_OP_WRITE_RESP:
+      writeResp(connectionHandle, dlen, data);
       break;
 
     case ATT_OP_PREP_WRITE_REQ:
-      prepWriteReq(connectionHandle, dlen, data);
+      prepWriteReq(connectionHandle, mtu, dlen, data);
       break;
 
     case ATT_OP_EXEC_WRITE_REQ:
-      execWriteReq(connectionHandle, dlen, data);
+      execWriteReq(connectionHandle, mtu, dlen, data);
+      break;
+
+    case ATT_OP_HANDLE_NOTIFY:
+    case ATT_OP_HANDLE_IND:
+      handleNotifyOrInd(connectionHandle, opcode, dlen, data);
       break;
 
     case ATT_OP_HANDLE_CNF:
@@ -177,12 +353,30 @@ void ATTClass::handleData(uint16_t connectionHandle, uint8_t dlen, uint8_t data[
 
 void ATTClass::removeConnection(uint8_t handle, uint16_t /*reason*/)
 {
-  if (_connectionHandle == handle) {
-    BLEDevice bleDevice(_connectionHandle, _peerAddress);
+  int peerIndex = -1;
+  int peerCount = 0;
 
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == handle) {
+      peerIndex = i;
+    }
+
+    if (_peers[i].connectionHandle != 0xffff) {
+      peerCount++;
+    }
+  }
+
+  if (peerIndex == -1) {
+    // bail not found
+    return;
+  }
+
+  BLEDevice bleDevice(_peers[peerIndex].addressType, _peers[peerIndex].address);
+
+  if (peerCount == 1) {
     // clear CCCD values on disconnect
     for (uint16_t i = 0; i < GATT.attributeCount(); i++) {
-      BLEAttribute* attribute = GATT.attribute(i);
+      BLELocalAttribute* attribute = GATT.attribute(i);
 
       if (attribute->type() == BLETypeCharacteristic) {
         BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)attribute;
@@ -191,46 +385,126 @@ void ATTClass::removeConnection(uint8_t handle, uint16_t /*reason*/)
       }
     }
 
-    if (_eventHandlers[BLEDisconnected]) {
-      _eventHandlers[BLEDisconnected](bleDevice);
-    }
-
-    _connectionHandle = 0xffff;
-    memset(_peerAddress, 0x00, sizeof(_peerAddress));
     _longWriteHandle = 0x0000;
     _longWriteValueLength = 0;
   }
+
+  if (_eventHandlers[BLEDisconnected]) {
+    _eventHandlers[BLEDisconnected](bleDevice);
+  }
+
+  _peers[peerIndex].connectionHandle = 0xffff;
+  _peers[peerIndex].role = 0x00;
+  _peers[peerIndex].addressType = 0x00;
+  memset(_peers[peerIndex].address, 0x00, sizeof(_peers[peerIndex].address));
+  _peers[peerIndex].mtu = 23;
+
+  if (_peers[peerIndex].device) {
+    delete _peers[peerIndex].device;
+  }
+  _peers[peerIndex].device = NULL;
+}
+
+uint16_t ATTClass::connectionHandle(uint8_t addressType, const uint8_t address[6]) const
+{
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].addressType == addressType && memcmp(_peers[i].address, address, 6) == 0) {
+      return _peers[i].connectionHandle;
+    }
+  }
+
+  return 0xffff;
+}
+
+BLERemoteDevice* ATTClass::device(uint8_t addressType, const uint8_t address[6]) const
+{
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].addressType == addressType && memcmp(_peers[i].address, address, 6) == 0) {
+      return _peers[i].device;
+    }
+  }
+
+  return NULL;
 }
 
 bool ATTClass::connected() const
 {
-  return (_connectionHandle != 0xffff);
-}
-
-bool ATTClass::connected(uint16_t handle, const uint8_t address[6]) const
-{
-  return ((_connectionHandle == handle) && memcmp(_peerAddress, address, 6) == 0);
-}
-
-bool ATTClass::disconnect()
-{
-  if (_connectionHandle != 0xffff) {
-    if (HCI.disconnect(_connectionHandle) != 0) {
-      return false;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle != 0xffff) {
+      return true;
     }
-
-    _connectionHandle = 0xffff;
-    memset(_peerAddress, 0x00, sizeof(_peerAddress));
-    return true;
   }
 
   return false;
 }
 
+bool ATTClass::connected(uint8_t addressType, const uint8_t address[6]) const
+{
+  return (connectionHandle(addressType, address) != 0xffff);
+}
+
+bool ATTClass::connected(uint16_t handle) const
+{
+  HCI.poll();
+
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == handle) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+uint16_t ATTClass::mtu(uint16_t handle) const
+{
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == handle) {
+      return _peers[i].mtu;
+    }
+  }
+
+  return 23;
+}
+
+bool ATTClass::disconnect()
+{
+  int numDisconnects = 0;
+
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff) {
+      continue;
+    }
+
+    if (HCI.disconnect(_peers[i].connectionHandle) != 0) {
+      continue;
+    }
+
+    numDisconnects++;
+
+    _peers[i].connectionHandle = 0xffff;
+    _peers[i].role = 0x00;
+    _peers[i].addressType = 0x00;
+    memset(_peers[i].address, 0x00, sizeof(_peers[i].address));
+    _peers[i].mtu = 23;
+
+    if (_peers[i].device) {
+      delete _peers[i].device;
+    }
+    _peers[i].device = NULL;
+  }
+
+  return (numDisconnects > 0);
+}
+
 BLEDevice ATTClass::central()
 {
-  if (connected()) {
-    return BLEDevice(_connectionHandle, _peerAddress);
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x01) {
+      continue;
+    }
+
+    return BLEDevice(_peers[i].addressType, _peers[i].address);
   }
 
   return BLEDevice();
@@ -238,8 +512,14 @@ BLEDevice ATTClass::central()
 
 bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
 {
-  if (_connectionHandle != 0xffff) {
-    uint8_t notication[_mtu];
+  int numNotifications = 0;
+
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff) {
+      continue;
+    }
+
+    uint8_t notication[_peers[i].mtu];
     uint16_t noticationLength = 0;
 
     notication[0] = ATT_OP_HANDLE_NOTIFY;
@@ -248,22 +528,28 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
     memcpy(&notication[1], &handle, sizeof(handle));
     noticationLength += sizeof(handle);
 
-    length = min((uint16_t)(_mtu - noticationLength), (uint16_t)length);
+    length = min((uint16_t)(_peers[i].mtu - noticationLength), (uint16_t)length);
     memcpy(&notication[noticationLength], value, length);
     noticationLength += length;
 
-    HCI.sendAclPkt(_connectionHandle, ATT_CID, noticationLength, notication);
+    HCI.sendAclPkt(_peers[i].connectionHandle, ATT_CID, noticationLength, notication);
 
-    return true;
+    numNotifications++;
   }
 
-  return false;
+  return (numNotifications > 0);
 }
 
 bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
 {
-  if (_connectionHandle != 0xffff) {
-    uint8_t indication[_mtu];
+  int numIndications = 0;
+
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff) {
+      continue;
+    }
+
+    uint8_t indication[_peers[i].mtu];
     uint16_t indicationLength = 0;
 
     indication[0] = ATT_OP_HANDLE_IND;
@@ -272,26 +558,46 @@ bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
     memcpy(&indication[1], &handle, sizeof(handle));
     indicationLength += sizeof(handle);
 
-    length = min((uint16_t)(_mtu - indicationLength), (uint16_t)length);
+    length = min((uint16_t)(_peers[i].mtu - indicationLength), (uint16_t)length);
     memcpy(&indication[indicationLength], value, length);
     indicationLength += length;
 
     _cnf = false;
 
-    HCI.sendAclPkt(_connectionHandle, ATT_CID, indicationLength, indication);
+    HCI.sendAclPkt(_peers[i].connectionHandle, ATT_CID, indicationLength, indication);
 
     while (!_cnf) {
       HCI.poll();
 
-      if (!connected()) {
-        return false;
+      if (!connected(_peers[i].addressType, _peers[i].address)) {
+        break;
       }
     }
 
-    return true;
+    numIndications++;
   }
 
-  return false;
+  return (numIndications > 0);
+}
+
+void ATTClass::error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+{
+  if (dlen != 4) {
+    // drop
+    return;
+  } 
+
+  struct __attribute__ ((packed)) AttError {
+    uint8_t opcode;
+    uint16_t handle;
+    uint8_t code;
+  } *attError = (AttError*)data;
+
+  if (_pendingResp.connectionHandle == connectionHandle && (_pendingResp.op - 1) == attError->opcode) {
+    _pendingResp.buffer[0] = ATT_OP_ERROR;
+    memcpy(&_pendingResp.buffer[1], data, dlen);
+    _pendingResp.length = dlen + 1;
+  }
 }
 
 void ATTClass::mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
@@ -307,7 +613,12 @@ void ATTClass::mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
     mtu = _maxMtu;
   }
 
-  _mtu = mtu;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == connectionHandle) {
+      _peers[i].mtu = mtu;
+      break;
+    }
+  }
 
   struct __attribute__ ((packed)) {
     uint8_t op;
@@ -317,7 +628,39 @@ void ATTClass::mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
   HCI.sendAclPkt(connectionHandle, ATT_CID, sizeof(mtuResp), &mtuResp);
 }
 
-void ATTClass::findInfoReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+int ATTClass::mtuReq(uint16_t connectionHandle, uint16_t mtu, uint8_t responseBuffer[])
+{
+  struct __attribute__ ((packed)) {
+    uint8_t op;
+    uint16_t mtu;
+  } mtuReq = { ATT_OP_MTU_REQ, mtu };
+
+  return sendReq(connectionHandle, &mtuReq, sizeof(mtuReq), responseBuffer);
+}
+
+void ATTClass::mtuResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+{
+  uint16_t mtu = *(uint16_t*)data;
+
+  if (dlen != 2) {
+    return;
+  }
+
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == connectionHandle) {
+      _peers[i].mtu = mtu;
+      break;
+    }
+  }
+
+  if (connectionHandle == _pendingResp.connectionHandle && _pendingResp.op == ATT_OP_MTU_RESP) {
+    _pendingResp.buffer[0] = ATT_OP_MTU_RESP;
+    memcpy(&_pendingResp.buffer[1], data, dlen);
+    _pendingResp.length = dlen + 1;
+  }
+}
+
+void ATTClass::findInfoReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen, uint8_t data[])
 {
   struct __attribute__ ((packed)) FindInfoReq {
     uint16_t startHandle;
@@ -329,7 +672,7 @@ void ATTClass::findInfoReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data
     return;
   }
 
-  uint8_t response[_mtu];
+  uint8_t response[mtu];
   uint16_t responseLength;
 
   response[0] = ATT_OP_FIND_INFO_RESP;
@@ -337,7 +680,7 @@ void ATTClass::findInfoReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data
   responseLength = 2;
 
   for (uint16_t i = (findInfoReq->startHandle - 1); i < GATT.attributeCount() && i <= (findInfoReq->endHandle - 1); i++) {
-    BLEAttribute* attribute = GATT.attribute(i);
+    BLELocalAttribute* attribute = GATT.attribute(i);
     uint16_t handle = (i + 1);
     bool isValueHandle = (attribute->type() == BLETypeCharacteristic) && (((BLELocalCharacteristic*)attribute)->valueHandle() == handle);
     int uuidLen = isValueHandle ? 2 : attribute->uuidLength();
@@ -368,7 +711,7 @@ void ATTClass::findInfoReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data
       responseLength += sizeof(type);
     }
 
-    if ((responseLength + (2 + uuidLen)) > _mtu) {
+    if ((responseLength + (2 + uuidLen)) > mtu) {
       break;
     }
   }
@@ -380,7 +723,31 @@ void ATTClass::findInfoReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data
   }
 }
 
-void ATTClass::findByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+int ATTClass::findInfoReq(uint16_t connectionHandle, uint16_t startHandle, uint16_t endHandle, uint8_t responseBuffer[])
+{
+  struct __attribute__ ((packed)) {
+    uint8_t op;
+    uint16_t startHandle;
+    uint16_t endHandle;
+  } findInfoReq = { ATT_OP_FIND_INFO_REQ, startHandle, endHandle };
+
+  return sendReq(connectionHandle, &findInfoReq, sizeof(findInfoReq), responseBuffer);
+}
+
+void ATTClass::findInfoResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+{
+  if (dlen < 2) {
+    return; // invalid, drop
+  }
+
+  if (connectionHandle == _pendingResp.connectionHandle && _pendingResp.op == ATT_OP_FIND_INFO_RESP) {
+    _pendingResp.buffer[0] = ATT_OP_FIND_INFO_RESP;
+    memcpy(&_pendingResp.buffer[1], data, dlen);
+    _pendingResp.length = dlen + 1;
+  }
+}
+
+void ATTClass::findByTypeReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen, uint8_t data[])
 {
   struct __attribute__ ((packed)) FindByTypeReq {
     uint16_t startHandle;
@@ -396,7 +763,7 @@ void ATTClass::findByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
   uint16_t valueLength = dlen - sizeof(*findByTypeReq);
   uint8_t* value = &data[sizeof(*findByTypeReq)];
 
-  uint8_t response[_mtu];
+  uint8_t response[mtu];
   uint16_t responseLength;
 
   response[0] = ATT_OP_FIND_BY_TYPE_RESP;
@@ -404,7 +771,7 @@ void ATTClass::findByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
 
   if (findByTypeReq->type == BLETypeService) {
     for (uint16_t i = (findByTypeReq->startHandle - 1); i < GATT.attributeCount() && i <= (findByTypeReq->endHandle - 1); i++) {
-      BLEAttribute* attribute = GATT.attribute(i);
+      BLELocalAttribute* attribute = GATT.attribute(i);
 
       if ((attribute->type() == findByTypeReq->type) && (attribute->uuidLength() == valueLength) && memcmp(attribute->uuidData(), value, valueLength) == 0) {
         BLELocalService* service = (BLELocalService*)attribute;
@@ -420,7 +787,7 @@ void ATTClass::findByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
         responseLength += sizeof(endHandle);
       }
 
-      if ((responseLength + 4) > _mtu) {
+      if ((responseLength + 4) > mtu) {
         break;
       }
     }
@@ -433,7 +800,7 @@ void ATTClass::findByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
   }
 }
 
-void ATTClass::readByGroupReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+void ATTClass::readByGroupReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen, uint8_t data[])
 {
   struct __attribute__ ((packed)) ReadByGroupReq {
     uint16_t startHandle;
@@ -446,7 +813,7 @@ void ATTClass::readByGroupReq(uint16_t connectionHandle, uint8_t dlen, uint8_t d
     return;
   }
 
-  uint8_t response[_mtu];
+  uint8_t response[mtu];
   uint16_t responseLength;
 
   response[0] = ATT_OP_READ_BY_GROUP_RESP;
@@ -454,7 +821,7 @@ void ATTClass::readByGroupReq(uint16_t connectionHandle, uint8_t dlen, uint8_t d
   responseLength = 2;
 
   for (uint16_t i = (readByGroupReq->startHandle - 1); i < GATT.attributeCount() && i <= (readByGroupReq->endHandle - 1); i++) {
-    BLEAttribute* attribute = GATT.attribute(i);
+    BLELocalAttribute* attribute = GATT.attribute(i);
 
     if (readByGroupReq->uuid != attribute->type()) {
       // not the type
@@ -489,7 +856,7 @@ void ATTClass::readByGroupReq(uint16_t connectionHandle, uint8_t dlen, uint8_t d
     memcpy(&response[responseLength], service->uuidData(), uuidLen);
     responseLength += uuidLen;
 
-    if ((responseLength + infoSize) > _mtu) {
+    if ((responseLength + infoSize) > mtu) {
       break;
     }
   }
@@ -501,7 +868,32 @@ void ATTClass::readByGroupReq(uint16_t connectionHandle, uint8_t dlen, uint8_t d
   }
 }
 
-void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint8_t opcode, uint8_t dlen, uint8_t data[])
+int ATTClass::readByGroupReq(uint16_t connectionHandle, uint16_t startHandle, uint16_t endHandle, uint16_t uuid, uint8_t responseBuffer[])
+{
+  struct __attribute__ ((packed)) {
+    uint8_t op;
+    uint16_t startHandle;
+    uint16_t endHandle;
+    uint16_t uuid;
+  } readByGroupReq = { ATT_OP_READ_BY_GROUP_REQ, startHandle, endHandle, uuid };
+
+  return sendReq(connectionHandle, &readByGroupReq, sizeof(readByGroupReq), responseBuffer);
+}
+
+void ATTClass::readByGroupResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+{
+  if (dlen < 2) {
+    return; // invalid, drop
+  }
+
+  if (connectionHandle == _pendingResp.connectionHandle && _pendingResp.op == ATT_OP_READ_BY_GROUP_RESP) {
+    _pendingResp.buffer[0] = ATT_OP_READ_BY_GROUP_RESP;
+    memcpy(&_pendingResp.buffer[1], data, dlen);
+    _pendingResp.length = dlen + 1;
+  }
+}
+
+void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint16_t mtu, uint8_t opcode, uint8_t dlen, uint8_t data[])
 {
   if (opcode == ATT_OP_READ_REQ) {
     if (dlen != sizeof(uint16_t)) {
@@ -523,13 +915,13 @@ void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint8_t opcode, uint
     return;
   }
 
-  uint8_t response[_mtu];
+  uint8_t response[mtu];
   uint16_t responseLength;
 
   response[0] = (opcode == ATT_OP_READ_REQ) ? ATT_OP_READ_RESP : ATT_OP_READ_BLOB_RESP;
   responseLength = 1;
 
-  BLEAttribute* attribute = GATT.attribute(handle - 1);
+  BLELocalAttribute* attribute = GATT.attribute(handle - 1);
   enum BLEAttributeType attributeType = attribute->type();
 
   if (attributeType == BLETypeService) {
@@ -578,10 +970,14 @@ void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint8_t opcode, uint
         return;
       }
 
-      valueLength = min(_mtu - responseLength, valueLength - offset);
+      valueLength = min(mtu - responseLength, valueLength - offset);
 
-      characteristic->readValue(BLEDevice(connectionHandle, _peerAddress), offset, &response[responseLength], valueLength);
-      responseLength += valueLength;
+      for (int i = 0; i < ATT_MAX_PEERS; i++) {
+        if (_peers[i].connectionHandle == connectionHandle) {
+          characteristic->readValue(BLEDevice(_peers[i].addressType, _peers[i].address), offset, &response[responseLength], valueLength);
+          responseLength += valueLength;
+        }
+      }
     }
   } else if (attributeType == BLETypeDescriptor) {
     BLELocalDescriptor* descriptor = (BLELocalDescriptor*)attribute;
@@ -593,7 +989,7 @@ void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint8_t opcode, uint
       return;
     }
 
-    valueLength = min(_mtu - responseLength, valueLength - offset);
+    valueLength = min(mtu - responseLength, valueLength - offset);
 
     memcpy(&response[responseLength], descriptor->value() + offset, valueLength);
     responseLength += valueLength;
@@ -602,7 +998,16 @@ void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint8_t opcode, uint
   HCI.sendAclPkt(connectionHandle, ATT_CID, responseLength, response);
 }
 
-void ATTClass::readByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+void ATTClass::readResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+{
+  if (connectionHandle == _pendingResp.connectionHandle && _pendingResp.op == ATT_OP_READ_RESP) {
+    _pendingResp.buffer[0] = ATT_OP_READ_RESP;
+    memcpy(&_pendingResp.buffer[1], data, dlen);
+    _pendingResp.length = dlen + 1;
+  }
+}
+
+void ATTClass::readByTypeReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen, uint8_t data[])
 {
   struct __attribute__ ((packed)) ReadByTypeReq {
     uint16_t startHandle;
@@ -615,7 +1020,7 @@ void ATTClass::readByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
     return;
   }
 
-  uint8_t response[_mtu];
+  uint8_t response[mtu];
   uint16_t responseLength;
 
   response[0] = ATT_OP_READ_BY_TYPE_RESP;
@@ -623,7 +1028,7 @@ void ATTClass::readByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
   responseLength = 2;
 
   for (uint16_t i = (readByTypeReq->startHandle - 1); i < GATT.attributeCount() && i <= (readByTypeReq->endHandle - 1); i++) {
-    BLEAttribute* attribute = GATT.attribute(i);
+    BLELocalAttribute* attribute = GATT.attribute(i);
     uint16_t handle = (i + 1);
 
     if (attribute->type() == readByTypeReq->uuid) {
@@ -666,7 +1071,7 @@ void ATTClass::readByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
         // skip the next handle, it's a value handle
         i++;
 
-        if ((responseLength + typeSize) > _mtu) {
+        if ((responseLength + typeSize) > mtu) {
           break;
         }
       } else if (attribute->type() == 0x2902) {
@@ -677,7 +1082,7 @@ void ATTClass::readByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
         responseLength += sizeof(handle);
 
         // add the value
-        int valueSize = min((uint16_t)(_mtu - responseLength), (uint16_t)descriptor->valueSize());
+        int valueSize = min((uint16_t)(mtu - responseLength), (uint16_t)descriptor->valueSize());
         memcpy(&response[responseLength], descriptor->value(), valueSize);
         responseLength += valueSize;
 
@@ -693,7 +1098,7 @@ void ATTClass::readByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
       responseLength += sizeof(handle);
 
       // add the value
-      int valueLength = min((uint16_t)(_mtu - responseLength), (uint16_t)characteristic->valueLength());
+      int valueLength = min((uint16_t)(mtu - responseLength), (uint16_t)characteristic->valueLength());
       memcpy(&response[responseLength], characteristic->value(), valueLength);
       responseLength += valueLength;
 
@@ -710,7 +1115,32 @@ void ATTClass::readByTypeReq(uint16_t connectionHandle, uint8_t dlen, uint8_t da
   }
 }
 
-void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint8_t op, uint8_t dlen, uint8_t data[])
+int ATTClass::readByTypeReq(uint16_t connectionHandle, uint16_t startHandle, uint16_t endHandle, uint16_t type, uint8_t responseBuffer[])
+{
+  struct __attribute__ ((packed)) {
+    uint8_t op;
+    uint16_t startHandle;
+    uint16_t endHandle;
+    uint16_t type;
+  } readByTypeReq = { ATT_OP_READ_BY_TYPE_REQ, startHandle, endHandle, type };
+
+  return sendReq(connectionHandle, &readByTypeReq, sizeof(readByTypeReq), responseBuffer);
+}
+
+void ATTClass::readByTypeResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+{
+  if (dlen < 1) {
+    return; // invalid, drop
+  }
+
+  if (connectionHandle == _pendingResp.connectionHandle && _pendingResp.op == ATT_OP_READ_BY_TYPE_RESP) {
+    _pendingResp.buffer[0] = ATT_OP_READ_BY_TYPE_RESP;
+    memcpy(&_pendingResp.buffer[1], data, dlen);
+    _pendingResp.length = dlen + 1;
+  }
+}
+
+void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op, uint8_t dlen, uint8_t data[])
 {
   boolean withResponse = (op == ATT_OP_WRITE_REQ);
 
@@ -733,7 +1163,7 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint8_t op, uint8_t dlen
   uint8_t valueLength = dlen - sizeof(handle);
   uint8_t* value = &data[sizeof(handle)];
 
-  BLEAttribute* attribute = GATT.attribute(handle - 1);
+  BLELocalAttribute* attribute = GATT.attribute(handle - 1);
 
   if (attribute->type() == BLETypeCharacteristic) {
     BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)attribute;
@@ -747,8 +1177,11 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint8_t op, uint8_t dlen
       return;
     }
 
-    if (connectionHandle == _connectionHandle) {
-      characteristic->writeValue(BLEDevice(connectionHandle, _peerAddress), value, valueLength);
+    for (int i = 0; i < ATT_MAX_PEERS; i++) {
+      if (_peers[i].connectionHandle == connectionHandle) {
+        characteristic->writeValue(BLEDevice(_peers[i].addressType, _peers[i].address), value, valueLength);
+        break;
+      }
     }
   } else if (attribute->type() == BLETypeDescriptor) {
     BLELocalDescriptor* descriptor = (BLELocalDescriptor*)attribute;
@@ -773,8 +1206,11 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint8_t op, uint8_t dlen
 
     BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)attribute;
 
-    if (connectionHandle == _connectionHandle) {
-      characteristic->writeCccdValue(BLEDevice(connectionHandle, _peerAddress), *((uint16_t*)value));
+    for (int i = 0; i < ATT_MAX_PEERS; i++) {
+      if (_peers[i].connectionHandle == connectionHandle) {
+        characteristic->writeCccdValue(BLEDevice(_peers[i].addressType, _peers[i].address), *((uint16_t*)value));
+        break;
+      }
     }
   } else {
     if (withResponse) {
@@ -784,7 +1220,7 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint8_t op, uint8_t dlen
   }
 
   if (withResponse) {
-    uint8_t response[_mtu];
+    uint8_t response[mtu];
     uint16_t responseLength;
 
     response[0] = ATT_OP_WRITE_RESP;
@@ -794,7 +1230,20 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint8_t op, uint8_t dlen
   }
 }
 
-void ATTClass::prepWriteReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+void ATTClass::writeResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+{
+  if (dlen != 0) {
+    return; // drop
+  }
+
+  if (connectionHandle == _pendingResp.connectionHandle && _pendingResp.op == ATT_OP_WRITE_RESP) {
+    _pendingResp.buffer[0] = ATT_OP_WRITE_RESP;
+    memcpy(&_pendingResp.buffer[1], data, dlen);
+    _pendingResp.length = dlen + 1;
+  }
+}
+
+void ATTClass::prepWriteReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen, uint8_t data[])
 {
   struct __attribute__ ((packed)) PrepWriteReq {
     uint16_t handle;
@@ -814,7 +1263,7 @@ void ATTClass::prepWriteReq(uint16_t connectionHandle, uint8_t dlen, uint8_t dat
     return;
   }
 
-  BLEAttribute* attribute = GATT.attribute(handle - 1);
+  BLELocalAttribute* attribute = GATT.attribute(handle - 1);
 
   if (attribute->type() != BLETypeCharacteristic) {
     sendError(connectionHandle, ATT_OP_PREP_WRITE_REQ, handle, ATT_ECODE_ATTR_NOT_LONG);
@@ -857,7 +1306,7 @@ void ATTClass::prepWriteReq(uint16_t connectionHandle, uint8_t dlen, uint8_t dat
   memcpy(_longWriteValue + offset, value, valueLength);
   _longWriteValueLength += valueLength;
 
-  uint8_t response[_mtu];
+  uint8_t response[mtu];
   uint16_t responseLength;
 
   response[0] = ATT_OP_PREP_WRITE_RESP;
@@ -867,7 +1316,7 @@ void ATTClass::prepWriteReq(uint16_t connectionHandle, uint8_t dlen, uint8_t dat
   HCI.sendAclPkt(connectionHandle, ATT_CID, responseLength, response);
 }
 
-void ATTClass::execWriteReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
+void ATTClass::execWriteReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen, uint8_t data[])
 {
   if (dlen != sizeof(uint8_t)) {
     sendError(connectionHandle, ATT_OP_EXEC_WRITE_REQ, 0x0000, ATT_ECODE_INVALID_PDU);
@@ -879,21 +1328,77 @@ void ATTClass::execWriteReq(uint16_t connectionHandle, uint8_t dlen, uint8_t dat
   if (_longWriteHandle && (flag & 0x01)) {
     BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)GATT.attribute(_longWriteHandle - 1);
 
-    if (connectionHandle == _connectionHandle) {
-      characteristic->writeValue(BLEDevice(connectionHandle, _peerAddress), _longWriteValue, _longWriteValueLength);
+    for (int i = 0; i < ATT_MAX_PEERS; i++) {
+      if (_peers[i].connectionHandle == connectionHandle) {
+        characteristic->writeValue(BLEDevice(_peers[i].addressType, _peers[i].address), _longWriteValue, _longWriteValueLength);
+        break;
+      }
     }
   }
 
   _longWriteHandle = 0x0000;
   _longWriteValueLength = 0;
 
-  uint8_t response[_mtu];
+  uint8_t response[mtu];
   uint16_t responseLength;
 
   response[0] = ATT_OP_EXEC_WRITE_RESP;
   responseLength = 1;
 
   HCI.sendAclPkt(connectionHandle, ATT_CID, responseLength, response);
+}
+
+void ATTClass::handleNotifyOrInd(uint16_t connectionHandle, uint8_t opcode, uint8_t dlen, uint8_t data[])
+{
+  if (dlen < 2) {
+    return; // drop
+  }
+
+  struct __attribute__ ((packed)) HandleNotifyOrInd {
+    uint16_t handle;
+  } *handleNotifyOrInd = (HandleNotifyOrInd*)data;
+
+  uint8_t handle = handleNotifyOrInd->handle;
+
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle != connectionHandle) {
+      continue;
+    }
+
+    BLERemoteDevice* device = _peers[i].device;
+
+    if (!device) {
+      break;
+    }
+
+    int serviceCount = device->serviceCount();
+
+    for (int i = 0; i < serviceCount; i++) {
+      BLERemoteService* s = device->service(i);
+
+      if (s->startHandle() < handle && s->endHandle() >= handle) {
+        int characteristicCount = s->characteristicCount();
+
+        for (int j = 0; j < characteristicCount; j++) {
+          BLERemoteCharacteristic* c = s->characteristic(j);
+
+          if (c->valueHandle() == handle) {
+            c->writeValue(BLEDevice(_peers[i].addressType, _peers[i].address), &data[2], dlen - 2);
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  if (opcode == ATT_OP_HANDLE_IND) {
+    // send CNF for IND
+
+    uint8_t cnf = ATT_OP_HANDLE_CNF;
+
+    HCI.sendAclPkt(connectionHandle, ATT_CID, sizeof(cnf), &cnf);
+  }
 }
 
 void ATTClass::handleCnf(uint16_t /*connectionHandle*/, uint8_t /*dlen*/, uint8_t /*data*/[])
@@ -913,11 +1418,273 @@ void ATTClass::sendError(uint16_t connectionHandle, uint8_t opcode, uint16_t han
   HCI.sendAclPkt(connectionHandle, ATT_CID, sizeof(attError), &attError);
 }
 
+
+bool ATTClass::exchangeMtu(uint16_t connectionHandle)
+{
+  uint8_t responseBuffer[_maxMtu];
+
+  if (!mtuReq(connectionHandle, _maxMtu, responseBuffer)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool ATTClass::discoverServices(uint16_t connectionHandle, BLERemoteDevice* device, const char* serviceUuidFilter)
+{
+  uint16_t reqStartHandle = 0x0001;
+  uint16_t reqEndHandle = 0xffff;
+
+  uint8_t responseBuffer[_maxMtu];
+
+  BLEUuid serviceUuid(serviceUuidFilter);
+
+  while (reqEndHandle == 0xffff) {
+    int respLength = readByGroupReq(connectionHandle, reqStartHandle, reqEndHandle, BLETypeService, responseBuffer);
+
+    if (respLength == 0) {
+      return false;
+    }
+
+    if (responseBuffer[0] == ATT_OP_READ_BY_GROUP_RESP) {
+      uint16_t lengthPerService = responseBuffer[1];
+      uint8_t uuidLen = lengthPerService - 4;
+
+      for (int i = 2; i < respLength; i += lengthPerService) {
+        struct __attribute__ ((packed)) RawService {
+          uint16_t startHandle;
+          uint16_t endHandle;
+          uint8_t uuid[16];
+        } *rawService = (RawService*)&responseBuffer[i];
+
+        if (serviceUuidFilter == NULL || 
+            (uuidLen == serviceUuid.length() && memcmp(rawService->uuid, serviceUuid.data(), uuidLen) == 0)) {
+        
+          BLERemoteService* service = new BLERemoteService(rawService->uuid, uuidLen,
+                                                            rawService->startHandle,
+                                                            rawService->endHandle);
+
+          if (service == NULL) {
+            return false;
+          }
+
+          device->addService(service);
+
+        }
+
+        reqStartHandle = rawService->endHandle + 1;
+
+        if (reqStartHandle == 0x0000) {
+          reqEndHandle = 0x0000;
+        }
+      }
+    } else {
+      reqEndHandle = 0x0000;
+    }
+  }
+
+  return true;
+}
+
+bool ATTClass::discoverCharacteristics(uint16_t connectionHandle, BLERemoteDevice* device)
+{
+  uint16_t reqStartHandle = 0x0001;
+  uint16_t reqEndHandle = 0xffff;
+
+  uint8_t responseBuffer[_maxMtu];
+
+  int serviceCount = device->serviceCount();
+  
+  for (int i = 0; i < serviceCount; i++) {
+    BLERemoteService* service = device->service(i);
+
+    reqStartHandle = service->startHandle();
+    reqEndHandle = service->endHandle();
+
+    while (1) {
+      int respLength = readByTypeReq(connectionHandle, reqStartHandle, reqEndHandle, BLETypeCharacteristic, responseBuffer);
+
+      if (respLength == 0) {
+        return false;
+      }
+
+      if (responseBuffer[0] == ATT_OP_READ_BY_TYPE_RESP) {
+        uint16_t lengthPerCharacteristic = responseBuffer[1];
+        uint8_t uuidLen = lengthPerCharacteristic - 5;
+
+        for (int i = 2; i < respLength; i += lengthPerCharacteristic) {
+          struct __attribute__ ((packed)) RawCharacteristic {
+            uint16_t startHandle;
+            uint8_t properties;
+            uint16_t valueHandle;
+            uint8_t uuid[16];
+          } *rawCharacteristic = (RawCharacteristic*)&responseBuffer[i];
+
+          BLERemoteCharacteristic* characteristic = new BLERemoteCharacteristic(rawCharacteristic->uuid, uuidLen,
+                                                                                connectionHandle,
+                                                                                rawCharacteristic->startHandle,
+                                                                                rawCharacteristic->properties,
+                                                                                rawCharacteristic->valueHandle);
+
+          if (characteristic == NULL) {
+            return false;
+          }
+
+          service->addCharacteristic(characteristic);
+
+          reqStartHandle = rawCharacteristic->valueHandle + 1;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool ATTClass::discoverDescriptors(uint16_t connectionHandle, BLERemoteDevice* device)
+{
+  uint16_t reqStartHandle = 0x0001;
+  uint16_t reqEndHandle = 0xffff;
+
+  uint8_t responseBuffer[_maxMtu];
+
+  int serviceCount = device->serviceCount();  
+
+  for (int i = 0; i < serviceCount; i++) {
+    BLERemoteService* service = device->service(i);
+
+    uint16_t serviceEndHandle = service->endHandle();
+
+    int characteristicCount = service->characteristicCount();
+
+    for (int j = 0; j < characteristicCount; j++) {
+      BLERemoteCharacteristic* characteristic = service->characteristic(j);
+      BLERemoteCharacteristic* nextCharacteristic = (j == (characteristicCount - 1)) ? NULL : service->characteristic(j);
+
+      reqStartHandle = characteristic->valueHandle() + 1;
+      reqEndHandle = nextCharacteristic ? nextCharacteristic->valueHandle() : serviceEndHandle;
+
+      if (reqStartHandle > reqEndHandle) {
+        continue;
+      }
+
+      while (1) {
+        int respLength = findInfoReq(connectionHandle, reqStartHandle, reqEndHandle, responseBuffer);
+
+        if (respLength == 0) {
+          return false;
+        }
+
+        if (responseBuffer[0] == ATT_OP_FIND_INFO_RESP) {
+          uint16_t lengthPerDescriptor = responseBuffer[1] * 4;
+          uint8_t uuidLen = 2;
+
+          for (int i = 2; i < respLength; i += lengthPerDescriptor) {
+            struct __attribute__ ((packed)) RawDescriptor {
+              uint16_t handle;
+              uint8_t uuid[16];
+            } *rawDescriptor = (RawDescriptor*)&responseBuffer[i];
+
+            BLERemoteDescriptor* descriptor = new BLERemoteDescriptor(rawDescriptor->uuid, uuidLen,
+                                                                      connectionHandle,
+                                                                      rawDescriptor->handle);
+
+            if (descriptor == NULL) {
+              return false;
+            }
+
+            characteristic->addDescriptor(descriptor);
+
+            reqStartHandle = rawDescriptor->handle + 1;
+          }
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+int ATTClass::sendReq(uint16_t connectionHandle, void* requestBuffer, int requestLength, uint8_t responseBuffer[])
+{
+  _pendingResp.connectionHandle = connectionHandle;
+  _pendingResp.op = ((uint8_t*)requestBuffer)[0] + 1;
+  _pendingResp.buffer = responseBuffer;
+  _pendingResp.length = 0;
+
+  HCI.sendAclPkt(connectionHandle, ATT_CID, requestLength, requestBuffer);
+
+  if (responseBuffer == NULL) {
+    // not waiting response
+    return 0;
+  } 
+
+  for (unsigned long start = millis(); (millis() - start) < _timeout;) {
+    HCI.poll();
+
+    if (!connected(connectionHandle)) {
+      break;
+    }
+
+    if (_pendingResp.length != 0) {
+      _pendingResp.connectionHandle = 0xffff;
+      return _pendingResp.length;
+    }
+  }
+
+  _pendingResp.connectionHandle = 0xffff;
+  return 0;
+}
+
 void ATTClass::setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler)
 {
   if (event < (sizeof(_eventHandlers) / (sizeof(_eventHandlers[0])))) {
     _eventHandlers[event] = eventHandler;
   }
+}
+
+int ATTClass::readReq(uint16_t connectionHandle, uint16_t handle, uint8_t responseBuffer[])
+{
+  struct __attribute__ ((packed)) {
+    uint8_t op;
+    uint16_t handle;
+  } readReq = { ATT_OP_READ_REQ, handle };
+
+  return sendReq(connectionHandle, &readReq, sizeof(readReq), responseBuffer);
+}
+
+int ATTClass::writeReq(uint16_t connectionHandle, uint16_t handle, const uint8_t* data, uint8_t dataLen, uint8_t responseBuffer[])
+{
+  struct __attribute__ ((packed)) {
+    uint8_t op;
+    uint16_t handle;
+    uint8_t data[255];
+  } writeReq;
+
+  writeReq.op = ATT_OP_WRITE_REQ;
+  writeReq.handle = handle;
+  memcpy(writeReq.data, data, dataLen);
+
+  return sendReq(connectionHandle, &writeReq, 3 + dataLen, responseBuffer);
+}
+
+void ATTClass::writeCmd(uint16_t connectionHandle, uint16_t handle, const uint8_t* data, uint8_t dataLen)
+{
+  struct __attribute__ ((packed)) {
+    uint8_t op;
+    uint16_t handle;
+    uint8_t data[255];
+  } writeReq;
+
+  writeReq.op = ATT_OP_WRITE_CMD;
+  writeReq.handle = handle;
+  memcpy(writeReq.data, data, dataLen);
+
+  sendReq(connectionHandle, &writeReq, 3 + dataLen, NULL);
 }
 
 ATTClass ATT;

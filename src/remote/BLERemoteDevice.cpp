@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2019 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,48 +17,43 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "BLEAttribute.h"
+#include "BLERemoteDevice.h"
 
-BLEAttribute::BLEAttribute(const char* uuid) :
-  _uuid(uuid),
-  _refCount(0)
+BLERemoteDevice::BLERemoteDevice()
 {
 }
 
-BLEAttribute::~BLEAttribute()
+BLERemoteDevice::~BLERemoteDevice()
 {
+  clearServices();
 }
 
-const char* BLEAttribute::uuid() const
+void BLERemoteDevice::addService(BLERemoteService* service)
 {
-  return _uuid.str();
+  service->retain();
+
+  _services.add(service);
 }
 
-const uint8_t* BLEAttribute::uuidData() const
+unsigned int BLERemoteDevice::serviceCount() const
 {
-  return _uuid.data();
+  return _services.size();
 }
 
-uint8_t BLEAttribute::uuidLength() const
+BLERemoteService* BLERemoteDevice::service(unsigned int index) const
 {
-  return _uuid.length();
+  return _services.get(index);
 }
 
-enum BLEAttributeType BLEAttribute::type() const
+void BLERemoteDevice::clearServices()
 {
-  return BLETypeUnknown;
-}
+  for (unsigned int i = 0; i < serviceCount(); i++) {
+    BLERemoteService* s = service(i);
 
-int BLEAttribute::retain()
-{
-  _refCount++;
+    if (s->release() <= 0) {
+      delete s;
+    }
+  }
 
-  return _refCount;
-}
-
-int BLEAttribute::release()
-{
-  _refCount--;
-
-  return _refCount;
+  _services.clear();
 }

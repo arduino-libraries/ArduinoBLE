@@ -36,6 +36,7 @@ public:
   void add(T);
   T get(unsigned int index) const;
   void clear();
+  T remove(unsigned int index);
 
   unsigned int size() const;
 
@@ -109,6 +110,38 @@ template <typename T> void BLELinkedList<T>::clear()
 template <typename T> unsigned int BLELinkedList<T>::size() const
 {
   return _size;
+}
+
+template <typename T> T BLELinkedList<T>::remove(unsigned int index)
+{
+  if (index >= _size) {
+    return T();
+  }
+
+  BLELinkedListNode<T>* previousItemNode = NULL;
+  BLELinkedListNode<T>* itemNode = _root;
+
+  for (unsigned int i = 0; i < index; i++) {
+    previousItemNode = itemNode;
+    itemNode = itemNode->next;
+  }
+
+  T result = itemNode->data;
+
+  if (previousItemNode == NULL) {
+    _root = itemNode->next;
+  } else {
+    previousItemNode->next = itemNode->next;
+  }
+
+  if (_last == itemNode) {
+    _last = previousItemNode;
+  }
+
+  delete itemNode;
+  _size--;
+
+  return result;
 }
 
 #endif

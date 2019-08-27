@@ -126,6 +126,16 @@ void BLELocalDevice::end()
 #endif
 }
 
+void BLELocalDevice::poll()
+{
+  HCI.poll();
+}
+
+void BLELocalDevice::poll(unsigned long timeout)
+{
+  HCI.poll(timeout);
+}
+
 bool BLELocalDevice::connected() const
 {
   HCI.poll();
@@ -205,6 +215,31 @@ void BLELocalDevice::stopAdvertise()
   GAP.stopAdvertise();
 }
 
+int BLELocalDevice::scan(bool withDuplicates)
+{
+  return GAP.scan(withDuplicates);
+}
+
+int BLELocalDevice::scanForName(String name, bool withDuplicates)
+{
+  return GAP.scanForName(name, withDuplicates);
+}
+
+int BLELocalDevice::scanForUuid(String uuid, bool withDuplicates)
+{
+  return GAP.scanForUuid(uuid, withDuplicates);
+}
+
+int BLELocalDevice::scanForAddress(String address, bool withDuplicates)
+{
+  return GAP.scanForAddress(address, withDuplicates);
+}
+
+void BLELocalDevice::stopScan()
+{
+  GAP.stopScan();
+}
+
 BLEDevice BLELocalDevice::central()
 {
   HCI.poll();
@@ -212,9 +247,20 @@ BLEDevice BLELocalDevice::central()
   return ATT.central();
 }
 
+BLEDevice BLELocalDevice::available()
+{
+  HCI.poll();
+
+  return GAP.available();
+}
+
 void BLELocalDevice::setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler)
 {
-  ATT.setEventHandler(event, eventHandler);
+  if (event == BLEDiscovered) {
+    GAP.setEventHandler(event, eventHandler);
+  } else {
+    ATT.setEventHandler(event, eventHandler);
+  }
 }
 
 void BLELocalDevice::setAdvertisingInterval(uint16_t advertisingInterval)
@@ -232,19 +278,9 @@ void BLELocalDevice::setConnectable(bool connectable)
   GAP.setConnectable(connectable);
 }
 
-BLELocalDevice::operator bool() const
+void BLELocalDevice::setTimeout(unsigned long timeout)
 {
-  return true;
-}
-
-bool BLELocalDevice::operator==(const BLEDevice& rhs) const
-{
-  return (this == &rhs);
-}
-
-bool BLELocalDevice::operator!=(const BLEDevice& rhs) const
-{
-  return (this != &rhs);
+  ATT.setTimeout(timeout);
 }
 
 void BLELocalDevice::debug(Stream& stream)

@@ -17,36 +17,28 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _BLE_LOCAL_DESCRIPTOR_H_
-#define _BLE_LOCAL_DESCRIPTOR_H_
+#ifndef _BLE_UUID_H_
+#define _BLE_UUID_H_
 
-#include <stdint.h>
+#include <Arduino.h>
 
-#include "BLELocalAttribute.h"
+#define BLE_UUID_MAX_LENGTH 16
 
-class BLELocalDescriptor : public BLELocalAttribute {
+class BLEUuid
+{
 public:
-  BLELocalDescriptor(const char* uuid, const uint8_t value[], int valueSize);
-  BLELocalDescriptor(const char* uuid, const char* value);
-  virtual ~BLELocalDescriptor();
+  BLEUuid(const char * str);
 
-  virtual enum BLEAttributeType type() const;
+  const char* str() const;
+  const uint8_t * data() const;
+  uint8_t length() const;
 
-  int valueSize() const;
-  const uint8_t* value() const;
-  uint8_t operator[] (int offset) const;
-
-protected:
-  friend class GATTClass;
-
-  void setHandle(uint16_t handle);
-  uint16_t handle() const;
+  static const char* uuidToString(const uint8_t* data, uint8_t length);
 
 private:
-  const uint8_t* _value;
-  int            _valueSize;
-
-  uint16_t       _handle;
+  const char* _str;
+  uint8_t     _data[BLE_UUID_MAX_LENGTH];
+  uint8_t     _length;
 };
 
 #endif

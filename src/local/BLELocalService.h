@@ -20,14 +20,15 @@
 #ifndef _BLE_LOCAL_SERVICE_H_
 #define _BLE_LOCAL_SERVICE_H_
 
-#include "BLEAttribute.h"
 #include "BLECharacteristic.h"
+
+#include "BLELocalAttribute.h"
 
 #include "utility/BLELinkedList.h"
 
 class BLELocalCharacteristic;
 
-class BLELocalService : public BLEAttribute {
+class BLELocalService : public BLELocalAttribute {
 public:
   BLELocalService(const char* uuid);
   virtual ~BLELocalService();

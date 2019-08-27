@@ -9,7 +9,7 @@
 ArduinoBLE	KEYWORD1
 BLE	KEYWORD1
 
-BLE	KEYWORD1
+BLEDevice	KEYWORD1
 BLECharacteristic	KEYWORD1
 BLEDescriptor	KEYWORD1
 BLEService	KEYWORD1
@@ -41,7 +41,22 @@ end	KEYWORD2
 connected	KEYWORD2
 disconnect	KEYWORD2
 address	KEYWORD2
+hasLocalName	KEYWORD2
+hasAdvertisedServiceUuid	KEYWORD2
+advertisedServiceUuidCount	KEYWORD2
+localName	KEYWORD2
+advertisedServiceUuid	KEYWORD2
 rssi	KEYWORD2
+connect	KEYWORD2
+discoverAttributes	KEYWORD2
+discoverService	KEYWORD2
+deviceName	KEYWORD2
+appearance	KEYWORD2
+serviceCount	KEYWORD2
+hasService	KEYWORD2
+service	KEYWORD2
+characteristicCount	KEYWORD2
+characteristic	KEYWORD2
 
 setAdvertisedServiceUuid	KEYWORD2
 setManufacturerData	KEYWORD2
@@ -51,11 +66,18 @@ setAppearance	KEYWORD2
 addService	KEYWORD2
 advertise	KEYWORD2
 stopAdvertise	KEYWORD2
+scan	KEYWORD2
+scanForName	KEYWORD2
+scanForUuid	KEYWORD2
+scanForAddress	KEYWORD2
+stopScan	KEYWORD2
 central	KEYWORD2
+available	KEYWORD2
 setEventHandler	KEYWORD2
 setAdvertisingInterval	KEYWORD2
 setConnectionInterval	KEYWORD2
 setConnectable	KEYWORD2
+setTimeout	KEYWORD2
 debug	KEYWORD2
 noDebug	KEYWORD2
 
@@ -63,12 +85,24 @@ properties	KEYWORD2
 valueSize	KEYWORD2
 value	KEYWORD2
 valueLength	KEYWORD2
+readValue	KEYWORD2
 writeValue	KEYWORD2
 setValue	KEYWORD2
 broadcast	KEYWORD2
 written	KEYWORD2
 subscribed	KEYWORD2
+valueUpdated	KEYWORD2	
 addDescriptor	KEYWORD2
+descriptorCount	KEYWORD2
+hasDescriptor	KEYWORD2
+descriptor	KEYWORD2
+canRead	KEYWORD2
+read	KEYWORD2
+canWrite	KEYWORD2
+canSubscribe	KEYWORD2
+subscribe	KEYWORD2
+canUnsubscribe	KEYWORD2
+unsubscribe	KEYWORD2	
 writeValueLE	KEYWORD2
 setValueLE	KEYWORD2
 valueLE	KEYWORD2
@@ -83,6 +117,10 @@ addCharacteristic	KEYWORD
 # Constants (LITERAL1)
 #######################################
 
+BLEConnected	LITERAL1
+BLEDisconnected	LITERAL1
+BLEDiscovered	LITERAL1
+
 BLEBroadcast	LITERAL1
 BLERead	LITERAL1
 BLEWriteWithoutResponse	LITERAL1
@@ -93,4 +131,5 @@ BLEIndicate	LITERAL1
 BLESubscribed	LITERAL1
 BLEUnsubscribed	LITERAL1
 BLEWritten	LITERAL1
+BLEUpdated	LITERAL1	
 

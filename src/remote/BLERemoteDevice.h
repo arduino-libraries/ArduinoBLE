@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2019 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,37 +17,27 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _BLE_ATTRIBUTE_H_
-#define _BLE_ATTRIBUTE_H_
+#ifndef _BLE_REMOTE_DEVICE_H_
+#define _BLE_REMOTE_DEVICE_H_
 
-#include "BLEUuid.h"
+#include "utility/BLELinkedList.h"
 
-enum BLEAttributeType {
-  BLETypeUnknown        = 0x0000,
+#include "BLERemoteService.h"
 
-  BLETypeService        = 0x2800,
-  BLETypeCharacteristic = 0x2803,
-  BLETypeDescriptor     = 0x2900
-};
-
-class BLEAttribute
-{
+class BLERemoteDevice /*: public BLEDevice*/ {
 public:
-  BLEAttribute(const char* uuid);
-  virtual ~BLEAttribute();
+  BLERemoteDevice();
+  virtual ~BLERemoteDevice();
 
-  const char* uuid() const;
-  const uint8_t* uuidData() const;
-  uint8_t uuidLength() const;
+  void addService(BLERemoteService* service);
 
-  virtual enum BLEAttributeType type() const;
+  unsigned int serviceCount() const;
+  BLERemoteService* service(unsigned int index) const;
 
-  int retain();
-  int release();
+  void clearServices();
 
 private:
-  BLEUuid               _uuid;
-  int _refCount;
+  BLELinkedList<BLERemoteService*> _services;
 };
 
 #endif

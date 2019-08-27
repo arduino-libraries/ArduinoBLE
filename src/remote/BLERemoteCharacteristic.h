@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2019 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,31 +17,23 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _BLE_LOCAL_CHARACTERISTIC_H_
-#define _BLE_LOCAL_CHARACTERISTIC_H_
-
-#include <stdint.h>
+#ifndef _BLE_REMOTE_CHARACTERISTIC_H_
+#define _BLE_REMOTE_CHARACTERISTIC_H_
 
 #include "BLECharacteristic.h"
-#include "BLEDescriptor.h"
 
-#include "BLELocalAttribute.h"
+#include "BLERemoteAttribute.h"
+#include "BLERemoteDescriptor.h"
 
 #include "utility/BLELinkedList.h"
 
-class BLELocalDescriptor;
-
-class BLELocalCharacteristic : public BLELocalAttribute {
+class BLERemoteCharacteristic : public BLERemoteAttribute {
 public:
-  BLELocalCharacteristic(const char* uuid, uint8_t properties, int valueSize, bool fixedLength = false);
-  BLELocalCharacteristic(const char* uuid, uint8_t properties, const char* value);
-  virtual ~BLELocalCharacteristic();
-
-  virtual enum BLEAttributeType type() const;
+  BLERemoteCharacteristic(const uint8_t uuid[], uint8_t uuidLen, uint16_t connectionHandle, uint16_t startHandle, uint8_t properties, uint16_t valueHandle);
+  virtual ~BLERemoteCharacteristic();
 
   uint8_t properties() const;
 
-  int valueSize() const;
   const uint8_t* value() const;
   int valueLength() const;
   uint8_t operator[] (int offset) const;
@@ -49,46 +41,40 @@ public:
   int writeValue(const uint8_t value[], int length);
   int writeValue(const char* value);
 
-  int broadcast();
+  bool valueUpdated();
 
-  bool written();
-  bool subscribed();
+  bool read();
+  bool writeCccd(uint16_t value);
 
-  void addDescriptor(BLEDescriptor& descriptor);
+  unsigned int descriptorCount() const;
+  BLERemoteDescriptor* descriptor(unsigned int index) const;
 
   void setEventHandler(BLECharacteristicEvent event, BLECharacteristicEventHandler eventHandler);
 
 protected:
   friend class ATTClass;
-  friend class GATTClass;
 
-  void setHandle(uint16_t handle);
-  uint16_t handle() const;
+  uint16_t startHandle() const;
   uint16_t valueHandle() const;
 
-  unsigned int descriptorCount() const;
-  BLELocalDescriptor* descriptor(unsigned int index) const;
+  void addDescriptor(BLERemoteDescriptor* descriptor);
 
-  void readValue(BLEDevice device, uint16_t offset, uint8_t value[], int length);
   void writeValue(BLEDevice device, const uint8_t value[], int length);
-  void writeCccdValue(BLEDevice device, uint16_t value);
 
 private:
-  uint8_t  _properties;
-  int      _valueSize;
+  uint16_t _connectionHandle;
+  uint16_t _startHandle;
+  uint8_t _properties;
+  uint16_t _valueHandle;
+
   uint8_t* _value;
-  uint16_t  _valueLength;
-  bool _fixedLength;
+  int _valueLength;
 
-  uint16_t _handle;
+  bool _valueUpdated;
 
-  bool _broadcast;
-  bool _written;
+  BLELinkedList<BLERemoteDescriptor*> _descriptors;
 
-  uint16_t _cccdValue;
-  BLELinkedList<BLELocalDescriptor*> _descriptors;
-
-  BLECharacteristicEventHandler _eventHandlers[BLECharacteristicEventLast];
+  BLECharacteristicEventHandler _valueUpdatedEventHandler;
 };
 
 #endif
