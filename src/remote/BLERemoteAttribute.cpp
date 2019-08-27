@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2019 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,26 +17,35 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _BLE_UUID_H_
-#define _BLE_UUID_H_
+#include "utility/BLEUuid.h"
 
-#include <stdint.h>
+#include "BLERemoteAttribute.h"
 
-#define BLE_UUID_MAX_LENGTH 16
-
-class BLEUuid
+BLERemoteAttribute::BLERemoteAttribute(const uint8_t uuid[], uint8_t uuidLen) :
+  _uuid(BLEUuid::uuidToString(uuid, uuidLen)),
+  _refCount(0)
 {
-public:
-  BLEUuid(const char * str);
+}
 
-  const char* str() const;
-  const uint8_t * data() const;
-  uint8_t length() const;
+BLERemoteAttribute::~BLERemoteAttribute()
+{
+}
 
-private:
-  const char* _str;
-  uint8_t     _data[BLE_UUID_MAX_LENGTH];
-  uint8_t     _length;
-};
+const char* BLERemoteAttribute::uuid() const
+{
+  return _uuid.c_str();
+}
 
-#endif
+int BLERemoteAttribute::retain()
+{
+  _refCount++;
+
+  return _refCount;
+}
+
+int BLERemoteAttribute::release()
+{
+  _refCount--;
+
+  return _refCount;
+}

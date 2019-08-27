@@ -88,7 +88,7 @@ unsigned int GATTClass::attributeCount() const
   return _attributes.size();
 }
 
-BLEAttribute* GATTClass::attribute(unsigned int index) const
+BLELocalAttribute* GATTClass::attribute(unsigned int index) const
 {
   return _attributes.get(index);
 }
@@ -100,7 +100,7 @@ uint16_t GATTClass::serviceUuidForCharacteristic(BLELocalCharacteristic* charact
   BLELocalService* lastService = NULL;
 
   for (unsigned int i = 0; i < attributeCount(); i++) {
-    BLEAttribute* a = attribute(i);
+    BLELocalAttribute* a = attribute(i);
     uint16_t attributeType = a->type();
 
     if (attributeType == BLETypeService) {
@@ -153,7 +153,7 @@ void GATTClass::addService(BLELocalService* service)
 void GATTClass::clearAttributes()
 {
   for (unsigned int i = 0; i < attributeCount(); i++) {
-    BLEAttribute* a = attribute(i);
+    BLELocalAttribute* a = attribute(i);
 
     if (a->release() <= 0) {
       delete a;

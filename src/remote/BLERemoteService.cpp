@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2019 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,21 +17,19 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "BLELocalCharacteristic.h"
+#include "BLERemoteService.h"
 
-#include "BLELocalService.h"
-
-BLELocalService::BLELocalService(const char* uuid) :
-  BLELocalAttribute(uuid),
-  _startHandle(0x0000),
-  _endHandle(0x0000)
+BLERemoteService::BLERemoteService(const uint8_t uuid[], uint8_t uuidLen, uint16_t startHandle, uint16_t endHandle) :
+  BLERemoteAttribute(uuid, uuidLen),
+  _startHandle(startHandle),
+  _endHandle(endHandle)
 {
 }
 
-BLELocalService::~BLELocalService()
+BLERemoteService::~BLERemoteService()
 {
   for (unsigned int i = 0; i < characteristicCount(); i++) {
-    BLELocalCharacteristic* c = characteristic(i);
+    BLERemoteCharacteristic* c = characteristic(i);
 
     if (c->release() <= 0) {
       delete c;
@@ -41,49 +39,29 @@ BLELocalService::~BLELocalService()
   _characteristics.clear();
 }
 
-enum BLEAttributeType BLELocalService::type() const
-{
-  return BLETypeService;
-}
-
-void BLELocalService::addCharacteristic(BLECharacteristic& characteristic)
-{
-  BLELocalCharacteristic* localCharacteristic = characteristic.local();
-
-  if (localCharacteristic) {
-    addCharacteristic(localCharacteristic);
-  }
-}
-
-void BLELocalService::setHandles(uint16_t start, uint16_t end)
-{
-  _startHandle = start;
-  _endHandle = end;
-}
-
-uint16_t BLELocalService::startHandle() const
+uint16_t BLERemoteService::startHandle() const
 {
   return _startHandle;
 }
 
-uint16_t BLELocalService::endHandle() const
+uint16_t BLERemoteService::endHandle() const
 {
   return _endHandle;
 }
 
-unsigned int BLELocalService::characteristicCount() const
+unsigned int BLERemoteService::characteristicCount() const
 {
   return _characteristics.size();
 }
 
-BLELocalCharacteristic* BLELocalService::characteristic(unsigned int index) const
+BLERemoteCharacteristic* BLERemoteService::characteristic(unsigned int index) const
 {
   return _characteristics.get(index);
 }
 
-void BLELocalService::addCharacteristic(BLELocalCharacteristic* characteristic)
+void BLERemoteService::addCharacteristic(BLERemoteCharacteristic* characteristic)
 {
-  characteristic->retain();
+  characteristic-> retain();
 
   _characteristics.add(characteristic);
 }

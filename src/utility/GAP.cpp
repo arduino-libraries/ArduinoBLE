@@ -22,9 +22,11 @@
 
 #include "GAP.h"
 
+#define GAP_MAX_DISCOVERED_QUEUE_SIZE 5
 
 GAPClass::GAPClass() :
   _advertising(false),
+  _scanning(false),
   _advertisedServiceUuid(NULL),
   _manufacturerData(NULL),
   _manufacturerDataLength(0),
@@ -32,7 +34,8 @@ GAPClass::GAPClass() :
   _advertisingInterval(160),
   _connectable(true),
   _serviceData(NULL),
-  _serviceDataLength(0)
+  _serviceDataLength(0),
+  _discoverEventHandler(NULL)
 {
 }
 
@@ -153,6 +156,88 @@ void GAPClass::stopAdvertise()
   HCI.leSetAdvertiseEnable(0x00);
 }
 
+int GAPClass::scan(bool withDuplicates)
+{
+  HCI.leSetScanEnable(false, true);
+
+  // active scan, 10 ms scan interval (N * 0.625), 10 ms scan window (N * 0.625), public own address type, no filter
+  if (HCI.leSetScanParameters(0x01, 0x0010, 0x0010, 0x00, 0x00) != 0) {
+    return false;
+  }
+
+  _scanning = true;
+
+  if (HCI.leSetScanEnable(true, !withDuplicates) != 0) {
+    return 0;
+  }
+
+  return 1;
+}
+
+int GAPClass::scanForName(String name, bool withDuplicates)
+{
+  _scanNameFilter    = name;
+  _scanUuidFilter    = "";
+  _scanAddressFilter = "";
+
+  return scan(withDuplicates);
+}
+
+int GAPClass::scanForUuid(String uuid, bool withDuplicates)
+{
+  _scanNameFilter    = "";
+  _scanUuidFilter    = uuid;
+  _scanAddressFilter = "";
+
+  return scan(withDuplicates);
+}
+
+int GAPClass::scanForAddress(String address, bool withDuplicates)
+{
+  _scanNameFilter    = "";
+  _scanUuidFilter    = "";
+  _scanAddressFilter = address;
+
+  return scan(withDuplicates);
+}
+
+void GAPClass::stopScan()
+{
+  HCI.leSetScanEnable(false, false);
+
+  _scanning = false;
+
+  for (unsigned int i = 0; i < _discoveredDevices.size(); i++) {
+    BLEDevice* device = _discoveredDevices.get(i);
+
+    delete device;
+  }
+
+  _discoveredDevices.clear();
+}
+
+BLEDevice GAPClass::available()
+{
+  for (unsigned int i = 0; i < _discoveredDevices.size(); i++) {
+    BLEDevice* device = _discoveredDevices.get(i);
+
+    if (device->discovered()) {
+      BLEDevice result = *device;
+
+      _discoveredDevices.remove(i);
+      delete device;
+
+      if (matchesScanFilter(result)) {
+        return result;
+      } else {
+        continue;
+      } 
+    }
+  }
+
+  return BLEDevice();
+}
+
 void GAPClass::setAdvertisingInterval(uint16_t advertisingInterval)
 {
   _advertisingInterval = advertisingInterval;
@@ -163,11 +248,95 @@ void GAPClass::setConnectable(bool connectable)
   _connectable = connectable;
 }
 
+void GAPClass::setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler)
+{
+  if (event == BLEDiscovered) {
+    _discoverEventHandler = eventHandler;
+  }
+}
+
 void GAPClass::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
 {
   _serviceDataUuid = uuid;
   _serviceData = data;
   _serviceDataLength = length;
+}
+
+void GAPClass::handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint8_t address[6],
+                                          uint8_t eirLength, uint8_t eirData[], int8_t rssi)
+{
+  if (!_scanning) {
+    return;
+  }
+
+  if (_discoverEventHandler && type == 0x03) {
+    // call event handler and skip adding to discover list
+    BLEDevice device(addressType, address);
+
+    device.setAdvertisementData(type, eirLength, eirData, rssi);
+
+    if (matchesScanFilter(device)) {
+      _discoverEventHandler(device);
+    }
+    return;
+  }
+
+  BLEDevice* discoveredDevice = NULL;
+  int discoveredIndex = -1;
+
+  for (unsigned int i = 0; i < _discoveredDevices.size(); i++) {
+    BLEDevice* device = _discoveredDevices.get(i);
+
+    if (device->hasAddress(addressType, address)) {
+      discoveredDevice = device;
+      discoveredIndex = i;
+
+      break;
+    }
+  }
+
+  if (discoveredDevice == NULL) {
+    if (_discoveredDevices.size() >= GAP_MAX_DISCOVERED_QUEUE_SIZE) {
+      // drop
+      return;
+    }
+
+    discoveredDevice = new BLEDevice(addressType, address);
+
+    _discoveredDevices.add(discoveredDevice);
+    discoveredIndex = _discoveredDevices.size() - 1;
+  }
+
+  if (type != 0x04) {
+    discoveredDevice->setAdvertisementData(type, eirLength, eirData, rssi);
+  } else {
+    discoveredDevice->setScanResponseData(eirLength, eirData, rssi);
+  }
+
+  if (discoveredDevice->discovered() && _discoverEventHandler) {
+    // remove from list and report as discovered
+    BLEDevice device = *discoveredDevice;
+
+    _discoveredDevices.remove(discoveredIndex);
+    delete discoveredDevice;
+
+    if (matchesScanFilter(device)) {
+      _discoverEventHandler(device);
+    }
+  }
+}
+
+bool GAPClass::matchesScanFilter(const BLEDevice& device)
+{
+  if (_scanAddressFilter.length() > 0 && _scanAddressFilter != device.address()) {
+    return false; // drop doesn't match
+  } else if (_scanNameFilter.length() > 0 && _scanNameFilter != device.localName()) {
+    return false; // drop doesn't match
+  } else if (_scanUuidFilter.length() > 0 && _scanUuidFilter != device.advertisedServiceUuid()) {
+    return false; // drop doesn't match
+  }
+
+  return true;
 }
 
 GAPClass GAP;

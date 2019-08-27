@@ -23,11 +23,13 @@
 #include "BLECharacteristic.h"
 
 class BLELocalService;
+class BLERemoteService;
 
 class BLEService {
 public:
   BLEService();
   BLEService(const char* uuid);
+  BLEService(const BLEService& other);
   virtual ~BLEService();
 
   const char* uuid() const;
@@ -35,6 +37,13 @@ public:
   void addCharacteristic(BLECharacteristic& characteristic);
 
   operator bool() const;
+
+  int characteristicCount() const;
+  bool hasCharacteristic(const char* uuid) const;
+  bool hasCharacteristic(const char* uuid, int index) const;
+  BLECharacteristic characteristic(int index) const;
+  BLECharacteristic characteristic(const char * uuid) const;
+  BLECharacteristic characteristic(const char * uuid, int index) const;
 
 protected:
   friend class GATTClass;
@@ -45,8 +54,14 @@ protected:
 
   void addCharacteristic(BLELocalCharacteristic* characteristic);
 
+protected:
+  friend class BLEDevice;
+
+  BLEService(BLERemoteService* remote);
+
 private:
   BLELocalService* _local;
+  BLERemoteService* _remote;
 };
 
 #endif

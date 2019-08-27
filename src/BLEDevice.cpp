@@ -18,18 +18,26 @@
 */
 
 #include "utility/ATT.h"
+#include "utility/BLEUuid.h"
 #include "utility/HCI.h"
+
+#include "remote/BLERemoteDevice.h"
 
 #include "BLEDevice.h"
 
 BLEDevice::BLEDevice() :
-  _handle(0xffff)
+  _advertisementTypeMask(0),
+  _eirDataLength(0),
+  _rssi(127)
 {
   memset(_address, 0x00, sizeof(_address));
 }
 
-BLEDevice::BLEDevice(uint16_t handle, uint8_t address[6]) :
-  _handle(handle)
+BLEDevice::BLEDevice(uint8_t addressType, uint8_t address[6]) :
+  _addressType(addressType),
+  _advertisementTypeMask(0),
+  _eirDataLength(0),
+  _rssi(127)
 {
   memcpy(_address, address, sizeof(_address));
 }
@@ -56,16 +64,12 @@ bool BLEDevice::connected() const
     return false;
   }
 
-  return ATT.connected(_handle, _address);
+  return ATT.connected(_addressType, _address);
 }
 
 bool BLEDevice::disconnect()
 {
-  if (_handle != 0xffff) {
-    return HCI.disconnect(_handle);
-  }
-
-  return false;
+  return ATT.disconnect(_addressType, _address);
 }
 
 String BLEDevice::address() const
@@ -76,28 +80,433 @@ String BLEDevice::address() const
   return result;
 }
 
-int BLEDevice::rssi()
+bool BLEDevice::hasLocalName() const
 {
-  if (_handle != 0xffff) {
-    return HCI.readRssi(_handle);
+  return (localName().length() > 0);
+}
+
+bool BLEDevice::hasAdvertisedServiceUuid() const
+{
+  return hasAdvertisedServiceUuid(0);
+}
+
+bool BLEDevice::hasAdvertisedServiceUuid(int index) const
+{
+  return (advertisedServiceUuid(index).length() > 0);
+}
+
+int BLEDevice::advertisedServiceUuidCount() const
+{
+  int advertisedServiceCount = 0;
+
+  for (unsigned char i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+
+    if (eirType == 0x02 || eirType == 0x03 || eirType == 0x06 || eirType == 0x07) {
+      int uuidLength;
+
+      if (eirType == 0x02 || eirType == 0x03) {
+        uuidLength = 2;
+      } else /*if (eirType == 0x06 || eirType == 0x07)*/ {
+        uuidLength = 16;
+      }
+
+      for (int j = 0; j < (eirLength - 1); j += uuidLength) {
+        advertisedServiceCount++;
+      }
+    }
+
+    i += (eirLength - 1);
   }
 
-  return 127;
+  return advertisedServiceCount;
+}
+
+String BLEDevice::localName() const
+{
+  String localName = "";
+
+  for (int i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+
+    if (eirType == 0x08 || eirType == 0x09) {
+      localName.reserve(eirLength - 1);
+
+      for (int j = 0; j < (eirLength - 1); j++) {
+        localName += (char)_eirData[i + j];
+      }
+      break;
+    }
+
+    i += (eirLength - 1);
+  }
+
+  return localName;
+}
+
+String BLEDevice::advertisedServiceUuid() const
+{
+  return advertisedServiceUuid(0);
+}
+
+String BLEDevice::advertisedServiceUuid(int index) const
+{
+  String serviceUuid;
+  int uuidIndex = 0;
+
+  for (unsigned char i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+
+    if (eirType == 0x02 || eirType == 0x03 || eirType == 0x06 || eirType == 0x07) {
+      int uuidLength;
+
+      if (eirType == 0x02 || eirType == 0x03) {
+        uuidLength = 2;
+      } else /*if (eirType == 0x06 || eirType == 0x07)*/ {
+        uuidLength = 16;
+      }
+
+      for (int j = 0; j < (eirLength - 1); j += uuidLength) {
+        if (uuidIndex == index) {
+          serviceUuid = BLEUuid::uuidToString(&_eirData[i + j * uuidLength], uuidLength);
+        }
+
+        uuidIndex++;
+      }
+    }
+
+    i += (eirLength - 1);
+  }
+
+  return serviceUuid;
+}
+
+int BLEDevice::rssi()
+{
+  uint16_t handle = ATT.connectionHandle(_addressType, _address);
+
+  if (handle != 0xffff) {
+    return HCI.readRssi(handle);
+  }
+
+  return _rssi;
+}
+
+bool BLEDevice::connect()
+{
+  return ATT.connect(_addressType, _address);
+}
+
+bool BLEDevice::discoverAttributes()
+{
+  return ATT.discoverAttributes(_addressType, _address, NULL);
+}
+
+bool BLEDevice::discoverService(const char* serviceUuid)
+{
+  return ATT.discoverAttributes(_addressType, _address, serviceUuid);
 }
 
 BLEDevice::operator bool() const
 {
   uint8_t zeros[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,};
 
-  return ((_handle != 0xffff) && memcmp(_address, zeros, sizeof(zeros)) != 0);
+  return (memcmp(_address, zeros, sizeof(zeros)) != 0);
 }
 
 bool BLEDevice::operator==(const BLEDevice& rhs) const
 {
-  return ((_handle == rhs._handle) && memcmp(_address, rhs._address, sizeof(_address)) == 0);
+  return ((_addressType == rhs._addressType) && memcmp(_address, rhs._address, sizeof(_address)) == 0);
 }
 
 bool BLEDevice::operator!=(const BLEDevice& rhs) const
 {
-  return ((_handle != rhs._handle) || memcmp(_address, rhs._address, sizeof(_address)) != 0);
+  return ((_addressType != rhs._addressType) || memcmp(_address, rhs._address, sizeof(_address)) != 0);
 }
+
+String BLEDevice::deviceName()
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    BLEService genericAccessService = service("1800");
+
+    if (genericAccessService) {
+      BLECharacteristic deviceNameCharacteristic = genericAccessService.characteristic("2a00");
+
+      if (deviceNameCharacteristic) {
+        deviceNameCharacteristic.read();
+
+        String result;
+        int valueLength = deviceNameCharacteristic.valueLength();
+        const char* value = (const char*)deviceNameCharacteristic.value();
+
+        result.reserve(valueLength);
+
+        for (int i = 0; i < valueLength; i++) {
+          result += value[i];
+        }
+
+        return result;
+      }
+    }
+  }
+
+  return "";
+}
+
+int BLEDevice::appearance()
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    BLEService genericAccessService = service("1801");
+
+    if (genericAccessService) {
+      BLECharacteristic appearanceCharacteristic = genericAccessService.characteristic("2a01");
+
+      if (appearanceCharacteristic) {
+        appearanceCharacteristic.read();
+
+        uint16_t result = 0;
+
+        memcpy  (&result, appearanceCharacteristic.value(), min((int)sizeof(result), appearanceCharacteristic.valueLength()));
+
+        return result;
+      }
+    }
+  }
+
+  return 0;
+}
+
+int BLEDevice::serviceCount() const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    return device->serviceCount();
+  }
+
+  return 0;
+}
+
+bool BLEDevice::hasService(const char* uuid) const
+{
+  return hasService(uuid, 0);
+}
+
+bool BLEDevice::hasService(const char* uuid, int index) const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    int count = 0;
+    int numServices = device->serviceCount();
+
+    for (int i = 0; i < numServices; i++) {
+      BLERemoteService* s = device->service(i);
+
+      if (strcmp(uuid, s->uuid()) == 0) {
+        if (count == index) {
+          return true;
+        }
+
+        count++;
+      }
+    }
+  }
+
+  return false;
+}
+
+BLEService BLEDevice::service(int index) const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    if (index < (int)device->serviceCount()) {
+      return BLEService(device->service(index));
+    }
+  }
+
+  return BLEService();
+}
+
+BLEService BLEDevice::service(const char * uuid) const
+{
+  return service(uuid, 0);
+}
+
+BLEService BLEDevice::service(const char * uuid, int index) const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    int count = 0;
+    int numServices = device->serviceCount();
+
+    for (int i = 0; i < numServices; i++) {
+      BLERemoteService* s = device->service(i);
+
+      if (strcmp(uuid, s->uuid()) == 0) {
+        if (count == index) {
+          return BLEService(s);
+        }
+
+        count++;
+      }
+    }
+  }
+
+  return BLEService();
+}
+
+int BLEDevice::characteristicCount() const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    int result = 0;
+    int numServices = device->serviceCount();
+
+    for (int i = 0; i < numServices; i++) {
+      result += device->service(i)->characteristicCount();
+    }
+
+    return result;
+  }
+
+  return 0;
+}
+
+bool BLEDevice::hasCharacteristic(const char* uuid) const
+{
+  return hasCharacteristic(uuid, 0);
+}
+
+bool BLEDevice::hasCharacteristic(const char* uuid, int index) const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    int count = 0;
+    int numServices = device->serviceCount();
+
+    for (int i = 0; i < numServices; i++) {
+      BLERemoteService* s = device->service(i);
+
+      int numCharacteristics = s->characteristicCount();
+
+      for (int j = 0; j < numCharacteristics; j++) {
+        BLERemoteCharacteristic* c = s->characteristic(j);
+
+
+        if (strcmp(c->uuid(), uuid) == 0) {
+          if (count == index) {
+            return true;
+          }
+        }
+
+        count++;
+      }
+    }
+  }
+
+  return false;
+}
+
+BLECharacteristic BLEDevice::characteristic(int index) const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    int count = 0;
+    int numServices = device->serviceCount();
+
+    for (int i = 0; i < numServices; i++) {
+      BLERemoteService* s = device->service(i);
+
+      int numCharacteristics = s->characteristicCount();
+
+      for (int j = 0; j < numCharacteristics; j++) {
+        if (count == index) {
+          BLERemoteCharacteristic* c = s->characteristic(j);
+
+          return BLECharacteristic(c);
+        }
+
+        count++;
+      }
+    }
+  }
+
+  return BLECharacteristic();
+}
+
+BLECharacteristic BLEDevice::characteristic(const char * uuid) const
+{
+  return characteristic(uuid, 0);
+}
+
+BLECharacteristic BLEDevice::characteristic(const char * uuid, int index) const
+{
+  BLERemoteDevice* device = ATT.device(_addressType, _address);
+
+  if (device) {
+    int count = 0;
+    int numServices = device->serviceCount();
+
+    for (int i = 0; i < numServices; i++) {
+      BLERemoteService* s = device->service(i);
+
+      int numCharacteristics = s->characteristicCount();
+
+      for (int j = 0; j < numCharacteristics; j++) {
+        BLERemoteCharacteristic* c = s->characteristic(j);
+
+        if (strcmp(c->uuid(), uuid) == 0) {
+          if (count == index) {
+
+            return BLECharacteristic(c);
+          }
+
+          count++;
+        }
+      }
+    }
+  }
+
+  return BLECharacteristic();
+}
+
+bool BLEDevice::hasAddress(uint8_t addressType, uint8_t address[6])
+{
+  return (_addressType == addressType) && (memcmp(_address, address, sizeof(_address)) == 0);
+}
+
+void BLEDevice::setAdvertisementData(uint8_t type, uint8_t eirDataLength, uint8_t eirData[], int8_t rssi)
+{
+  _advertisementTypeMask = (1 << type);
+  _eirDataLength = eirDataLength;
+  memcpy(_eirData, eirData, eirDataLength);
+  _rssi = rssi;
+}
+
+void BLEDevice::setScanResponseData(uint8_t eirDataLength, uint8_t eirData[], int8_t rssi)
+{
+  _advertisementTypeMask |= (1 << 0x04);
+  memcpy(&_eirData[_eirDataLength], eirData, eirDataLength);
+  _eirDataLength += eirDataLength;
+  _rssi = rssi;
+}
+
+bool BLEDevice::discovered()
+{
+  // expect, 0x03 or 0x04 flag to be set
+  return (_advertisementTypeMask & 0x18) != 0;
+}
+

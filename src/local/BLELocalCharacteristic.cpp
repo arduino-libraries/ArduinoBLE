@@ -29,7 +29,7 @@
 #include "BLELocalCharacteristic.h"
 
 BLELocalCharacteristic::BLELocalCharacteristic(const char* uuid, uint8_t properties, int valueSize, bool fixedLength) :
-  BLEAttribute(uuid),
+  BLELocalAttribute(uuid),
   _properties(properties),
   _valueSize(min(valueSize, 512)),
   _valueLength(0),
@@ -155,7 +155,6 @@ bool BLELocalCharacteristic::written()
 
   return written;
 }
-
 
 bool BLELocalCharacteristic::subscribed()
 {

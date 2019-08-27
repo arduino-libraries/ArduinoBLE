@@ -17,36 +17,42 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _BLE_LOCAL_DESCRIPTOR_H_
-#define _BLE_LOCAL_DESCRIPTOR_H_
+#ifndef _BLE_LOCAL_ATTRIBUTE_H_
+#define _BLE_LOCAL_ATTRIBUTE_H_
 
-#include <stdint.h>
+#include "utility/BLEUuid.h"
 
-#include "BLELocalAttribute.h"
+enum BLEAttributeType {
+  BLETypeUnknown        = 0x0000,
 
-class BLELocalDescriptor : public BLELocalAttribute {
+  BLETypeService        = 0x2800,
+  BLETypeCharacteristic = 0x2803,
+  BLETypeDescriptor     = 0x2900
+};
+
+class BLELocalAttribute
+{
 public:
-  BLELocalDescriptor(const char* uuid, const uint8_t value[], int valueSize);
-  BLELocalDescriptor(const char* uuid, const char* value);
-  virtual ~BLELocalDescriptor();
+  BLELocalAttribute(const char* uuid);
+  virtual ~BLELocalAttribute();
+
+  const char* uuid() const;
 
   virtual enum BLEAttributeType type() const;
 
-  int valueSize() const;
-  const uint8_t* value() const;
-  uint8_t operator[] (int offset) const;
+  int retain();
+  int release();
 
 protected:
+  friend class ATTClass;
   friend class GATTClass;
 
-  void setHandle(uint16_t handle);
-  uint16_t handle() const;
+  const uint8_t* uuidData() const;
+  uint8_t uuidLength() const;
 
 private:
-  const uint8_t* _value;
-  int            _valueSize;
-
-  uint16_t       _handle;
+  BLEUuid _uuid;
+  int _refCount;
 };
 
 #endif

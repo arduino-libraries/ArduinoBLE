@@ -22,10 +22,10 @@
 
 #include "utility/BLELinkedList.h"
 
-#include "local/BLELocalService.h"
+#include "local/BLELocalAttribute.h"
 #include "local/BLELocalCharacteristic.h"
+#include "local/BLELocalService.h"
 
-#include "BLEAttribute.h"
 #include "BLEService.h"
 
 class GATTClass {
@@ -45,7 +45,7 @@ protected:
   friend class ATTClass;
 
   unsigned int attributeCount() const;
-  BLEAttribute* attribute(unsigned int index) const;
+  BLELocalAttribute* attribute(unsigned int index) const;
 
 protected:
   friend class BLELocalCharacteristic;
@@ -58,7 +58,7 @@ private:
   void clearAttributes();
 
 private:
-  BLELinkedList<BLEAttribute*> _attributes;
+  BLELinkedList<BLELocalAttribute*> _attributes;
 
   BLELocalService              _genericAccessService;
   BLELocalCharacteristic       _deviceNameCharacteristic;

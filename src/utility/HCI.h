@@ -52,8 +52,17 @@ public:
   int leSetAdvertisingData(uint8_t length, uint8_t data[]);
   int leSetScanResponseData(uint8_t length, uint8_t data[]);
   int leSetAdvertiseEnable(uint8_t enable);
+  int leSetScanParameters(uint8_t type, uint16_t interval, uint16_t window, 
+                          uint8_t ownBdaddrType, uint8_t filter);
+  int leSetScanEnable(uint8_t enabled, uint8_t duplicates);
+  int leCreateConn(uint16_t interval, uint16_t window, uint8_t initiatorFilter,
+                  uint8_t peerBdaddrType, uint8_t peerBdaddr[6], uint8_t ownBdaddrType,
+                  uint16_t minInterval, uint16_t maxInterval, uint16_t latency,
+                  uint16_t supervisionTimeout, uint16_t minCeLength, uint16_t maxCeLength);
   int leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxInterval, 
                   uint16_t latency, uint16_t supervisionTimeout);
+  int leCancelConn();
+
 
   int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
 

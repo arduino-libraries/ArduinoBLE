@@ -20,6 +20,10 @@
 #ifndef _GAP_H_
 #define _GAP_H_
 
+#include "utility/BLELinkedList.h"
+
+#include "BLEDevice.h"
+
 class GAPClass {
 public:
   GAPClass();
@@ -33,16 +37,35 @@ public:
   int advertise();
   void stopAdvertise();
 
+  int scan(bool withDuplicates);
+  int scanForName(String name, bool withDuplicates);
+  int scanForUuid(String uuid, bool withDuplicates);
+  int scanForAddress(String address, bool withDuplicates);
+  void stopScan();
+  BLEDevice available();
+
   void setAdvertisingInterval(uint16_t advertisingInterval);
-  void setConnectable(bool connectable); 
+  void setConnectable(bool connectable);
+
+  void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
 
 protected:
   friend class BLELocalCharacteristic;
 
   void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
 
+protected:
+  friend class HCIClass;
+
+  void handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint8_t address[6],
+                                  uint8_t eirLength, uint8_t eirData[], int8_t rssi);
+
+private:
+  bool matchesScanFilter(const BLEDevice& device);
+
 private:
   bool _advertising;
+  bool _scanning;
 
   const char* _advertisedServiceUuid;
   const uint8_t* _manufacturerData;
@@ -54,6 +77,13 @@ private:
   uint16_t _serviceDataUuid;
   const uint8_t* _serviceData;
   int _serviceDataLength;
+
+  BLEDeviceEventHandler _discoverEventHandler;
+  BLELinkedList<BLEDevice*> _discoveredDevices;
+
+  String _scanNameFilter;
+  String _scanUuidFilter;
+  String _scanAddressFilter;
 };
 
 extern GAPClass GAP;

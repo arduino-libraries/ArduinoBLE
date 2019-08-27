@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2019 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,51 +17,25 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <stdlib.h>
-#include <string.h>
+#ifndef _BLE_REMOTE_ATTRIBUTE_H_
+#define _BLE_REMOTE_ATTRIBUTE_H_
 
-#include "BLEUuid.h"
+#include <Arduino.h>
 
-BLEUuid::BLEUuid(const char * str) :
-  _str(str)
+class BLERemoteAttribute
 {
-  char temp[] = {0, 0, 0};
+public:
+  BLERemoteAttribute(const uint8_t uuid[], uint8_t uuidLen);
+  virtual ~BLERemoteAttribute();
 
-  memset(_data, 0x00, sizeof(_data));
+  const char* uuid() const;
 
-  _length = 0;
-  for (int i = strlen(str) - 1; i >= 0 && _length < BLE_UUID_MAX_LENGTH; i -= 2) {
-    if (str[i] == '-') {
-      i++;
-      continue;
-    }
+  int retain();
+  int release();
 
-    temp[0] = str[i - 1];
-    temp[1] = str[i];
+private:
+  String _uuid;
+  int _refCount;
+};
 
-    _data[_length] = strtoul(temp, NULL, 16);
-
-    _length++;
-  }
-
-  if (_length <= 2) {
-    _length = 2;
-  } else {
-    _length = 16;
-  }
-}
-
-const char* BLEUuid::str() const
-{
-  return _str;
-}
-
-const uint8_t* BLEUuid::data() const
-{
-  return _data;
-}
-
-uint8_t BLEUuid::length() const
-{
-  return _length;
-}
+#endif

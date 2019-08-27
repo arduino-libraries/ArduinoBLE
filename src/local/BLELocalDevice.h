@@ -23,7 +23,7 @@
 #include "BLEDevice.h"
 #include "BLEService.h"
 
-class BLELocalDevice : public BLEDevice {
+class BLELocalDevice {
 public:
   BLELocalDevice();
   virtual ~BLELocalDevice();
@@ -31,12 +31,15 @@ public:
   int begin();
   void end();
 
-  virtual bool connected() const;
-  virtual bool disconnect();
+  void poll();
+  void poll(unsigned long timeout);
 
-  virtual String address() const;
+  bool connected() const;
+  bool disconnect();
 
-  virtual int rssi();
+  String address() const;
+
+ int rssi();
 
   void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
   void setAdvertisedService(const BLEService& service);
@@ -51,7 +54,14 @@ public:
   int advertise();
   void stopAdvertise();
 
+  int scan(bool withDuplicates = false);
+  int scanForName(String name, bool withDuplicates = false);
+  int scanForUuid(String uuid, bool withDuplicates = false);
+  int scanForAddress(String address, bool withDuplicates = false);
+  void stopScan();
+
   BLEDevice central();
+  BLEDevice available();
 
   void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
 
@@ -59,15 +69,12 @@ public:
   void setConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
   void setConnectable(bool connectable); 
 
-  virtual operator bool() const;
-  virtual bool operator==(const BLEDevice& rhs) const;
-  virtual bool operator!=(const BLEDevice& rhs) const;
+  void setTimeout(unsigned long timeout);
 
   void debug(Stream& stream);
   void noDebug();
 
 private:
-  
 };
 
 extern BLELocalDevice BLE;

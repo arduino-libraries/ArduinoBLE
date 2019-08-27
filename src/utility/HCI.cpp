@@ -18,6 +18,7 @@
 */
 
 #include "ATT.h"
+#include "GAP.h"
 #include "HCITransport.h"
 #include "L2CAPSignaling.h"
 
@@ -27,12 +28,14 @@
 #define HCI_ACLDATA_PKT 0x02
 #define HCI_EVENT_PKT   0x04
 
-#define EVT_CMD_COMPLETE 0xe
 #define EVT_DISCONN_COMPLETE 0x05
-#define EVT_NUM_COMP_PKTS 0x13
-#define EVT_LE_META_EVENT 0x3e
+#define EVT_CMD_COMPLETE     0xe
+#define EVT_CMD_STATUS       0x0f
+#define EVT_NUM_COMP_PKTS    0x13
+#define EVT_LE_META_EVENT    0x3e
 
-#define EVT_LE_CONN_COMPLETE 0x01
+#define EVT_LE_CONN_COMPLETE      0x01
+#define EVT_LE_ADVERTISING_REPORT 0x02
 
 #define OGF_LINK_CTL           0x01
 #define OGF_HOST_CTL           0x03
@@ -61,6 +64,10 @@
 #define OCF_LE_SET_ADVERTISING_DATA       0x0008
 #define OCF_LE_SET_SCAN_RESPONSE_DATA     0x0009
 #define OCF_LE_SET_ADVERTISE_ENABLE       0x000a
+#define OCF_LE_SET_SCAN_PARAMETERS        0x000b
+#define OCF_LE_SET_SCAN_ENABLE            0x000c
+#define OCF_LE_CREATE_CONN                0x000d
+#define OCF_LE_CANCEL_CONN                0x000e
 #define OCF_LE_CONN_UPDATE                0x0013
 
 #define HCI_OE_USER_ENDED_CONNECTION 0x13
@@ -308,6 +315,80 @@ int HCIClass::leSetAdvertiseEnable(uint8_t enable)
   return sendCommand(OGF_LE_CTL << 10 | OCF_LE_SET_ADVERTISE_ENABLE, sizeof(enable), &enable);
 }
 
+int HCIClass::leSetScanParameters(uint8_t type, uint16_t interval, uint16_t window, 
+                          uint8_t ownBdaddrType, uint8_t filter)
+{
+  struct __attribute__ ((packed)) HCILeSetScanParameters {
+    uint8_t type;
+    uint16_t interval;
+    uint16_t window;
+    uint8_t ownBdaddrType;
+    uint8_t filter;
+  } leScanParameters;
+
+  leScanParameters.type = type;
+  leScanParameters.interval = interval;
+  leScanParameters.window = window;
+  leScanParameters.ownBdaddrType = ownBdaddrType;
+  leScanParameters.filter = filter;
+
+  return sendCommand(OGF_LE_CTL << 10 | OCF_LE_SET_SCAN_PARAMETERS, sizeof(leScanParameters), &leScanParameters);
+}
+
+int HCIClass::leSetScanEnable(uint8_t enabled, uint8_t duplicates)
+{
+  struct __attribute__ ((packed)) HCILeSetScanEnableData {
+    uint8_t enabled;
+    uint8_t duplicates;
+  } leScanEnableData;
+
+  leScanEnableData.enabled = enabled;
+  leScanEnableData.duplicates = duplicates;
+
+  return sendCommand(OGF_LE_CTL << 10 | OCF_LE_SET_SCAN_ENABLE, sizeof(leScanEnableData), &leScanEnableData);
+}
+
+int HCIClass::leCreateConn(uint16_t interval, uint16_t window, uint8_t initiatorFilter,
+                            uint8_t peerBdaddrType, uint8_t peerBdaddr[6], uint8_t ownBdaddrType,
+                            uint16_t minInterval, uint16_t maxInterval, uint16_t latency,
+                            uint16_t supervisionTimeout, uint16_t minCeLength, uint16_t maxCeLength)
+{
+  struct __attribute__ ((packed)) HCILeCreateConnData {
+    uint16_t interval;
+    uint16_t window;
+    uint8_t initiatorFilter;
+    uint8_t peerBdaddrType;
+    uint8_t peerBdaddr[6];
+    uint8_t ownBdaddrType;
+    uint16_t minInterval;
+    uint16_t maxInterval;
+    uint16_t latency;
+    uint16_t supervisionTimeout;
+    uint16_t minCeLength;
+    uint16_t maxCeLength;
+  } leCreateConnData;
+
+  leCreateConnData.interval = interval;
+  leCreateConnData.window = window;
+  leCreateConnData.initiatorFilter = initiatorFilter;
+  leCreateConnData.peerBdaddrType = peerBdaddrType;
+  memcpy(leCreateConnData.peerBdaddr, peerBdaddr, sizeof(leCreateConnData.peerBdaddr));
+  leCreateConnData.ownBdaddrType = ownBdaddrType;
+  leCreateConnData.minInterval = minInterval;
+  leCreateConnData.maxInterval = maxInterval;
+  leCreateConnData.latency = latency;
+  leCreateConnData.supervisionTimeout = supervisionTimeout;
+  leCreateConnData.minCeLength = minCeLength;
+  leCreateConnData.maxCeLength = maxCeLength;
+
+  return sendCommand(OGF_LE_CTL << 10 | OCF_LE_CREATE_CONN, sizeof(leCreateConnData), &leCreateConnData);
+}
+
+int HCIClass::leCancelConn()
+{
+  return sendCommand(OGF_LE_CTL << 10 | OCF_LE_CANCEL_CONN, 0, NULL);
+}
+
 int HCIClass::leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxInterval, 
                           uint16_t latency, uint16_t supervisionTimeout)
 {
@@ -473,6 +554,17 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
     _cmdCompleteStatus = cmdCompleteHeader->status;
     _cmdResponseLen = pdata[1] - sizeof(CmdComplete);
     _cmdResponse = &pdata[sizeof(HCIEventHdr) + sizeof(CmdComplete)];
+
+  } else if (eventHdr->evt == EVT_CMD_STATUS) {
+    struct __attribute__ ((packed)) CmdStatus {
+      uint8_t status;
+      uint8_t ncmd;
+      uint16_t opcode;
+    } *cmdStatusHeader = (CmdStatus*)&pdata[sizeof(HCIEventHdr)];
+
+    _cmdCompleteOpcode = cmdStatusHeader->opcode;
+    _cmdCompleteStatus = cmdStatusHeader->status;
+    _cmdResponseLen = 0;
   } else if (eventHdr->evt == EVT_NUM_COMP_PKTS) {
     uint8_t numHandles = pdata[sizeof(HCIEventHdr)];
     uint16_t* data = (uint16_t*)&pdata[sizeof(HCIEventHdr) + sizeof(numHandles)];
@@ -518,6 +610,28 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
                               leConnectionComplete->latency,
                               leConnectionComplete->supervisionTimeout,
                               leConnectionComplete->masterClockAccuracy);
+      }
+    } else if (leMetaHeader->subevent == EVT_LE_ADVERTISING_REPORT) {
+      struct __attribute__ ((packed)) EvtLeAdvertisingReport {
+        uint8_t status;
+        uint8_t type;
+        uint8_t peerBdaddrType;
+        uint8_t peerBdaddr[6];
+        uint8_t eirLength;
+        uint8_t eirData[31];
+      } *leAdvertisingReport = (EvtLeAdvertisingReport*)&pdata[sizeof(HCIEventHdr) + sizeof(LeMetaEventHeader)];
+
+      if (leAdvertisingReport->status == 0x01) {
+        // last byte is RSSI
+        int8_t rssi = leAdvertisingReport->eirData[leAdvertisingReport->eirLength];
+
+        GAP.handleLeAdvertisingReport(leAdvertisingReport->type,
+                                      leAdvertisingReport->peerBdaddrType,
+                                      leAdvertisingReport->peerBdaddr,
+                                      leAdvertisingReport->eirLength,
+                                      leAdvertisingReport->eirData,
+                                      rssi);
+
       }
     }
   }
