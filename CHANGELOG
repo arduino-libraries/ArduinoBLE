@@ -1,5 +1,9 @@
 ArduinoBLE ?.?.? - ????.??.??
 
+ArduinoBLE 1.1.0 - 2019.08.27
+
+* Added BLE Central support
+
 ArduinoBLE 1.0.0 - 2019.07.31
 
 * Added support for Arduino Nano 33 BLE boards
