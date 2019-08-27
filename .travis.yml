@@ -22,10 +22,16 @@ before_install:
       arduino --install-boards arduino:mbed;
     fi
   - buildExamplePeripheralSketch() { arduino --verbose-build --verify --board $BOARD $PWD/examples/Peripheral/$1/$1.ino; }
+  - buildExampleCentralSketch() { arduino --verbose-build --verify --board $BOARD $PWD/examples/Central/$1/$1.ino; }
 install:
   - mkdir -p $HOME/Arduino/libraries
   - ln -s $PWD $HOME/Arduino/libraries/.
 script:
+  - buildExampleCentralSketch LedControl
+  - buildExampleCentralSketch PeripheralExplorer
+  - buildExampleCentralSketch Scan
+  - buildExampleCentralSketch ScanCallback
+  - buildExampleCentralSketch SensorTagButton
   - buildExamplePeripheralSketch BatteryMonitor
   - buildExamplePeripheralSketch ButtonLED
   - buildExamplePeripheralSketch CallbackLED
