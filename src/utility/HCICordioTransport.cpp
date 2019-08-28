@@ -147,7 +147,8 @@ static void bleLoop()
 #endif // CORDIO_ZERO_COPY_HCI
 }
 
-rtos::Thread bleLoopThread;
+static osThreadId mainThreadId;
+static rtos::Thread bleLoopThread;
 
 
 HCICordioTransportClass::HCICordioTransportClass()
@@ -161,6 +162,8 @@ HCICordioTransportClass::~HCICordioTransportClass()
 int HCICordioTransportClass::begin()
 {
   _rxBuf.clear();
+
+  mainThreadId = osThreadGetId();
 
 #if CORDIO_ZERO_COPY_HCI
   ble::vendor::cordio::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
@@ -184,11 +187,12 @@ void HCICordioTransportClass::end()
 
 void HCICordioTransportClass::wait(unsigned long timeout)
 {
-  for (unsigned long start = millis(); (millis() - start) < timeout;) {
-    if (available()) {
-      break;
-    }
+  if (available()) {
+    return;
   }
+
+  // wait for handleRxData to signal
+  rtos::ThisThread::flags_wait_all_for(0x01, timeout, true);
 }
 
 int HCICordioTransportClass::available()
@@ -232,6 +236,8 @@ void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
   for (int i = 0; i < len; i++) {
     _rxBuf.store_char(data[i]);
   }
+
+  osSignalSet(mainThreadId, 0x1);
 }
 
 HCICordioTransportClass HCICordioTransport;
