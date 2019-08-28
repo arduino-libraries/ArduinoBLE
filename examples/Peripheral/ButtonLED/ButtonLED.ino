@@ -6,7 +6,8 @@
   represents the state of the button.
 
   The circuit:
-  - Arduino MKR WiFi 1010 or Arduino Uno WiFi Rev2 board
+  - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
+    Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
   - Button connected to pin 4
 
   You can use a generic BLE central app, like LightBlue (iOS and Android) or
