@@ -47,6 +47,7 @@ private:
   void handleRxData(uint8_t* data, uint8_t len);
 
 private:
+  bool _begun;
   RingBufferN<256> _rxBuf;
 };
 
