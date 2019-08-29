@@ -150,7 +150,8 @@ static void bleLoop()
 rtos::Thread bleLoopThread;
 
 
-HCICordioTransportClass::HCICordioTransportClass()
+HCICordioTransportClass::HCICordioTransportClass() :
+  _begun(false)
 {
 }
 
@@ -172,6 +173,8 @@ int HCICordioTransportClass::begin()
 
   CordioHCIHook::setDataReceivedHandler(HCICordioTransportClass::onDataReceived);
 
+  _begun = true;
+
   return 1;
 }
 
@@ -180,6 +183,8 @@ void HCICordioTransportClass::end()
   bleLoopThread.terminate();
 
   CordioHCIHook::getDriver().terminate();
+
+  _begun = false;
 }
 
 void HCICordioTransportClass::wait(unsigned long timeout)
@@ -208,12 +213,16 @@ int HCICordioTransportClass::read()
 
 size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
 {
+  if (!_begun) {
+    return 0;
+  }
+
   uint8_t packetLength = length - 1;
   uint8_t packetType   = data[0];
 
 #if CORDIO_ZERO_COPY_HCI
   uint8_t* packet = (uint8_t*)WsfMsgAlloc(max(packetLength, MIN_WSF_ALLOC));
-  
+
   memcpy(packet, &data[1], packetLength);
 
   return CordioHCIHook::getTransportDriver().write(packetType, packetLength, packet);
