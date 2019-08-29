@@ -498,8 +498,37 @@ void HCIClass::handleAclDataPkt(uint8_t /*plen*/, uint8_t pdata[])
     uint16_t cid;
   } *aclHdr = (HCIACLHdr*)pdata;
 
+  uint16_t aclFlags = (aclHdr->handle & 0xf000) >> 12;
+
+  if ((aclHdr->dlen - 4) != aclHdr->len) {
+    // packet is fragmented
+    if (aclFlags != 0x01) {
+      // copy into ACL buffer
+      memcpy(_aclPktBuffer, &_recvBuffer[1], sizeof(HCIACLHdr) + aclHdr->dlen - 4);
+    } else {
+      // copy next chunk into the buffer
+      HCIACLHdr* aclBufferHeader = (HCIACLHdr*)_aclPktBuffer;
+
+      memcpy(&_aclPktBuffer[sizeof(HCIACLHdr) + aclBufferHeader->dlen - 4], &_recvBuffer[1 + sizeof(aclHdr->handle) + sizeof(aclHdr->dlen)], aclHdr->dlen);
+
+      aclBufferHeader->dlen += aclHdr->dlen;
+      aclHdr = aclBufferHeader;
+    }
+  }
+
+  if ((aclHdr->dlen - 4) != aclHdr->len) {
+    // don't have the full packet yet
+    return;
+  }
+
   if (aclHdr->cid == ATT_CID) {
-    ATT.handleData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
+    if (aclFlags == 0x01) {
+      // use buffered packet
+      ATT.handleData(aclHdr->handle & 0x0fff, aclHdr->len, &_aclPktBuffer[sizeof(HCIACLHdr)]);
+    } else {
+      // use the recv buffer
+      ATT.handleData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
+    }
   } else if (aclHdr->cid == SIGNALING_CID) {
     L2CAPSignaling.handleData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
   } else {
