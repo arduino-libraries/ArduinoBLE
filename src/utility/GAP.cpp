@@ -48,9 +48,13 @@ void GAPClass::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
   _advertisedServiceUuid = advertisedServiceUuid;
 }
 
-void GAPClass::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
+void GAPClass::setManufacturerData(const uint16_t companyId,const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  _manufacturerData = manufacturerData;
+  uint8_t tmpManufacturerData[manufacturerDataLength + 2];
+  tmpManufacturerData[0] = companyId & 0xff;
+  tmpManufacturerData[1] = companyId >> 8;
+  memcpy(&tmpManufacturerData[2], manufacturerData, manufacturerDataLength);
+  _manufacturerData = tmpManufacturerData;
   _manufacturerDataLength = manufacturerDataLength;
 }
 

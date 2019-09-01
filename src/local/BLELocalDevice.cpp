@@ -180,9 +180,9 @@ void BLELocalDevice::setAdvertisedService(const BLEService& service)
   setAdvertisedServiceUuid(service.uuid());
 }
 
-void BLELocalDevice::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
+void BLELocalDevice::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  GAP.setManufacturerData(manufacturerData, manufacturerDataLength);
+  GAP.setManufacturerData(companyId, manufacturerData, manufacturerDataLength);
 }
 
 void BLELocalDevice::setLocalName(const char *localName)
