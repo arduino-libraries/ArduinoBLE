@@ -33,6 +33,7 @@ BLERemoteCharacteristic::BLERemoteCharacteristic(const uint8_t uuid[], uint8_t u
   _value(NULL),
   _valueLength(0),
   _valueUpdated(false),
+  _updatedValueRead(true),
   _valueUpdatedEventHandler(NULL)
 {
 }
@@ -148,6 +149,15 @@ bool BLERemoteCharacteristic::valueUpdated()
   return result;
 }
 
+bool BLERemoteCharacteristic::updatedValueRead()
+{
+  bool result = _updatedValueRead;
+
+  _updatedValueRead = true;
+
+  return result;
+}
+
 bool BLERemoteCharacteristic::read()
 {
   if (!ATT.connected(_connectionHandle)) {
@@ -177,7 +187,6 @@ bool BLERemoteCharacteristic::read()
     return false;
   }
 
-  _valueUpdated = true;
   memcpy(_value, &resp[1], _valueLength); 
 
   return true;
@@ -245,6 +254,7 @@ void BLERemoteCharacteristic::writeValue(BLEDevice device, const uint8_t value[]
   }
 
   _valueUpdated = true;
+  _updatedValueRead = false;
   memcpy(_value, value, _valueLength);
 
   if (_valueUpdatedEventHandler) {
