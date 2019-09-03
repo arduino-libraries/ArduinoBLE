@@ -170,10 +170,9 @@ int BLECharacteristic::readValue(uint8_t value[], int length)
   }
 
   if (_remote) {
-    // trigger a read if the value hasn't been updated via
-    // indication or notification, and the characteristic is
-    // readable
-    if (!valueUpdated() && canRead()) {
+    // trigger a read if the updated value (notification/indication)
+    // has already been read and the characteristic is readable
+    if (_remote->updatedValueRead() && canRead()) {
       if (!read()) {
         // read failed
         return 0;

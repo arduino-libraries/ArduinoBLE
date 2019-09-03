@@ -42,6 +42,7 @@ public:
   int writeValue(const char* value);
 
   bool valueUpdated();
+  bool updatedValueRead();
 
   bool read();
   bool writeCccd(uint16_t value);
@@ -71,6 +72,7 @@ private:
   int _valueLength;
 
   bool _valueUpdated;
+  bool _updatedValueRead;
 
   BLELinkedList<BLERemoteDescriptor*> _descriptors;
 
