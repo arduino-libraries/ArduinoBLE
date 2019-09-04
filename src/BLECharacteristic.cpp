@@ -382,7 +382,7 @@ bool BLECharacteristic::hasDescriptor(const char* uuid, int index) const
     for (int i = 0; i < numDescriptors; i++) {
       BLERemoteDescriptor* d = _remote->descriptor(i);
 
-      if (strcmp(uuid, d->uuid()) == 0) {
+      if (strcasecmp(uuid, d->uuid()) == 0) {
         if (count == index) {
           return true;
         }
@@ -418,7 +418,7 @@ BLEDescriptor BLECharacteristic::descriptor(const char * uuid, int index) const
     for (int i = 0; i < numDescriptors; i++) {
       BLERemoteDescriptor* d = _remote->descriptor(i);
 
-      if (strcmp(uuid, d->uuid()) == 0) {
+      if (strcasecmp(uuid, d->uuid()) == 0) {
         if (count == index) {
           return BLEDescriptor(d);
         }

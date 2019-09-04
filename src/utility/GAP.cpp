@@ -328,11 +328,11 @@ void GAPClass::handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint
 
 bool GAPClass::matchesScanFilter(const BLEDevice& device)
 {
-  if (_scanAddressFilter.length() > 0 && _scanAddressFilter != device.address()) {
+  if (_scanAddressFilter.length() > 0 && !(_scanAddressFilter.equalsIgnoreCase(device.address()))) {
     return false; // drop doesn't match
   } else if (_scanNameFilter.length() > 0 && _scanNameFilter != device.localName()) {
     return false; // drop doesn't match
-  } else if (_scanUuidFilter.length() > 0 && _scanUuidFilter != device.advertisedServiceUuid()) {
+  } else if (_scanUuidFilter.length() > 0 && !(_scanUuidFilter.equalsIgnoreCase(device.advertisedServiceUuid()))) {
     return false; // drop doesn't match
   }
 

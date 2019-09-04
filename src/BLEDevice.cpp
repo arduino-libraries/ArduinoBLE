@@ -310,7 +310,7 @@ bool BLEDevice::hasService(const char* uuid, int index) const
     for (int i = 0; i < numServices; i++) {
       BLERemoteService* s = device->service(i);
 
-      if (strcmp(uuid, s->uuid()) == 0) {
+      if (strcasecmp(uuid, s->uuid()) == 0) {
         if (count == index) {
           return true;
         }
@@ -352,7 +352,7 @@ BLEService BLEDevice::service(const char * uuid, int index) const
     for (int i = 0; i < numServices; i++) {
       BLERemoteService* s = device->service(i);
 
-      if (strcmp(uuid, s->uuid()) == 0) {
+      if (strcasecmp(uuid, s->uuid()) == 0) {
         if (count == index) {
           return BLEService(s);
         }
@@ -405,7 +405,7 @@ bool BLEDevice::hasCharacteristic(const char* uuid, int index) const
         BLERemoteCharacteristic* c = s->characteristic(j);
 
 
-        if (strcmp(c->uuid(), uuid) == 0) {
+        if (strcasecmp(c->uuid(), uuid) == 0) {
           if (count == index) {
             return true;
           }
@@ -468,7 +468,7 @@ BLECharacteristic BLEDevice::characteristic(const char * uuid, int index) const
       for (int j = 0; j < numCharacteristics; j++) {
         BLERemoteCharacteristic* c = s->characteristic(j);
 
-        if (strcmp(c->uuid(), uuid) == 0) {
+        if (strcasecmp(c->uuid(), uuid) == 0) {
           if (count == index) {
 
             return BLECharacteristic(c);

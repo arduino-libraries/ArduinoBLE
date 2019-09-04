@@ -193,7 +193,7 @@ bool ATTClass::discoverAttributes(uint8_t peerBdaddrType, uint8_t peerBdaddr[6],
     for (int i = 0; i < serviceCount; i++) {
       BLERemoteService* service = device->service(i);
 
-      if (strcmp(service->uuid(), serviceUuidFilter) == 0) {
+      if (strcasecmp(service->uuid(), serviceUuidFilter) == 0) {
         // found an existing service with same UUID
         return true;
       }

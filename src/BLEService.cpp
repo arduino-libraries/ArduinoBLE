@@ -122,7 +122,7 @@ bool BLEService::hasCharacteristic(const char* uuid, int index) const
     for (int i = 0; i < numCharacteristics; i++) {
       BLERemoteCharacteristic* c = _remote->characteristic(i);
 
-      if (strcmp(uuid, c->uuid()) == 0) {
+      if (strcasecmp(uuid, c->uuid()) == 0) {
         if (count == index) {
           return true;
         }
@@ -158,7 +158,7 @@ BLECharacteristic BLEService::characteristic(const char * uuid, int index) const
     for (int i = 0; i < numCharacteristics; i++) {
       BLERemoteCharacteristic* c = _remote->characteristic(i);
 
-      if (strcmp(uuid, c->uuid()) == 0) {
+      if (strcasecmp(uuid, c->uuid()) == 0) {
         if (count == index) {
           return BLECharacteristic(c);
         }
