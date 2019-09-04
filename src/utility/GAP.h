@@ -30,6 +30,7 @@ public:
   virtual ~GAPClass();
 
   void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
+  void setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
   void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   void setLocalName(const char *localName);
 
