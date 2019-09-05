@@ -54,6 +54,15 @@ void GAPClass::setManufacturerData(const uint8_t manufacturerData[], int manufac
   _manufacturerDataLength = manufacturerDataLength;
 }
 
+void GAPClass::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
+{
+  uint8_t tmpManufacturerData[manufacturerDataLength + 2];
+  tmpManufacturerData[0] = companyId & 0xff;
+  tmpManufacturerData[1] = companyId >> 8;
+  memcpy(&tmpManufacturerData[2], manufacturerData, manufacturerDataLength);
+  this->setManufacturerData(tmpManufacturerData, manufacturerDataLength + 2);
+}
+
 void GAPClass::setLocalName(const char *localName)
 {
   _localName = localName;

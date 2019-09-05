@@ -44,6 +44,7 @@ public:
   void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
   void setAdvertisedService(const BLEService& service);
   void setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
+  void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   void setLocalName(const char *localName);
 
   void setDeviceName(const char* deviceName);

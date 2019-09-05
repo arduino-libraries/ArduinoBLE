@@ -185,6 +185,11 @@ void BLELocalDevice::setManufacturerData(const uint8_t manufacturerData[], int m
   GAP.setManufacturerData(manufacturerData, manufacturerDataLength);
 }
 
+void BLELocalDevice::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
+{
+  GAP.setManufacturerData(companyId, manufacturerData, manufacturerDataLength);
+}
+
 void BLELocalDevice::setLocalName(const char *localName)
 {
   GAP.setLocalName(localName);
