@@ -1,5 +1,13 @@
 ArduinoBLE ?.?.? - ????.??.??
 
+ArduinoBLE 1.1.1 - 2019.09.05
+
+* [Cordio] Fixed crashing when BLE.begin() is not called
+* Fixed ACL RX packet fragmentation, affected devices that supported large MTUs
+* Fixed BLECharacteristic::readValue(...) triggering a read request after a notification/indication was received
+* Added support for case insensitive comparison of UUID or address string inputs
+* Added (optional) company ID argument to BLE.setManufacturerData(...). Thanks @konikoni428
+
 ArduinoBLE 1.1.0 - 2019.08.27
 
 * Added BLE Central support
