@@ -103,6 +103,9 @@ extern "C" void wsf_mbed_ble_signal_event(void)
 }
 #endif //CORDIO_ZERO_COPY_HCI
 
+#undef WSF_MS_PER_TICK
+#define WSF_MS_PER_TICK 10
+
 static void bleLoop()
 {
 #if CORDIO_ZERO_COPY_HCI
@@ -137,7 +140,18 @@ static void bleLoop()
         /* don't bother sleeping if we're already past tick */
         if (sleep && (WSF_MS_PER_TICK * 1000 > time_spent)) {
             /* sleep to maintain constant tick rate */
-            wait_us(WSF_MS_PER_TICK * 1000 - time_spent);
+            uint64_t wait_time_us = WSF_MS_PER_TICK * 1000 - time_spent;
+            uint64_t wait_time_ms = wait_time_us / 1000;
+
+            wait_time_us = wait_time_us % 1000;
+
+            if (wait_time_ms) {
+              rtos::ThisThread::sleep_for(wait_time_ms);
+            }
+
+            if (wait_time_us) {
+              wait_us(wait_time_us);
+            }
         }
     }
 #else
@@ -147,7 +161,7 @@ static void bleLoop()
 #endif // CORDIO_ZERO_COPY_HCI
 }
 
-static osThreadId mainThreadId;
+static rtos::EventFlags bleEventFlags; 
 static rtos::Thread bleLoopThread;
 
 
@@ -162,8 +176,6 @@ HCICordioTransportClass::~HCICordioTransportClass()
 int HCICordioTransportClass::begin()
 {
   _rxBuf.clear();
-
-  mainThreadId = osThreadGetId();
 
 #if CORDIO_ZERO_COPY_HCI
   ble::vendor::cordio::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
@@ -192,7 +204,7 @@ void HCICordioTransportClass::wait(unsigned long timeout)
   }
 
   // wait for handleRxData to signal
-  rtos::ThisThread::flags_wait_all_for(0x01, timeout, true);
+  bleEventFlags.wait_all(0x01, timeout, true);
 }
 
 int HCICordioTransportClass::available()
@@ -237,7 +249,7 @@ void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
     _rxBuf.store_char(data[i]);
   }
 
-  osSignalSet(mainThreadId, 0x1);
+  bleEventFlags.set(0x01);
 }
 
 HCICordioTransportClass HCICordioTransport;
