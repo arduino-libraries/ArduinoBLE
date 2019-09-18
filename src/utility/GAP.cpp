@@ -79,7 +79,7 @@ int GAPClass::advertise()
 
   uint8_t type = (_connectable) ? 0x00 : (_localName ? 0x02 : 0x03);
 
-  _advertising = false;
+  stopAdvertise();
 
   if (HCI.leSetAdvertisingParameters(_advertisingInterval, _advertisingInterval, type, 0x00, 0x00, directBdaddr, 0x07, 0) != 0) {
     return 0;
@@ -110,7 +110,7 @@ int GAPClass::advertise()
     advertisingDataLen += (2 + _manufacturerDataLength);
   }
 
-  if (_serviceData && _serviceDataLength > 0 && advertisingDataLen >= (_serviceDataLength + 4)) {
+  if (_serviceData && _serviceDataLength > 0 && (sizeof(advertisingData) - advertisingDataLen) >= (_serviceDataLength + 4)) {
     advertisingData[advertisingDataLen++] = _serviceDataLength + 3;
     advertisingData[advertisingDataLen++] = 0x16;
 
@@ -153,7 +153,7 @@ int GAPClass::advertise()
     return 0;
   }
 
-  _advertising = false;
+  _advertising = true;
 
   return 1;
 }
