@@ -17,6 +17,8 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#ifndef ARDUINO_ARCH_STM32
+
 #ifndef ARDUINO_ARCH_MBED
 
 #include "HCIUartTransport.h"
@@ -97,3 +99,5 @@ HCIUartTransportClass HCIUartTransport(SerialHCI, 912600);
 HCITransportInterface& HCITransport = HCIUartTransport;
 
 #endif
+
+#endif /* ARDUINO_ARCH_STM32 */
