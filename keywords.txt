@@ -30,6 +30,7 @@ BLEFloatCharacteristic	KEYWORD1
 BLEDoubleCharacteristic	KEYWORD1
 BLEStringCharacteristic	KEYWORD1
 
+HCISpiTransportClass	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -140,4 +141,11 @@ BLESubscribed	LITERAL1
 BLEUnsubscribed	LITERAL1
 BLEWritten	LITERAL1
 BLEUpdated	LITERAL1
+
+SPBTLE_RF	LITERAL1
+SPBTLE_1S	LITERAL1
+BLUENRG_M2SP	LITERAL1
+BLUENRG_M0	LITERAL1
+BLUENRG_LP	LITERAL1
+BLEChip_t	LITERAL1
 
