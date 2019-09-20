@@ -1,6 +1,6 @@
 /*
-  This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  This file is part of the STM32duinoBLE library.
+  Copyright (c) 2019 STMicroelectronics. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
