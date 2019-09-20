@@ -1,16 +1,13 @@
-# ArduinoBLE
+# STM32duinoBLE
 
-[![Build Status](https://travis-ci.org/arduino-libraries/ArduinoBLE.svg?branch=master)](https://travis-ci.org/arduino-libraries/ArduinoBLE)
+This library is a fork of ArduinoBLE library to add the support of STBTLE-RF and STBTLE-1S BLE modules.
 
-Enables BLE connectivity on the Arduino MKR WiFi 1010, Arduino UNO WiFi Rev.2, Arduino Nano 33 IoT, and Arduino Nano 33 BLE.
+You can find the official Pull Request at the following link:
 
-This library supports creating a BLE peripheral and BLE central mode.
+https://github.com/arduino-libraries/ArduinoBLE/pull/26
 
-For the Arduino MKR WiFi 1010, Arduino UNO WiFi Rev.2, and Arduino Nano 33 IoT boards, it requires the NINA module to be running [Arduino NINA-W102 firmware](https://github.com/arduino/nina-fw) v1.2.0 or later.
-
-
-For more information about this library please visit us at:
-https://www.arduino.cc/en/Reference/ArduinoBLE
+For more information about ArduinoBLE library please visit the official web page at:
+https://github.com/arduino-libraries/ArduinoBLE
 
 ## License
 
