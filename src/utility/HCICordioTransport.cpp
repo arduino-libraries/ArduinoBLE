@@ -103,6 +103,8 @@ extern "C" void wsf_mbed_ble_signal_event(void)
 }
 #endif //CORDIO_ZERO_COPY_HCI
 
+#define CORDIO_TRANSPORT_WSF_MS_PER_TICK 10
+
 static void bleLoop()
 {
 #if CORDIO_ZERO_COPY_HCI
@@ -114,7 +116,7 @@ static void bleLoop()
         timer.reset();
 
         uint64_t last_update_ms = (last_update_us / 1000);
-        wsfTimerTicks_t wsf_ticks = (last_update_ms / WSF_MS_PER_TICK);
+        wsfTimerTicks_t wsf_ticks = (last_update_ms / CORDIO_TRANSPORT_WSF_MS_PER_TICK);
 
         if (wsf_ticks > 0) {
             WsfTimerUpdate(wsf_ticks);
@@ -135,9 +137,20 @@ static void bleLoop()
         uint64_t time_spent = (uint64_t) timer.read_high_resolution_us();
 
         /* don't bother sleeping if we're already past tick */
-        if (sleep && (WSF_MS_PER_TICK * 1000 > time_spent)) {
+        if (sleep && (CORDIO_TRANSPORT_WSF_MS_PER_TICK * 1000 > time_spent)) {
             /* sleep to maintain constant tick rate */
-            wait_us(WSF_MS_PER_TICK * 1000 - time_spent);
+            uint64_t wait_time_us = CORDIO_TRANSPORT_WSF_MS_PER_TICK * 1000 - time_spent;
+            uint64_t wait_time_ms = wait_time_us / 1000;
+
+            wait_time_us = wait_time_us % 1000;
+
+            if (wait_time_ms) {
+              rtos::ThisThread::sleep_for(wait_time_ms);
+            }
+
+            if (wait_time_us) {
+              wait_us(wait_time_us);
+            }
         }
     }
 #else
@@ -147,7 +160,8 @@ static void bleLoop()
 #endif // CORDIO_ZERO_COPY_HCI
 }
 
-rtos::Thread bleLoopThread;
+static rtos::EventFlags bleEventFlags; 
+static rtos::Thread bleLoopThread;
 
 
 HCICordioTransportClass::HCICordioTransportClass() :
@@ -189,11 +203,12 @@ void HCICordioTransportClass::end()
 
 void HCICordioTransportClass::wait(unsigned long timeout)
 {
-  for (unsigned long start = millis(); (millis() - start) < timeout;) {
-    if (available()) {
-      break;
-    }
+  if (available()) {
+    return;
   }
+
+  // wait for handleRxData to signal
+  bleEventFlags.wait_all(0x01, timeout, true);
 }
 
 int HCICordioTransportClass::available()
@@ -241,6 +256,8 @@ void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
   for (int i = 0; i < len; i++) {
     _rxBuf.store_char(data[i]);
   }
+
+  bleEventFlags.set(0x01);
 }
 
 HCICordioTransportClass HCICordioTransport;
