@@ -53,7 +53,7 @@ public:
 
   void handleData(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
 
-  void removeConnection(uint8_t handle, uint16_t reason);
+  void removeConnection(uint16_t handle, uint8_t reason);
 
   uint16_t connectionHandle(uint8_t addressType, const uint8_t address[6]) const;
   BLERemoteDevice* device(uint8_t addressType, const uint8_t address[6]) const;
