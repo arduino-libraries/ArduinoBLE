@@ -351,7 +351,7 @@ void ATTClass::handleData(uint16_t connectionHandle, uint8_t dlen, uint8_t data[
   }
 }
 
-void ATTClass::removeConnection(uint8_t handle, uint16_t /*reason*/)
+void ATTClass::removeConnection(uint16_t handle, uint8_t /*reason*/)
 {
   int peerIndex = -1;
   int peerCount = 0;
