@@ -1,0 +1,57 @@
+name: Build Library Examples
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        fqbn: [
+          "arduino:samd:mkrwifi1010",
+          "arduino:samd:nano_33_iot",
+          "arduino:megaavr:uno2018:mode=on",
+          "arduino:mbed:nano33ble"
+        ]
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Setup arduino-cli
+        env:
+          VERSION: latest
+        run: |
+          set -x
+          wget -P $HOME https://downloads.arduino.cc/arduino-cli/arduino-cli_${VERSION}_Linux_64bit.tar.gz
+          mkdir $HOME/bin
+          tar xf $HOME/arduino-cli_${VERSION}_Linux_64bit.tar.gz  -C $HOME/bin
+          echo ::add-path::$HOME/bin
+
+      - name: Export FQBN and BOARD
+        run: |
+          FQBN=${{ matrix.fqbn }}
+          CORE=`echo "$FQBN" | cut -d':' -f1,2`
+          echo ::set-env name=FQBN::"$FQBN"
+          echo ::set-env name=CORE::"$CORE"
+
+      - name: Install Core
+        run: |
+          set -x
+          arduino-cli core update-index
+          arduino-cli core install $CORE
+
+      - name: Symlink Library
+        run: |
+          set -x
+          mkdir -p $HOME/Arduino/libraries
+          ln -s $PWD $HOME/Arduino/libraries/.
+
+      - name: Compile Examples
+        run: |
+          set -x
+          EXAMPLES=`find examples/ -name *.ino | xargs`
+          for EXAMPLE in $EXAMPLES; do
+            echo Building example $EXAMPLE
+            arduino-cli compile --verbose --warnings all --fqbn $FQBN $EXAMPLE
+          done || exit 1
