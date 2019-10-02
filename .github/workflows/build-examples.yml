@@ -43,7 +43,7 @@ jobs:
       - name: Compile Examples
         run: |
           set -x
-          EXAMPLES=`find examples/ -name *.ino | xargs`
+          EXAMPLES=`find examples/ -name '*.ino' | xargs dirname | uniq`
           for EXAMPLE in $EXAMPLES; do
             echo Building example $EXAMPLE
             arduino-cli compile --verbose --warnings all --fqbn $FQBN $EXAMPLE
