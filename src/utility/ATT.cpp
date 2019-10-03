@@ -519,20 +519,20 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
       continue;
     }
 
-    uint8_t notication[_peers[i].mtu];
-    uint16_t noticationLength = 0;
+    uint8_t notification[_peers[i].mtu];
+    uint16_t notificationLength = 0;
 
-    notication[0] = ATT_OP_HANDLE_NOTIFY;
-    noticationLength++;
+    notification[0] = ATT_OP_HANDLE_NOTIFY;
+    notificationLength++;
 
-    memcpy(&notication[1], &handle, sizeof(handle));
-    noticationLength += sizeof(handle);
+    memcpy(&notification[1], &handle, sizeof(handle));
+    notificationLength += sizeof(handle);
 
-    length = min((uint16_t)(_peers[i].mtu - noticationLength), (uint16_t)length);
-    memcpy(&notication[noticationLength], value, length);
-    noticationLength += length;
+    length = min((uint16_t)(_peers[i].mtu - notificationLength), (uint16_t)length);
+    memcpy(&notification[notificationLength], value, length);
+    notificationLength += length;
 
-    HCI.sendAclPkt(_peers[i].connectionHandle, ATT_CID, noticationLength, notication);
+    HCI.sendAclPkt(_peers[i].connectionHandle, ATT_CID, notificationLength, notification);
 
     numNotifications++;
   }
