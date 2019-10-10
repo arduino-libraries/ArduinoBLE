@@ -120,7 +120,7 @@ void exploreService(BLEService service) {
 }
 
 void exploreCharacteristic(BLECharacteristic characteristic) {
-  // print the UUID and properies of the characteristic
+  // print the UUID and properties of the characteristic
   Serial.print("\tCharacteristic ");
   Serial.print(characteristic.uuid());
   Serial.print(", properties 0x");

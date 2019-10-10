@@ -1,0 +1,11 @@
+name: Spell Check
+on: [push, pull_request]
+jobs:
+ build:
+   runs-on: ubuntu-latest
+
+   steps:
+     - uses: actions/checkout@v1
+       with:
+         fetch-depth: 1
+     - uses: arduino/actions/libraries/spell-check@master
