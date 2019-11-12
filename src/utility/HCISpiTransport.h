@@ -24,11 +24,11 @@
 #include "SPI.h"
 
 #if defined(ARDUINO_STEVAL_MKSBOX1V1)
-#define STBTLE_1S /* STEVAL_MKSBOX1V1 */
+#define SPBTLE_1S /* STEVAL_MKSBOX1V1 */
 #elif defined(ARDUINO_DISCO_L475VG_IOT)
-#define STBTLE_RF /* B-L475E-IOT01A1 */
+#define SPBTLE_RF /* B-L475E-IOT01A1 */
 #else
-#define STBTLE_RF /* Shield IDB05A1 */
+#define SPBTLE_RF /* Shield IDB05A1 */
 #endif /* ARDUINO_STEVAL_MKSBOX1V1 */
 
 #define BLE_MODULE_SPI_BUFFER_SIZE 128
@@ -50,11 +50,11 @@ public:
   virtual size_t write(const uint8_t* data, size_t length);
 
 private:
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
   void wait_for_blue_initialize();
   void wait_for_enable_ll_only();
   void enable_ll_only();
-#endif /* STBTLE_RF */
+#endif /* SPBTLE_RF */
   SPIClass* _spi;
   uint8_t _cs_pin;
   uint8_t _spi_irq;
