@@ -75,15 +75,15 @@ int HCISpiTransportClass::begin()
   digitalWrite(_ble_rst, HIGH);
   delay(5);
 
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
   // Wait for Blue Initialize
   wait_for_blue_initialize();
-#endif /* STBTLE_RF */
+#endif /* SPBTLE_RF */
 
-#if defined(STBTLE_1S)
+#if defined(SPBTLE_1S)
   // Wait a while for the reset of the BLE module
   delay(300);
-#endif /* STBTLE_1S */
+#endif /* SPBTLE_1S */
 
   return 1;
 }
@@ -132,11 +132,11 @@ int HCISpiTransportClass::available()
       /* Write the header */
       _spi->transfer(header_master, 5);
 
-#if defined(STBTLE_RF) 
+#if defined(SPBTLE_RF) 
       /* device is ready */
       if(header_master[0] == 0x02) 
       {
-#endif /* STBTLE_RF */
+#endif /* SPBTLE_RF */
         uint16_t byte_count = (header_master[4] << 8) | header_master[3];
 
         if(byte_count > 0)
@@ -156,7 +156,7 @@ int HCISpiTransportClass::available()
               _write_index_initial++;
             }
 
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
             /* Check if the message is a Blue Initialize */
             /* If so we need to send the command to enable LL_ONLY */
             if(byte_count == 6)
@@ -171,8 +171,8 @@ int HCISpiTransportClass::available()
                 ble_reset = 1;
               }
             }
-#endif /* STBTLE_RF */
-#if defined(STBTLE_1S)
+#endif /* SPBTLE_RF */
+#if defined(SPBTLE_1S)
             /* Check if the message is a CMD_COMPLETE */
             /* We suppose that the first CMD is always a HCI_RESET */
             if(byte_count == 7)
@@ -188,7 +188,7 @@ int HCISpiTransportClass::available()
                 ble_reset = 1;
               }
             }
-#endif /* STBTLE_1S */
+#endif /* SPBTLE_1S */
           } else
           {
             /* avoid to read more data that available size of the buffer */
@@ -207,9 +207,9 @@ int HCISpiTransportClass::available()
             }
           }
         }
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
       }
-#endif /* STBTLE_RF */
+#endif /* SPBTLE_RF */
 
       digitalWrite(_cs_pin, HIGH);
 
@@ -218,15 +218,15 @@ int HCISpiTransportClass::available()
 
     if(ble_reset)
     {
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
       /* BLE chip was reset: we need to enable LL_ONLY */
       enable_ll_only();
       wait_for_enable_ll_only();
-#endif /* STBTLE_RF */
-#if defined(STBTLE_1S)
+#endif /* SPBTLE_RF */
+#if defined(SPBTLE_1S)
       /* BLE chip was reset: we need to wait for a while */
       delay(300);
-#endif /* STBTLE_1S */
+#endif /* SPBTLE_1S */
 
       /* Now we can update the write index and close the initial phase */
       _write_index = _write_index_initial;
@@ -287,16 +287,16 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
 
   do
   {
-#if defined(STBTLE_1S)
+#if defined(SPBTLE_1S)
     uint32_t tickstart_data_available = millis();
-#endif /* STBTLE_1S */
+#endif /* SPBTLE_1S */
     result = 0;
 
     _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
 
     digitalWrite(_cs_pin, LOW);
 
-#if defined(STBTLE_1S)
+#if defined(SPBTLE_1S)
     /*
      * Wait until BlueNRG-1 is ready.
      * When ready it will raise the IRQ pin.
@@ -316,20 +316,20 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
       _spi->endTransaction();
       break;
     }
-#endif /* STBTLE_1S */
+#endif /* SPBTLE_1S */
 
     /* Write the header */
     _spi->transfer(header_master, 5);
 
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
     /* device is ready */
     if(header_master[0] == 0x02) 
     {
       if(header_master[1] >= length)
-#endif /* STBTLE_RF */
-#if defined(STBTLE_1S)
+#endif /* SPBTLE_RF */
+#if defined(SPBTLE_1S)
       if((int)((((uint16_t)header_master[2])<<8) | ((uint16_t)header_master[1])) >= (int)length)
-#endif /* STBTLE_1S */
+#endif /* SPBTLE_1S */
       {
         /* Write the data */
         _spi->transfer(my_data, length);
@@ -337,12 +337,12 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
       {
         result = -2;
       }
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
     } else
     {
       result = -1;
     }
-#endif /* STBTLE_RF */
+#endif /* SPBTLE_RF */
 
     digitalWrite(_cs_pin, HIGH);
 
@@ -364,7 +364,7 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
   }
 }
 
-#if defined(STBTLE_RF)
+#if defined(SPBTLE_RF)
 void HCISpiTransportClass::wait_for_blue_initialize()
 {
   int event_blue_initialize = 0;
@@ -535,7 +535,7 @@ void HCISpiTransportClass::enable_ll_only()
     _spi->endTransaction();
   } while (result < 0);
 }
-#endif /* STBTLE_RF */
+#endif /* SPBTLE_RF */
 
 #if defined(ARDUINO_STEVAL_MKSBOX1V1)
 HCISpiTransportClass HCISpiTransport(SpiHCI, PD0, PD4, PA8, 1000000, SPI_MODE1); /* STEVAL_MKSBOX1V1 */
