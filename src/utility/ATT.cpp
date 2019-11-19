@@ -1142,7 +1142,7 @@ void ATTClass::readByTypeResp(uint16_t connectionHandle, uint8_t dlen, uint8_t d
 
 void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op, uint8_t dlen, uint8_t data[])
 {
-  boolean withResponse = (op == ATT_OP_WRITE_REQ);
+  bool withResponse = (op == ATT_OP_WRITE_REQ);
 
   if (dlen < sizeof(uint16_t)) {
     if (withResponse) {

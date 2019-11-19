@@ -27,7 +27,7 @@ public:
   BLEBoolCharacteristic(const char* uuid, unsigned char properties);
 };
 
-class BLEBooleanCharacteristic : public BLETypedCharacteristic<boolean> {
+class BLEBooleanCharacteristic : public BLETypedCharacteristic<bool> {
 public:
   BLEBooleanCharacteristic(const char* uuid, unsigned char properties);
 };
