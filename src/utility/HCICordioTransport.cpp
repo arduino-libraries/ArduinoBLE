@@ -111,6 +111,8 @@ static void bleLoop()
     uint64_t last_update_us = 0;
     mbed::LowPowerTimer timer;
 
+    timer.start();
+
     while (true) {
         last_update_us += (uint64_t) timer.read_high_resolution_us();
         timer.reset();
