@@ -103,20 +103,20 @@ extern "C" void wsf_mbed_ble_signal_event(void)
 }
 #endif //CORDIO_ZERO_COPY_HCI
 
-#define CORDIO_TRANSPORT_WSF_MS_PER_TICK 10
-
 static void bleLoop()
 {
 #if CORDIO_ZERO_COPY_HCI
     uint64_t last_update_us = 0;
     mbed::LowPowerTimer timer;
 
+    timer.start();
+
     while (true) {
         last_update_us += (uint64_t) timer.read_high_resolution_us();
         timer.reset();
 
         uint64_t last_update_ms = (last_update_us / 1000);
-        wsfTimerTicks_t wsf_ticks = (last_update_ms / CORDIO_TRANSPORT_WSF_MS_PER_TICK);
+        wsfTimerTicks_t wsf_ticks = (last_update_ms / WSF_MS_PER_TICK);
 
         if (wsf_ticks > 0) {
             WsfTimerUpdate(wsf_ticks);
@@ -137,9 +137,9 @@ static void bleLoop()
         uint64_t time_spent = (uint64_t) timer.read_high_resolution_us();
 
         /* don't bother sleeping if we're already past tick */
-        if (sleep && (CORDIO_TRANSPORT_WSF_MS_PER_TICK * 1000 > time_spent)) {
+        if (sleep && (WSF_MS_PER_TICK * 1000 > time_spent)) {
             /* sleep to maintain constant tick rate */
-            uint64_t wait_time_us = CORDIO_TRANSPORT_WSF_MS_PER_TICK * 1000 - time_spent;
+            uint64_t wait_time_us = WSF_MS_PER_TICK * 1000 - time_spent;
             uint64_t wait_time_ms = wait_time_us / 1000;
 
             wait_time_us = wait_time_us % 1000;
