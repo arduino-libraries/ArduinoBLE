@@ -5,16 +5,44 @@
   address, local name, adverised service UUID's.
 
   The circuit:
-  - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
-    Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
+  - STEVAL-MKSBOX1V1, B-L475E-IOT01A1, or a Nucleo board plus the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
 
   This example code is in the public domain.
 */
 
 #include <ArduinoBLE.h>
 
+#if defined(ARDUINO_STEVAL_MKSBOX1V1)
+/* STEVAL-MKSBOX1V1 */
+SPIClass SpiHCI(PC3, PD3, PD1);
+HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_1S, PD0, PD4, PA8, 1000000, SPI_MODE1);
+BLELocalDevice BLE(&HCISpiTransport);
+#elif defined(ARDUINO_DISCO_L475VG_IOT)
+/* B-L475E-IOT01A1 */
+SPIClass SpiHCI(PC12, PC11, PC10);
+HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000, SPI_MODE0);
+BLELocalDevice BLE(&HCISpiTransport);
+#else
+/* Shield IDB05A1 with SPI clock on D3 */
+SPIClass SpiHCI(D11, D12, D3);
+HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
+BLELocalDevice BLE(&HCISpiTransport);
+/* Shield IDB05A1 with SPI clock on D13 */
+/*SPIClass SpiHCI(D11, D12, D13);
+HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
+BLELocalDevice BLE(&HCISpiTransport); */
+/* Shield BNRG2A1 with SPI clock on D3 */
+/*SPIClass SpiHCI(D11, D12, D3);
+HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
+BLELocalDevice BLE(&HCISpiTransport); */
+/* Shield BNRG2A1 with SPI clock on D13 */
+/*SPIClass SpiHCI(D11, D12, D13);
+HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
+BLELocalDevice BLE(&HCISpiTransport); */
+#endif
+
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial);
 
   // begin initialization
@@ -26,8 +54,17 @@ void setup() {
 
   Serial.println("BLE Central scan");
 
-  // start scanning for peripheral
-  BLE.scan();
+  // start scanning for peripherals
+  int ret = 1;
+  do
+  {
+    ret = BLE.scan();
+    if (ret == 0)
+    {
+      BLE.end();
+      BLE.begin();
+    }
+  } while(ret == 0);
 }
 
 void loop() {

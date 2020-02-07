@@ -19,7 +19,6 @@
 
 #include "ATT.h"
 #include "GAP.h"
-#include "HCITransport.h"
 #include "L2CAPSignaling.h"
 
 #include "HCI.h"
@@ -75,8 +74,10 @@
 HCIClass::HCIClass() :
   _debug(NULL),
   _recvIndex(0),
-  _pendingPkt(0)
+  _pendingPkt(0),
+  _HCITransport(0)
 {
+  
 }
 
 HCIClass::~HCIClass()
@@ -87,12 +88,12 @@ int HCIClass::begin()
 {
   _recvIndex = 0;
 
-  return HCITransport.begin();
+  return _HCITransport->begin();
 }
 
 void HCIClass::end()
 {
-  HCITransport.end();
+  _HCITransport->end();
 }
 
 void HCIClass::poll()
@@ -102,16 +103,12 @@ void HCIClass::poll()
 
 void HCIClass::poll(unsigned long timeout)
 {
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
-  digitalWrite(NINA_RTS, LOW);
-#endif
-
   if (timeout) {
-    HCITransport.wait(timeout);
+    _HCITransport->wait(timeout);
   }
 
-  while (HCITransport.available()) {
-    byte b = HCITransport.read();
+  while (_HCITransport->available()) {
+    byte b = _HCITransport->read();
 
     _recvBuffer[_recvIndex++] = b;
 
@@ -120,35 +117,23 @@ void HCIClass::poll(unsigned long timeout)
         if (_debug) {
           dumpPkt("HCI ACLDATA RX <- ", _recvIndex, _recvBuffer);
         }
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
-        digitalWrite(NINA_RTS, HIGH);
-#endif
+
         int pktLen = _recvIndex - 1;
         _recvIndex = 0;
 
         handleAclDataPkt(pktLen, &_recvBuffer[1]);
-
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
-        digitalWrite(NINA_RTS, LOW);  
-#endif
       }
     } else if (_recvBuffer[0] == HCI_EVENT_PKT) {
       if (_recvIndex > 3 && _recvIndex >= (3 + _recvBuffer[2])) {
         if (_debug) {
           dumpPkt("HCI EVENT RX <- ", _recvIndex, _recvBuffer);
         }
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
-        digitalWrite(NINA_RTS, HIGH);
-#endif
+
         // received full event
         int pktLen = _recvIndex - 1;
         _recvIndex = 0;
 
         handleEventPkt(pktLen, &_recvBuffer[1]);
-
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
-        digitalWrite(NINA_RTS, LOW);
-#endif
       }
     } else {
       _recvIndex = 0;
@@ -158,10 +143,6 @@ void HCIClass::poll(unsigned long timeout)
       }
     }
   }
-
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
-  digitalWrite(NINA_RTS, HIGH);
-#endif
 }
 
 int HCIClass::reset()
@@ -240,9 +221,7 @@ int HCIClass::readLeBufferSize(uint16_t& pktLen, uint8_t& maxPkt)
     pktLen = leBufferSize->pktLen;
     _maxPkt = maxPkt = leBufferSize->maxPkt;
 
-#ifndef __AVR__
     ATT.setMaxMtu(pktLen - 9); // max pkt len - ACL header size
-#endif
   }
 
   return result;
@@ -436,7 +415,7 @@ int HCIClass::sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data)
   }
 
   _pendingPkt++;
-  HCITransport.write(txBuffer, sizeof(aclHdr) + plen);
+  _HCITransport->write(txBuffer, sizeof(aclHdr) + plen);
 
   return 0;
 }
@@ -477,7 +456,7 @@ int HCIClass::sendCommand(uint16_t opcode, uint8_t plen, void* parameters)
     dumpPkt("HCI COMMAND TX -> ", sizeof(pktHdr) + plen, txBuffer);
   }
 
-  HCITransport.write(txBuffer, sizeof(pktHdr) + plen);
+  _HCITransport->write(txBuffer, sizeof(pktHdr) + plen);
 
   _cmdCompleteOpcode = 0xffff;
   _cmdCompleteStatus = -1;
@@ -571,7 +550,9 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
     ATT.removeConnection(disconnComplete->handle, disconnComplete->reason);
     L2CAPSignaling.removeConnection(disconnComplete->handle, disconnComplete->reason);
 
-    HCI.leSetAdvertiseEnable(0x01);
+    if(GAP.advertising()) {
+      HCI.leSetAdvertiseEnable(0x01);
+    }
   } else if (eventHdr->evt == EVT_CMD_COMPLETE) {
     struct __attribute__ ((packed)) CmdComplete {
       uint8_t ncmd;
@@ -684,6 +665,11 @@ void HCIClass::dumpPkt(const char* prefix, uint8_t plen, uint8_t pdata[])
     _debug->println();
     _debug->flush();
   }
+}
+
+void HCIClass::setTransport(HCITransportInterface *HCITransport)
+{
+  _HCITransport = HCITransport;
 }
 
 HCIClass HCI;

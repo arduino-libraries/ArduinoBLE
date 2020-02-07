@@ -23,19 +23,17 @@
 #include "HCITransport.h"
 #include "SPI.h"
 
-#if defined(ARDUINO_STEVAL_MKSBOX1V1)
-#define SPBTLE_1S /* STEVAL_MKSBOX1V1 */
-#elif defined(ARDUINO_DISCO_L475VG_IOT)
-#define SPBTLE_RF /* B-L475E-IOT01A1 */
-#else
-#define SPBTLE_RF /* Shield IDB05A1 */
-#endif /* ARDUINO_STEVAL_MKSBOX1V1 */
+typedef enum BLEChip_s {
+  SPBTLE_RF,
+  SPBTLE_1S,
+  BLUENRG_M2SP
+} BLEChip_t;
 
 #define BLE_MODULE_SPI_BUFFER_SIZE 128
 
 class HCISpiTransportClass : public HCITransportInterface {
 public:
-  HCISpiTransportClass(SPIClass& spi, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, unsigned long frequency, int spi_mode);
+  HCISpiTransportClass(SPIClass& spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, unsigned long frequency, int spi_mode);
   virtual ~HCISpiTransportClass();
 
   virtual int begin();
@@ -50,12 +48,11 @@ public:
   virtual size_t write(const uint8_t* data, size_t length);
 
 private:
-#if defined(SPBTLE_RF)
   void wait_for_blue_initialize();
   void wait_for_enable_ll_only();
   void enable_ll_only();
-#endif /* SPBTLE_RF */
   SPIClass* _spi;
+  BLEChip_t _ble_chip;
   uint8_t _cs_pin;
   uint8_t _spi_irq;
   uint8_t _ble_rst;

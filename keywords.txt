@@ -80,6 +80,7 @@ setConnectable	KEYWORD2
 setTimeout	KEYWORD2
 debug	KEYWORD2
 noDebug	KEYWORD2
+setTransport	KEYWORD2
 
 properties	KEYWORD2
 valueSize	KEYWORD2

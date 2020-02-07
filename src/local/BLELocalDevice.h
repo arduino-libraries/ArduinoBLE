@@ -20,12 +20,13 @@
 #ifndef _BLE_LOCAL_DEVICE_H_
 #define _BLE_LOCAL_DEVICE_H_
 
+#include "utility/HCI.h"
 #include "BLEDevice.h"
 #include "BLEService.h"
 
 class BLELocalDevice {
 public:
-  BLELocalDevice();
+  BLELocalDevice(HCITransportInterface *HCITransport);
   virtual ~BLELocalDevice();
 
   int begin();
@@ -39,7 +40,7 @@ public:
 
   String address() const;
 
- int rssi();
+  int rssi();
 
   void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
   void setAdvertisedService(const BLEService& service);
@@ -59,7 +60,7 @@ public:
   int scanForName(String name, bool withDuplicates = false);
   int scanForUuid(String uuid, bool withDuplicates = false);
   int scanForAddress(String address, bool withDuplicates = false);
-  void stopScan();
+  int stopScan();
 
   BLEDevice central();
   BLEDevice available();
@@ -76,8 +77,7 @@ public:
   void noDebug();
 
 private:
+  HCITransportInterface *_HCITransport;
 };
-
-extern BLELocalDevice BLE;
 
 #endif

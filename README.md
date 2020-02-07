@@ -1,16 +1,17 @@
 # STM32duinoBLE
 
 This library is a fork of ArduinoBLE library to add the support of SPBTLE-RF and SPBTLE-1S BLE modules.
-It was successfully tested with the X-NUCLEO-IDB05A1 expansion board and a NUCLEO-F401RE or NUCLEO-L476RG or
-NUCLEO-L053R8, with B-L475E-IOT01A and with STEVAL-MKSBOX1V1.
+It was successfully tested with the X-NUCLEO-IDB05A1 or X-NUCLEO-BNRG2A1 expansion board and a NUCLEO-F401RE
+or NUCLEO-L476RG or NUCLEO-L053R8, with B-L475E-IOT01A and with STEVAL-MKSBOX1V1.
 In order to use this library with STEVAL-MKSBOX1V1, you need to update the firmware of the SPBTLE-1S BLE module
 mounted on that board as described in the following wiki page:
 
 https://github.com/stm32duino/wiki/wiki/STM32duinoBLE-with-STEVAL_MKSBOX1V1
 
-You can find the official Pull Request at the following link:
+In order to use this library with X-NUCLEO-BNRG2A1, you need to update the firmware of the BLUENRG-M2SP BLE module
+mounted on that expansion board as described in the following wiki page:
 
-https://github.com/arduino-libraries/ArduinoBLE/pull/26
+https://github.com/stm32duino/wiki/wiki/STM32duinoBLE-with-X_NUCLEO_BNRG2A1
 
 For more information about ArduinoBLE library please visit the official web page at:
 https://github.com/arduino-libraries/ArduinoBLE

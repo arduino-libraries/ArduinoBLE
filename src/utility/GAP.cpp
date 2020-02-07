@@ -153,7 +153,7 @@ int GAPClass::advertise()
     return 0;
   }
 
-  _advertising = false;
+  _advertising = true;
 
   return 1;
 }
@@ -167,7 +167,12 @@ void GAPClass::stopAdvertise()
 
 int GAPClass::scan(bool withDuplicates)
 {
-  HCI.leSetScanEnable(false, true);
+  if(_scanning) {
+    // Check if the HCI command fails
+    if (HCI.leSetScanEnable(false, true) != 0) {
+      return 0;
+    }
+  }
 
   // active scan, 10 ms scan interval (N * 0.625), 10 ms scan window (N * 0.625), public own address type, no filter
   if (HCI.leSetScanParameters(0x01, 0x0010, 0x0010, 0x00, 0x00) != 0) {
@@ -210,9 +215,14 @@ int GAPClass::scanForAddress(String address, bool withDuplicates)
   return scan(withDuplicates);
 }
 
-void GAPClass::stopScan()
+int GAPClass::stopScan()
 {
-  HCI.leSetScanEnable(false, false);
+  if(_scanning) {
+    // Check if the HCI command fails
+    if (HCI.leSetScanEnable(false, false) != 0) {
+      return 0;
+    }
+  }
 
   _scanning = false;
 
@@ -223,6 +233,8 @@ void GAPClass::stopScan()
   }
 
   _discoveredDevices.clear();
+
+  return 1;
 }
 
 BLEDevice GAPClass::available()
