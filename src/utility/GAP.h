@@ -37,7 +37,7 @@ public:
   virtual int scanForName(String name, bool withDuplicates);
   virtual int scanForUuid(String uuid, bool withDuplicates);
   virtual int scanForAddress(String address, bool withDuplicates);
-  virtual void stopScan();
+  virtual int stopScan();
   virtual BLEDevice available();
 
   virtual void setAdvertisingInterval(uint16_t advertisingInterval);

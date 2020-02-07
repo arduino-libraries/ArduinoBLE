@@ -421,9 +421,9 @@ int BLELocalDevice::scanForAddress(String address, bool withDuplicates)
   return GAP.scanForAddress(address, withDuplicates);
 }
 
-void BLELocalDevice::stopScan()
+int BLELocalDevice::stopScan()
 {
-  GAP.stopScan();
+  return GAP.stopScan();
 }
 
 BLEDevice BLELocalDevice::central()

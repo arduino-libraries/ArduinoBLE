@@ -84,7 +84,12 @@ void GAPClass::stopAdvertise()
 
 int GAPClass::scan(bool withDuplicates)
 {
-  HCI.leSetScanEnable(false, true);
+  if(_scanning) {
+    // Check if the HCI command fails
+    if (HCI.leSetScanEnable(false, true) != 0) {
+      return 0;
+    }
+  }
 
   // active scan, 20 ms scan interval (N * 0.625), 20 ms scan window (N * 0.625), public own address type, no filter
   /*
@@ -133,9 +138,14 @@ int GAPClass::scanForAddress(String address, bool withDuplicates)
   return scan(withDuplicates);
 }
 
-void GAPClass::stopScan()
+int GAPClass::stopScan()
 {
-  HCI.leSetScanEnable(false, false);
+  if(_scanning) {
+    // Check if the HCI command fails
+    if (HCI.leSetScanEnable(false, false) != 0) {
+      return 0;
+    }
+  }
 
   _scanning = false;
 
@@ -146,6 +156,8 @@ void GAPClass::stopScan()
   }
 
   _discoveredDevices.clear();
+
+  return 1;
 }
 
 BLEDevice GAPClass::available()

@@ -77,7 +77,7 @@ public:
   virtual int scanForName(String name, bool withDuplicates = false);
   virtual int scanForUuid(String uuid, bool withDuplicates = false);
   virtual int scanForAddress(String address, bool withDuplicates = false);
-  virtual void stopScan();
+  virtual int stopScan();
 
   virtual BLEDevice central();
   virtual BLEDevice available();
