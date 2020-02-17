@@ -21,15 +21,14 @@
 
 volatile int data_avail = 0;
 
-HCISpiTransportClass::HCISpiTransportClass(SPIClass& spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, unsigned long frequency, int spi_mode) :
+HCISpiTransportClass::HCISpiTransportClass(SPIClass& spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, uint32_t frequency, uint8_t spi_mode) :
   _spi(&spi),
   _ble_chip(ble_chip),
   _cs_pin(cs_pin),
   _spi_irq(spi_irq),
-  _ble_rst(ble_rst),
-  _frequency(frequency),
-  _spi_mode(spi_mode)
+  _ble_rst(ble_rst)
 {
+  _spiSettings = SPISettings(frequency, (BitOrder)BLE_SPI_BYTE_ORDER, spi_mode);
   _read_index = 0;
   _write_index = 0;
   _write_index_initial = 0;
@@ -125,7 +124,7 @@ int HCISpiTransportClass::available()
         detachInterrupt(_spi_irq);
       }
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
@@ -337,7 +336,7 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
     {
       result = 0;
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
@@ -376,7 +375,7 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
 
       detachInterrupt(_spi_irq);
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
@@ -458,7 +457,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
     {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
@@ -526,7 +525,7 @@ void HCISpiTransportClass::wait_for_enable_ll_only()
     {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
@@ -580,7 +579,7 @@ void HCISpiTransportClass::enable_ll_only()
   {
     result = 0;
 
-    _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+    _spi->beginTransaction(_spiSettings);
 
     digitalWrite(_cs_pin, LOW);
 

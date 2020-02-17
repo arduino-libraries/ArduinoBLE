@@ -29,11 +29,14 @@ typedef enum BLEChip_s {
   BLUENRG_M2SP
 } BLEChip_t;
 
+#ifndef BLE_SPI_BYTE_ORDER
+#define BLE_SPI_BYTE_ORDER  MSBFIRST
+#endif
 #define BLE_MODULE_SPI_BUFFER_SIZE 128
 
 class HCISpiTransportClass : public HCITransportInterface {
 public:
-  HCISpiTransportClass(SPIClass& spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, unsigned long frequency, int spi_mode);
+  HCISpiTransportClass(SPIClass& spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, uint32_t frequency, uint8_t spi_mode);
   virtual ~HCISpiTransportClass();
 
   virtual int begin();
@@ -52,12 +55,11 @@ private:
   void wait_for_enable_ll_only();
   void enable_ll_only();
   SPIClass* _spi;
+  SPISettings _spiSettings;
   BLEChip_t _ble_chip;
   uint8_t _cs_pin;
   uint8_t _spi_irq;
   uint8_t _ble_rst;
-  unsigned long _frequency;
-  int _spi_mode;
   uint8_t _rxbuff[BLE_MODULE_SPI_BUFFER_SIZE];
   uint16_t _read_index;
   uint16_t _write_index;
