@@ -12,7 +12,7 @@
   This example code is in the public domain.
 */
 
-#include <ArduinoBLE.h>
+#include <STM32duinoBLE.h>
 
 #if defined(ARDUINO_STEVAL_MKSBOX1V1)
 /* STEVAL-MKSBOX1V1 */

@@ -1,13 +1,12 @@
 #######################################
-# Syntax Coloring Map For ArduinoBLE
+# Syntax Coloring Map For STM32duinoBLE
 #######################################
 
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
 
-ArduinoBLE	KEYWORD1
-BLE	KEYWORD1
+STM32duinoBLE	KEYWORD1
 
 BLEDevice	KEYWORD1
 BLECharacteristic	KEYWORD1
