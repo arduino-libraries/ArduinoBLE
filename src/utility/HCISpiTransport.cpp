@@ -76,7 +76,8 @@ int HCISpiTransportClass::begin()
     delay(300);
   } else
   {
-
+    // BLE chip not supported
+    return 0;
   }
 
   return 1;
@@ -101,6 +102,11 @@ void HCISpiTransportClass::wait(unsigned long timeout)
 
 int HCISpiTransportClass::available()
 {
+  if(_ble_chip != SPBTLE_RF && _ble_chip !=SPBTLE_1S && _ble_chip !=BLUENRG_M2SP)
+  {
+    return 0;
+  }
+
   if(_read_index != _write_index)
   {
     return 1;
@@ -242,9 +248,6 @@ int HCISpiTransportClass::available()
             }
           }
         }
-      } else
-      {
-
       }
 
       digitalWrite(_cs_pin, HIGH);
@@ -268,9 +271,6 @@ int HCISpiTransportClass::available()
       {
         /* BLE chip was reset: we need to wait for a while */
         delay(300);
-      } else
-      {
-
       }
 
       /* Now we can update the write index and close the initial phase */
@@ -329,6 +329,11 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
   void *my_data = (void *)data;
   int result = 0;
   uint32_t tickstart = millis();
+
+  if(_ble_chip != SPBTLE_RF && _ble_chip !=SPBTLE_1S && _ble_chip !=BLUENRG_M2SP)
+  {
+    return 0;
+  }
 
   do
   {
@@ -423,9 +428,6 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
         result = -3;
         break;
       }
-    } else
-    {
-
     }
   } while(result < 0);
 
