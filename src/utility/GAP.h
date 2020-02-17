@@ -42,7 +42,7 @@ public:
   int scanForName(String name, bool withDuplicates);
   int scanForUuid(String uuid, bool withDuplicates);
   int scanForAddress(String address, bool withDuplicates);
-  void stopScan();
+  int stopScan();
   BLEDevice available();
 
   void setAdvertisingInterval(uint16_t advertisingInterval);

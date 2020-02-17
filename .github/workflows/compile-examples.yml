@@ -7,10 +7,9 @@ jobs:
    strategy:
      matrix:
        fqbn: [
-         "arduino:samd:mkrwifi1010",
-         "arduino:samd:nano_33_iot",
-         "arduino:megaavr:uno2018:mode=on",
-         "arduino:mbed:nano33ble"
+         '"STM32:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
+         '"STM32:stm32:Nucleo_64:pnum=NUCLEO_L476RG" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
+         '"STM32:stm32:Disco:pnum=DISCO_L475VG_IOT" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"'
        ]
 
    steps:

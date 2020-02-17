@@ -21,6 +21,7 @@
 #define _HCI_H_
 
 #include <Arduino.h>
+#include "HCITransport.h"
 
 class HCIClass {
 public:
@@ -71,6 +72,8 @@ public:
   void debug(Stream& stream);
   void noDebug();
 
+  void setTransport(HCITransportInterface *HCITransport);
+
 private:
   int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
 
@@ -94,6 +97,8 @@ private:
   uint8_t _pendingPkt;
 
   uint8_t _aclPktBuffer[255];
+
+  HCITransportInterface *_HCITransport;
 };
 
 extern HCIClass HCI;

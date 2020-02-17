@@ -18,14 +18,13 @@
 */
 
 #include "utility/ATT.h"
-#include "utility/HCI.h"
 #include "utility/GAP.h"
 #include "utility/GATT.h"
 #include "utility/L2CAPSignaling.h"
-
 #include "BLELocalDevice.h"
 
-BLELocalDevice::BLELocalDevice()
+BLELocalDevice::BLELocalDevice(HCITransportInterface *HCITransport) :
+  _HCITransport(HCITransport) 
 {
 }
 
@@ -35,39 +34,7 @@ BLELocalDevice::~BLELocalDevice()
 
 int BLELocalDevice::begin()
 {
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_NANO_33_IOT)
-  // reset the NINA in BLE mode
-  pinMode(SPIWIFI_SS, OUTPUT);
-  pinMode(NINA_RESETN, OUTPUT);
-  
-  digitalWrite(SPIWIFI_SS, LOW);
-#endif
-
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
-  digitalWrite(NINA_RESETN, HIGH);
-  delay(100);
-  digitalWrite(NINA_RESETN, LOW);
-  delay(750);
-#elif defined(ARDUINO_SAMD_NANO_33_IOT)
-  // inverted reset
-  digitalWrite(NINA_RESETN, LOW);
-  delay(100);
-  digitalWrite(NINA_RESETN, HIGH);
-  delay(750);
-#endif
-
-
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
-  // set SS HIGH
-  digitalWrite(SPIWIFI_SS, HIGH);
-
-  // set RTS HIGH
-  pinMode(NINA_RTS, OUTPUT);
-  digitalWrite(NINA_RTS, HIGH);
-
-  // set CTS as input
-  pinMode(NINA_CTS, INPUT);
-#endif
+  HCI.setTransport(_HCITransport);
 
   if (!HCI.begin()) {
     end();
@@ -116,14 +83,6 @@ void BLELocalDevice::end()
   GATT.end();
 
   HCI.end();
-
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
-  // disable the NINA
-  digitalWrite(NINA_RESETN, HIGH);
-#elif defined(ARDUINO_SAMD_NANO_33_IOT)
-  // disable the NINA
-  digitalWrite(NINA_RESETN, LOW);
-#endif
 }
 
 void BLELocalDevice::poll()
@@ -240,9 +199,9 @@ int BLELocalDevice::scanForAddress(String address, bool withDuplicates)
   return GAP.scanForAddress(address, withDuplicates);
 }
 
-void BLELocalDevice::stopScan()
+int BLELocalDevice::stopScan()
 {
-  GAP.stopScan();
+  return GAP.stopScan();
 }
 
 BLEDevice BLELocalDevice::central()
@@ -297,5 +256,3 @@ void BLELocalDevice::noDebug()
 {
   HCI.noDebug();
 }
-
-BLELocalDevice BLE;

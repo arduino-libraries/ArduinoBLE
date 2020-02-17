@@ -17,27 +17,18 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifdef ARDUINO_ARCH_STM32
-
 #include "HCISpiTransport.h"
 
-#if defined(ARDUINO_STEVAL_MKSBOX1V1)
-SPIClass SpiHCI(PC3, PD3, PD1); /* STEVAL_MKSBOX1V1 */
-#elif defined(ARDUINO_DISCO_L475VG_IOT)
-SPIClass SpiHCI(PC12, PC11, PC10); /* B-L475E-IOT01A1 */
-#else
-SPIClass SpiHCI(D11, D12, D3); /* Shield IDB05A1 */
-#endif /* ARDUINO_STEVAL_MKSBOX1V1 */
 volatile int data_avail = 0;
 
-HCISpiTransportClass::HCISpiTransportClass(SPIClass& spi, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, unsigned long frequency, int spi_mode) :
+HCISpiTransportClass::HCISpiTransportClass(SPIClass& spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, uint32_t frequency, uint8_t spi_mode) :
   _spi(&spi),
+  _ble_chip(ble_chip),
   _cs_pin(cs_pin),
   _spi_irq(spi_irq),
-  _ble_rst(ble_rst),
-  _frequency(frequency),
-  _spi_mode(spi_mode)
+  _ble_rst(ble_rst)
 {
+  _spiSettings = SPISettings(frequency, (BitOrder)BLE_SPI_BYTE_ORDER, spi_mode);
   _read_index = 0;
   _write_index = 0;
   _write_index_initial = 0;
@@ -75,15 +66,19 @@ int HCISpiTransportClass::begin()
   digitalWrite(_ble_rst, HIGH);
   delay(5);
 
-#if defined(SPBTLE_RF)
-  // Wait for Blue Initialize
-  wait_for_blue_initialize();
-#endif /* SPBTLE_RF */
-
-#if defined(SPBTLE_1S)
-  // Wait a while for the reset of the BLE module
-  delay(300);
-#endif /* SPBTLE_1S */
+  if (_ble_chip == SPBTLE_RF)
+  {
+    // Wait for Blue Initialize
+    wait_for_blue_initialize();
+  } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP)
+  {
+    // Wait a while for the reset of the BLE module
+    delay(300);
+  } else
+  {
+    // BLE chip not supported
+    return 0;
+  }
 
   return 1;
 }
@@ -107,6 +102,11 @@ void HCISpiTransportClass::wait(unsigned long timeout)
 
 int HCISpiTransportClass::available()
 {
+  if(_ble_chip != SPBTLE_RF && _ble_chip !=SPBTLE_1S && _ble_chip !=BLUENRG_M2SP)
+  {
+    return 0;
+  }
+
   if(_read_index != _write_index)
   {
     return 1;
@@ -125,18 +125,77 @@ int HCISpiTransportClass::available()
     {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      if(_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP)
+      {
+        detachInterrupt(_spi_irq);
+      }
+
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
       /* Write the header */
       _spi->transfer(header_master, 5);
 
-#if defined(SPBTLE_RF) 
-      /* device is ready */
-      if(header_master[0] == 0x02) 
+      if (_ble_chip == SPBTLE_RF)
       {
-#endif /* SPBTLE_RF */
+        /* device is ready */
+        if(header_master[0] == 0x02) 
+        {
+          uint16_t byte_count = (header_master[4] << 8) | header_master[3];
+
+          if(byte_count > 0)
+          {
+            if(_initial_phase)
+            {
+              /* avoid to read more data that available size of the buffer */
+              if(byte_count > (BLE_MODULE_SPI_BUFFER_SIZE - _write_index_initial))
+              {
+                byte_count = (BLE_MODULE_SPI_BUFFER_SIZE - _write_index_initial);
+              }
+
+              /* Read the response */
+              for(int j=0; j < byte_count; j++)
+              {
+                _rxbuff[_write_index_initial] = _spi->transfer(0xFF);
+                _write_index_initial++;
+              }
+
+              /* Check if the message is a Blue Initialize */
+              /* If so we need to send the command to enable LL_ONLY */
+              if(byte_count == 6)
+              {
+                if(_rxbuff[_write_index_initial - 6] == 0x04 &&
+                   _rxbuff[_write_index_initial - 5] == 0xFF &&
+                   _rxbuff[_write_index_initial - 4] == 0x03 &&
+                   _rxbuff[_write_index_initial - 3] == 0x01 &&
+                   _rxbuff[_write_index_initial - 2] == 0x00 &&
+                   _rxbuff[_write_index_initial - 1] == 0x01)
+                {
+                  ble_reset = 1;
+                }
+              }
+            } else
+            {
+              /* avoid to read more data that available size of the buffer */
+              if(byte_count > (BLE_MODULE_SPI_BUFFER_SIZE - _write_index))
+              {
+                byte_count = (BLE_MODULE_SPI_BUFFER_SIZE - _write_index);
+                /* SPI buffer is full but we still have data to store, so we set the data_avail flag to true */
+                data_avail = 1;
+              }
+
+              /* Read the response */
+              for(int j=0; j < byte_count; j++)
+              {
+                _rxbuff[_write_index] = _spi->transfer(0xFF);
+                _write_index++;
+              }
+            }
+          }
+        }
+      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP)
+      {
         uint16_t byte_count = (header_master[4] << 8) | header_master[3];
 
         if(byte_count > 0)
@@ -156,23 +215,6 @@ int HCISpiTransportClass::available()
               _write_index_initial++;
             }
 
-#if defined(SPBTLE_RF)
-            /* Check if the message is a Blue Initialize */
-            /* If so we need to send the command to enable LL_ONLY */
-            if(byte_count == 6)
-            {
-              if(_rxbuff[_write_index_initial - 6] == 0x04 &&
-                 _rxbuff[_write_index_initial - 5] == 0xFF &&
-                 _rxbuff[_write_index_initial - 4] == 0x03 &&
-                 _rxbuff[_write_index_initial - 3] == 0x01 &&
-                 _rxbuff[_write_index_initial - 2] == 0x00 &&
-                 _rxbuff[_write_index_initial - 1] == 0x01)
-              {
-                ble_reset = 1;
-              }
-            }
-#endif /* SPBTLE_RF */
-#if defined(SPBTLE_1S)
             /* Check if the message is a CMD_COMPLETE */
             /* We suppose that the first CMD is always a HCI_RESET */
             if(byte_count == 7)
@@ -188,7 +230,6 @@ int HCISpiTransportClass::available()
                 ble_reset = 1;
               }
             }
-#endif /* SPBTLE_1S */
           } else
           {
             /* avoid to read more data that available size of the buffer */
@@ -207,26 +248,30 @@ int HCISpiTransportClass::available()
             }
           }
         }
-#if defined(SPBTLE_RF)
       }
-#endif /* SPBTLE_RF */
 
       digitalWrite(_cs_pin, HIGH);
 
       _spi->endTransaction();
+
+      if(_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP)
+      {
+        attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+      }
     }
 
     if(ble_reset)
     {
-#if defined(SPBTLE_RF)
-      /* BLE chip was reset: we need to enable LL_ONLY */
-      enable_ll_only();
-      wait_for_enable_ll_only();
-#endif /* SPBTLE_RF */
-#if defined(SPBTLE_1S)
-      /* BLE chip was reset: we need to wait for a while */
-      delay(300);
-#endif /* SPBTLE_1S */
+      if (_ble_chip == SPBTLE_RF)
+      {
+        /* BLE chip was reset: we need to enable LL_ONLY */
+        enable_ll_only();
+        wait_for_enable_ll_only();
+      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP)
+      {
+        /* BLE chip was reset: we need to wait for a while */
+        delay(300);
+      }
 
       /* Now we can update the write index and close the initial phase */
       _write_index = _write_index_initial;
@@ -285,51 +330,85 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
   int result = 0;
   uint32_t tickstart = millis();
 
+  if(_ble_chip != SPBTLE_RF && _ble_chip !=SPBTLE_1S && _ble_chip !=BLUENRG_M2SP)
+  {
+    return 0;
+  }
+
   do
   {
-#if defined(SPBTLE_1S)
-    uint32_t tickstart_data_available = millis();
-#endif /* SPBTLE_1S */
-    result = 0;
-
-    _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
-
-    digitalWrite(_cs_pin, LOW);
-
-#if defined(SPBTLE_1S)
-    /*
-     * Wait until BlueNRG-1 is ready.
-     * When ready it will raise the IRQ pin.
-     */
-    while(!(digitalRead(_spi_irq) == 1))
+    if (_ble_chip == SPBTLE_RF)
     {
-      if((millis() - tickstart_data_available) > 1000)
+      result = 0;
+
+      _spi->beginTransaction(_spiSettings);
+
+      digitalWrite(_cs_pin, LOW);
+
+      /* Write the header */
+      _spi->transfer(header_master, 5);
+
+      /* device is ready */
+      if(header_master[0] == 0x02) 
+      {
+        if(header_master[1] >= length)
+        {
+          /* Write the data */
+          _spi->transfer(my_data, length);
+        } else
+        {
+          result = -2;
+        }
+      } else
+      {
+        result = -1;
+      }
+
+      digitalWrite(_cs_pin, HIGH);
+
+      _spi->endTransaction();
+
+      if((millis() - tickstart) > 1000)
       {
         result = -3;
         break;
       }
-    }
-
-    if(result == -3)
+    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP)
     {
-      digitalWrite(_cs_pin, HIGH);
-      _spi->endTransaction();
-      break;
-    }
-#endif /* SPBTLE_1S */
+      uint32_t tickstart_data_available = millis();
+      result = 0;
 
-    /* Write the header */
-    _spi->transfer(header_master, 5);
+      detachInterrupt(_spi_irq);
 
-#if defined(SPBTLE_RF)
-    /* device is ready */
-    if(header_master[0] == 0x02) 
-    {
-      if(header_master[1] >= length)
-#endif /* SPBTLE_RF */
-#if defined(SPBTLE_1S)
+      _spi->beginTransaction(_spiSettings);
+
+      digitalWrite(_cs_pin, LOW);
+
+      /*
+       * Wait until BlueNRG-1 is ready.
+       * When ready it will raise the IRQ pin.
+       */
+      while(!(digitalRead(_spi_irq) == 1))
+      {
+        if((millis() - tickstart_data_available) > 1000)
+        {
+          result = -3;
+          break;
+        }
+      }
+
+      if(result == -3)
+      {
+        digitalWrite(_cs_pin, HIGH);
+        _spi->endTransaction();
+        attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+        break;
+      }
+
+      /* Write the header */
+      _spi->transfer(header_master, 5);
+
       if((int)((((uint16_t)header_master[2])<<8) | ((uint16_t)header_master[1])) >= (int)length)
-#endif /* SPBTLE_1S */
       {
         /* Write the data */
         _spi->transfer(my_data, length);
@@ -337,21 +416,18 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
       {
         result = -2;
       }
-#if defined(SPBTLE_RF)
-    } else
-    {
-      result = -1;
-    }
-#endif /* SPBTLE_RF */
 
-    digitalWrite(_cs_pin, HIGH);
+      digitalWrite(_cs_pin, HIGH);
 
-    _spi->endTransaction();
+      _spi->endTransaction();
 
-    if((millis() - tickstart) > 1000)
-    {
-      result = -3;
-      break;
+      attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+
+      if((millis() - tickstart) > 1000)
+      {
+        result = -3;
+        break;
+      }
     }
   } while(result < 0);
 
@@ -364,7 +440,6 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
   }
 }
 
-#if defined(SPBTLE_RF)
 void HCISpiTransportClass::wait_for_blue_initialize()
 {
   int event_blue_initialize = 0;
@@ -384,7 +459,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
     {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
@@ -452,7 +527,7 @@ void HCISpiTransportClass::wait_for_enable_ll_only()
     {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+      _spi->beginTransaction(_spiSettings);
 
       digitalWrite(_cs_pin, LOW);
 
@@ -506,7 +581,7 @@ void HCISpiTransportClass::enable_ll_only()
   {
     result = 0;
 
-    _spi->beginTransaction(SPISettings(_frequency, MSBFIRST, _spi_mode));
+    _spi->beginTransaction(_spiSettings);
 
     digitalWrite(_cs_pin, LOW);
 
@@ -535,15 +610,3 @@ void HCISpiTransportClass::enable_ll_only()
     _spi->endTransaction();
   } while (result < 0);
 }
-#endif /* SPBTLE_RF */
-
-#if defined(ARDUINO_STEVAL_MKSBOX1V1)
-HCISpiTransportClass HCISpiTransport(SpiHCI, PD0, PD4, PA8, 1000000, SPI_MODE1); /* STEVAL_MKSBOX1V1 */
-#elif defined(ARDUINO_DISCO_L475VG_IOT)
-HCISpiTransportClass HCISpiTransport(SpiHCI, PD13, PE6, PA8, 8000000, SPI_MODE0); /* B-L475E-IOT01A1 */
-#else
-HCISpiTransportClass HCISpiTransport(SpiHCI, A1, A0, D7, 8000000, SPI_MODE0); /* Shield IDB05A1 */
-#endif /* ARDUINO_STEVAL_MKSBOX1V1 */
-HCITransportInterface& HCITransport = HCISpiTransport;
-
-#endif /* ARDUINO_ARCH_STM32 */
