@@ -30,6 +30,9 @@ BLEFloatCharacteristic	KEYWORD1
 BLEDoubleCharacteristic	KEYWORD1
 BLEStringCharacteristic	KEYWORD1
 
+HCISpiTransportClass	KEYWORD1
+HCITransportInterface	KEYWORD1
+
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
@@ -112,7 +115,11 @@ setValueBE	KEYWORD2
 valueBE	KEYWORD2
 
 uuid	KEYWORD2
-addCharacteristic	KEYWORD
+addCharacteristic	KEYWORD2
+
+wait	KEYWORD2
+peek	KEYWORD2
+write	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -132,5 +139,10 @@ BLEIndicate	LITERAL1
 BLESubscribed	LITERAL1
 BLEUnsubscribed	LITERAL1
 BLEWritten	LITERAL1
-BLEUpdated	LITERAL1	
+BLEUpdated	LITERAL1
+
+SPBTLE_RF	LITERAL1
+SPBTLE_1S	LITERAL1
+BLUENRG_M2SP	LITERAL1
+BLEChip_t	LITERAL1
 
