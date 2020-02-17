@@ -37,7 +37,7 @@ BLELocalDevice BLE(&HCISpiTransport);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
 BLELocalDevice BLE(&HCISpiTransport); */
 /* Shield BNRG2A1 with SPI clock on D3 */
-/*SPIClass SpiHCI(D11, D12, D3);
+/*#define SpiHCI SPI
 HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
 BLELocalDevice BLE(&HCISpiTransport); */
 /* Shield BNRG2A1 with SPI clock on D13 */
