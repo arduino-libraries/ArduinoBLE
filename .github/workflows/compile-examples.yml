@@ -15,3 +15,28 @@ on:
   workflow_dispatch:
 
 jobs:
+  build-for-stm32:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        fqbn:
+          - STMicroelectronics:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen
+          - STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_L476RG
+          - STMicroelectronics:stm32:Disco:pnum=B_L475E_IOT01A
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{ matrix.fqbn }}
+          platforms: |
+            - name: STMicroelectronics:stm32
+              source-url: https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+          sketch-paths: |
+            - examples
+          cli-compile-flags: |
+            - --build-property
+            - build.extra_flags=-DIDB05A2_SPI_CLOCK_D3
+
