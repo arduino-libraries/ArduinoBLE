@@ -46,7 +46,7 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, 
 BLELocalDevice BLE(&HCISpiTransport);
 const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
 /* Shield BNRG2A1 with SPI clock on D13 */
-/*SPIClass SpiHCI(D11, D12, D13);
+/*#define SpiHCI SPI
 HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
 BLELocalDevice BLE(&HCISpiTransport);
 const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
