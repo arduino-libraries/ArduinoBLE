@@ -1,4 +1,7 @@
-ArduinoBLE ?.?.? - ????.??.??
+STM32duinoBLE 1.2.0 - 2020.02.17
+* Added support to X-NUCLEO-BNRG2A1
+* Renamed ArduinoBLE as STM32duinoBLE
+* Moved the SPI Transport instance in the application code to improve portability
 
 ArduinoBLE 1.1.2 - 2019.11.12
 
