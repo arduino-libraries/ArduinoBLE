@@ -56,7 +56,7 @@ void GAPClass::setManufacturerData(const uint8_t manufacturerData[], int manufac
 
 void GAPClass::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  uint8_t tmpManufacturerData[manufacturerDataLength + 2];
+  uint8_t* tmpManufacturerData = (uint8_t*)malloc(manufacturerDataLength + 2);
   tmpManufacturerData[0] = companyId & 0xff;
   tmpManufacturerData[1] = companyId >> 8;
   memcpy(&tmpManufacturerData[2], manufacturerData, manufacturerDataLength);
