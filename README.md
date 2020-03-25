@@ -6,12 +6,12 @@ or NUCLEO-L476RG or NUCLEO-L053R8, with B-L475E-IOT01A and with STEVAL-MKSBOX1V1
 In order to use this library with STEVAL-MKSBOX1V1, you need to update the firmware of the SPBTLE-1S BLE module
 mounted on that board as described in the following wiki page:
 
-https://github.com/stm32duino/wiki/wiki/STM32duinoBLE-with-STEVAL_MKSBOX1V1
+https://github.com/stm32duino/wiki/wiki/STM32duinoBLE#stm32duinoble-with-steval_mksbox1v1
 
 In order to use this library with X-NUCLEO-BNRG2A1, you need to update the firmware of the BLUENRG-M2SP BLE module
 mounted on that expansion board as described in the following wiki page:
 
-https://github.com/stm32duino/wiki/wiki/STM32duinoBLE-with-X_NUCLEO_BNRG2A1
+https://github.com/stm32duino/wiki/wiki/STM32duinoBLE#stm32duinoble-with-x-nucleo-bnrg2a1
 
 For more information about ArduinoBLE library please visit the official web page at:
 https://github.com/arduino-libraries/ArduinoBLE
