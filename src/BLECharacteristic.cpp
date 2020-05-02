@@ -234,6 +234,18 @@ int BLECharacteristic::readValue(int32_t& value)
   return readValue((uint8_t*)&value, sizeof(value));
 }
 
+int BLECharacteristic::writeValue(const uint8_t value[], int length, bool bWithResponse)
+{
+   if (_local) {
+     return _local->writeValue(value, length);
+   }
+
+   if (_remote) {
+     return _remote->writeValue(value, length, bWithResponse);
+   }
+  return 0;
+}
+
 int BLECharacteristic::writeValue(const uint8_t value[], int length)
 {
   if (_local) {
@@ -245,6 +257,11 @@ int BLECharacteristic::writeValue(const uint8_t value[], int length)
   }
 
   return 0;
+}
+
+int BLECharacteristic::writeValue(const void* value, int length, bool bWithResponse)
+{
+  return writeValue((const uint8_t*)value, length, bWithResponse);
 }
 
 int BLECharacteristic::writeValue(const void* value, int length)

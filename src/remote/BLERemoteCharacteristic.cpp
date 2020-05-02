@@ -133,6 +133,53 @@ int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length)
   return 0;
 }
 
+int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length, bool bWithResponse)
+{ 
+  if (!ATT.connected(_connectionHandle)) {
+    return false;
+  }
+  
+  uint16_t maxLength = ATT.mtu(_connectionHandle) - 3;
+  
+  if (length > (int)maxLength) {
+    // cap to MTU max length
+    length = maxLength;
+  }
+  
+  _value = (uint8_t*)realloc(_value, length);
+  if (_value == NULL) {
+    // realloc failed
+    return 0;
+  }
+  
+  if ((_properties & BLEWrite) && bWithResponse) {
+    uint8_t resp[4]; 
+    int respLength = ATT.writeReq(_connectionHandle, _valueHandle, value, length, resp);
+    
+    if (!respLength) {
+      return 0;
+    }
+    
+    if (resp[0] == 0x01) {
+      // error
+      return 0;
+    }
+    
+    memcpy(_value, value, length);
+    _valueLength = length;
+    
+    return 1;
+  } else if (_properties & BLEWriteWithoutResponse) {
+    ATT.writeCmd(_connectionHandle, _valueHandle, value, length);
+    
+    memcpy(_value, value, length);
+    _valueLength = length;
+    
+    return 1;
+  }
+  
+  return 0;
+}
 int BLERemoteCharacteristic::writeValue(const char* value)
 {
   return writeValue((uint8_t*)value, strlen(value));

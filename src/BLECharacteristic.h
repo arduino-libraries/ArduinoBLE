@@ -69,7 +69,9 @@ public:
   int readValue(int32_t& value);
 
   int writeValue(const uint8_t value[], int length);
+  int writeValue(const uint8_t value[], int length, bool bWithResponse);
   int writeValue(const void* value, int length);
+  int writeValue(const void* value, int length, bool bWithResponse);
   int writeValue(const char* value);
   int writeValue(uint8_t value);
   int writeValue(int8_t value);

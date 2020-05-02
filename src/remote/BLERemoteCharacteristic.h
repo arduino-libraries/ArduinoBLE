@@ -39,6 +39,7 @@ public:
   uint8_t operator[] (int offset) const;
 
   int writeValue(const uint8_t value[], int length);
+  int writeValue(const uint8_t value[], int length, bool bWithResponse);
   int writeValue(const char* value);
 
   bool valueUpdated();
