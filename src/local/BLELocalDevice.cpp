@@ -25,6 +25,12 @@
 
 #include "BLELocalDevice.h"
 
+#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+#ifndef BT_REG_ON
+#define BT_REG_ON PJ_12
+#endif
+#endif
+
 BLELocalDevice::BLELocalDevice()
 {
 }
@@ -54,6 +60,10 @@ int BLELocalDevice::begin()
   delay(100);
   digitalWrite(NINA_RESETN, HIGH);
   delay(750);
+#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+  // BT_REG_ON -> HIGH
+  pinMode(BT_REG_ON, OUTPUT);
+  digitalWrite(BT_REG_ON, HIGH);
 #endif
 
 
@@ -123,6 +133,9 @@ void BLELocalDevice::end()
 #elif defined(ARDUINO_SAMD_NANO_33_IOT)
   // disable the NINA
   digitalWrite(NINA_RESETN, LOW);
+#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+  // BT_REG_ON -> LOW
+  digitalWrite(BT_REG_ON, LOW);
 #endif
 }
 

@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef ARDUINO_ARCH_MBED
+#if !defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
 
 #include "HCIUartTransport.h"
 
@@ -25,6 +25,10 @@
 #define SerialHCI Serial2
 #elif defined(ARDUINO_SAMD_NANO_33_IOT)
 // SerialHCI is already defined in the variant
+#elif defined(ARDUINO_PORTENTA_H7_M4)
+// SerialHCI is already defined in the variant
+#elif defined(ARDUINO_PORTENTA_H7_M7)
+#define SerialHCI Serial2
 #else
 #error "Unsupported board selected!"
 #endif
@@ -91,6 +95,8 @@ size_t HCIUartTransportClass::write(const uint8_t* data, size_t length)
 
 #ifdef ARDUINO_AVR_UNO_WIFI_REV2
 HCIUartTransportClass HCIUartTransport(SerialHCI, 119600);
+#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+HCIUartTransportClass HCIUartTransport(SerialHCI, 115200);
 #else
 HCIUartTransportClass HCIUartTransport(SerialHCI, 912600);
 #endif

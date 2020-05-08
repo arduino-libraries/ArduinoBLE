@@ -17,12 +17,12 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifdef ARDUINO_ARCH_MBED
+#if defined(ARDUINO_ARCH_MBED) && defined(CORDIO_ZERO_COPY_HCI)
 
 #include <driver/CordioHCITransportDriver.h>
 #include <driver/CordioHCIDriver.h>
 
-#include <mbed_config.h>
+#include <mbed.h>
 
 // Parts of this file are based on: https://github.com/ARMmbed/mbed-os-cordio-hci-passthrough/pull/2
 // With permission from the Arm Mbed team to re-license
@@ -155,7 +155,7 @@ static void bleLoop()
     }
 #else
     while(true) {
-        rtos::Thread::wait(osWaitForever);
+        rtos::ThisThread::sleep_for(osWaitForever);
     }
 #endif // CORDIO_ZERO_COPY_HCI
 }
@@ -242,7 +242,7 @@ size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
 
   return CordioHCIHook::getTransportDriver().write(packetType, packetLength, packet);
 #else
-  return CordioHCIHook::.getTransportDriver().write(packetType, packetLength, &data[1]);
+  return CordioHCIHook::getTransportDriver().write(packetType, packetLength, (uint8_t*)&data[1]);
 #endif
 }
 
