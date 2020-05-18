@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#if !defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+#if !defined(ARDUINO_ARCH_MBED)
 
 #include "HCIUartTransport.h"
 
@@ -95,8 +95,6 @@ size_t HCIUartTransportClass::write(const uint8_t* data, size_t length)
 
 #ifdef ARDUINO_AVR_UNO_WIFI_REV2
 HCIUartTransportClass HCIUartTransport(SerialHCI, 119600);
-#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
-HCIUartTransportClass HCIUartTransport(SerialHCI, 115200);
 #else
 HCIUartTransportClass HCIUartTransport(SerialHCI, 912600);
 #endif

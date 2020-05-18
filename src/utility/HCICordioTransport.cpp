@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#if defined(ARDUINO_ARCH_MBED) && defined(CORDIO_ZERO_COPY_HCI)
+#if defined(ARDUINO_ARCH_MBED)
 
 #include <driver/CordioHCITransportDriver.h>
 #include <driver/CordioHCIDriver.h>
@@ -183,6 +183,8 @@ int HCICordioTransportClass::begin()
 #endif
 
   CordioHCIHook::getDriver().initialize();
+  CordioHCIHook::getDriver().start_reset_sequence();
+
   bleLoopThread.start(bleLoop);
 
   CordioHCIHook::setDataReceivedHandler(HCICordioTransportClass::onDataReceived);
