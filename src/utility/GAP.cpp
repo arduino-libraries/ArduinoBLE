@@ -110,7 +110,7 @@ int GAPClass::advertise()
     advertisingDataLen += _manufacturerDataLength;
   }
 
-  if (_serviceData && _serviceDataLength > 0 && advertisingDataLen >= (_serviceDataLength + 4)) {
+  if (_serviceData && _serviceDataLength > 0 && (sizeof(advertisingData) - advertisingDataLen) >= (_serviceDataLength + 4)) {
     advertisingData[advertisingDataLen++] = _serviceDataLength + 3;
     advertisingData[advertisingDataLen++] = 0x16;
 
@@ -153,7 +153,7 @@ int GAPClass::advertise()
     return 0;
   }
 
-  _advertising = false;
+  _advertising = true;
 
   return 1;
 }
@@ -240,7 +240,7 @@ BLEDevice GAPClass::available()
         return result;
       } else {
         continue;
-      } 
+      }
     }
   }
 
