@@ -2,7 +2,7 @@
   Scan
 
   This example scans for BLE peripherals and prints out their advertising details:
-  address, local name, adverised service UUID's.
+  address, local name, advertised service UUID's.
 
   The circuit:
   - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
