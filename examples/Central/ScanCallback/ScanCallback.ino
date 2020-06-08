@@ -2,7 +2,7 @@
   Scan Callback
 
   This example scans for BLE peripherals and prints out their advertising details:
-  address, local name, adverised service UUIDs. Unlike the Scan example, it uses
+  address, local name, advertised service UUIDs. Unlike the Scan example, it uses
   the callback style APIs and disables filtering so the peripheral discovery is
   reported for every single advertisement it makes.
 
