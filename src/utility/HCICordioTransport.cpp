@@ -162,7 +162,7 @@ static void bleLoop()
 }
 
 static rtos::EventFlags bleEventFlags; 
-static rtos::Thread bleLoopThread;
+static rtos::Thread* bleLoopThread = NULL;
 
 
 HCICordioTransportClass::HCICordioTransportClass() :
@@ -186,7 +186,10 @@ int HCICordioTransportClass::begin()
   CordioHCIHook::getDriver().initialize();
   CordioHCIHook::getDriver().start_reset_sequence();
 
-  bleLoopThread.start(bleLoop);
+  if (bleLoopThread == NULL) {
+    bleLoopThread = new rtos::Thread();
+    bleLoopThread->start(bleLoop);
+  }
 
   CordioHCIHook::setDataReceivedHandler(HCICordioTransportClass::onDataReceived);
 
@@ -197,7 +200,11 @@ int HCICordioTransportClass::begin()
 
 void HCICordioTransportClass::end()
 {
-  bleLoopThread.terminate();
+  if (bleLoopThread != NULL) {
+    bleLoopThread->terminate();
+    delete bleLoopThread;
+    bleLoopThread = NULL;
+  }
 
   CordioHCIHook::getDriver().terminate();
 
