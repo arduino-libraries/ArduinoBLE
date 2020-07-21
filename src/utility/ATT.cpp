@@ -1561,7 +1561,7 @@ bool ATTClass::discoverDescriptors(uint16_t connectionHandle, BLERemoteDevice* d
 
     for (int j = 0; j < characteristicCount; j++) {
       BLERemoteCharacteristic* characteristic = service->characteristic(j);
-      BLERemoteCharacteristic* nextCharacteristic = (j == (characteristicCount - 1)) ? NULL : service->characteristic(j);
+      BLERemoteCharacteristic* nextCharacteristic = (j == (characteristicCount - 1)) ? NULL : service->characteristic(j + 1);
 
       reqStartHandle = characteristic->valueHandle() + 1;
       reqEndHandle = nextCharacteristic ? nextCharacteristic->valueHandle() : serviceEndHandle;
