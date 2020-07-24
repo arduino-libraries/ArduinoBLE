@@ -68,6 +68,7 @@ public:
 
   void setAdvertisingInterval(uint16_t advertisingInterval);
   void setConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
+  void setSupervisionTimeout(uint16_t supervisionTimeout);
   void setConnectable(bool connectable); 
 
   void setTimeout(unsigned long timeout);

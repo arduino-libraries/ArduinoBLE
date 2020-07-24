@@ -40,6 +40,8 @@ public:
 
   void setConnectionInterval(uint16_t minInterval, uint16_t maxInterval);
 
+  void setSupervisionTimeout(uint16_t supervisionTimeout);
+
 private:
   void connectionParameterUpdateRequest(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[]);
   void connectionParameterUpdateResponse(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[]);
@@ -47,6 +49,7 @@ private:
 private:
   uint16_t _minInterval;
   uint16_t _maxInterval;
+  uint16_t _supervisionTimeout;
 };
 
 extern L2CAPSignalingClass L2CAPSignaling;

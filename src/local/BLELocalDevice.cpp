@@ -291,6 +291,11 @@ void BLELocalDevice::setConnectionInterval(uint16_t minimumConnectionInterval, u
   L2CAPSignaling.setConnectionInterval(minimumConnectionInterval, maximumConnectionInterval);
 }
 
+void BLELocalDevice::setSupervisionTimeout(uint16_t supervisionTimeout)
+{
+  L2CAPSignaling.setSupervisionTimeout(supervisionTimeout);
+}
+
 void BLELocalDevice::setConnectable(bool connectable)
 {
   GAP.setConnectable(connectable);
