@@ -23,7 +23,7 @@
 #define protected public
 #include "BLEDevice.h"
 
-SCENARIO("BLE discovered device test", "[ArduinoBLE::BLEDevice]")
+TEST_CASE("BLE discovered device test", "[ArduinoBLE::BLEDevice]")
 {
 
   WHEN("Retrieve local name from advertisement packet")
@@ -39,7 +39,12 @@ SCENARIO("BLE discovered device test", "[ArduinoBLE::BLEDevice]")
 
     // Simulate device discovery
     BLEDevice device = BLEDevice();
+<<<<<<< HEAD
     device.setAdvertisingData(eirLength, eirData, rssi); 
+=======
+    device.setAdvertisementData(0x03, eirLength, eirData, rssi); // internal API changed
+    //device.setAdvertisingData(eirLength, eirData, rssi); // API changed
+>>>>>>> cf03112... CI - Integrate CI unit testing
 
     bool hasName = device.hasLocalName();
     REQUIRE(hasName);
