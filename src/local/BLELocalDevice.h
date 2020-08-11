@@ -62,6 +62,11 @@ public:
   void stopScan();
 
   BLEDevice central();
+  BLEDevice central(int index); 
+  int centralCount();
+  BLEDevice peripheral(); 
+  BLEDevice peripheral(int index); 
+  int peripheralCount();
   BLEDevice available();
 
   void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
