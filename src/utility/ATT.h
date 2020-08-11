@@ -67,6 +67,11 @@ public:
   virtual bool disconnect();
 
   virtual BLEDevice central();
+  BLEDevice central(int index); 
+  int centralCount();
+  BLEDevice peripheral(); 
+  BLEDevice peripheral(int index); 
+  int peripheralCount();
 
   virtual bool handleNotify(uint16_t handle, const uint8_t* value, int length);
   virtual bool handleInd(uint16_t handle, const uint8_t* value, int length);

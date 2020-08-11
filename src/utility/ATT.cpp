@@ -497,17 +497,76 @@ bool ATTClass::disconnect()
   return (numDisconnects > 0);
 }
 
-BLEDevice ATTClass::central()
+BLEDevice ATTClass::central() 
 {
+  return central(0);
+}
+
+BLEDevice ATTClass::central(int index) 
+{
+  int currentIndex = 0;
   for (int i = 0; i < ATT_MAX_PEERS; i++) {
     if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x01) {
       continue;
     }
 
-    return BLEDevice(_peers[i].addressType, _peers[i].address);
+    if (currentIndex == index) {
+      return BLEDevice(_peers[i].addressType, _peers[i].address);
+    }
+    currentIndex++;
   }
 
   return BLEDevice();
+}
+
+int ATTClass::centralCount()
+{
+  int count = 0;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x01) {
+      continue;
+    }
+
+    count++;
+  }
+
+  return count;
+}
+
+BLEDevice ATTClass::peripheral()
+{
+  return peripheral(0);
+}
+
+BLEDevice ATTClass::peripheral(int index)
+{
+  int currentIndex = 0;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x00) {
+      continue;
+    }
+
+    if (currentIndex == index) {
+      return BLEDevice(_peers[i].addressType, _peers[i].address);
+    }
+    currentIndex++;
+  }
+
+  return BLEDevice();
+}
+
+int ATTClass::peripheralCount()
+{
+  int count = 0;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x00) {
+      continue;
+    }
+
+    count++;
+  }
+
+  return count;
 }
 
 bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)

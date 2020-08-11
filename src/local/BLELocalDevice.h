@@ -67,7 +67,13 @@ public:
   virtual void stopScan();
 
   virtual BLEDevice central();
-  virtual BLEDevice available();
+  virtual BLEDevice available(); 
+  int centralCount();
+  BLEDevice peripheral(); 
+  BLEDevice peripheral(int index); 
+  int peripheralCount();
+  BLEDevice available();
+
 
   virtual void setAdvertisingInterval(uint16_t advertisingInterval);
   virtual void setConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
