@@ -25,6 +25,11 @@
 #include <Arduino.h>
 #include <mbed.h>
 
+#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+#include "ble/BLE.h"
+#include <events/mbed_events.h>
+#endif
+
 // Parts of this file are based on: https://github.com/ARMmbed/mbed-os-cordio-hci-passthrough/pull/2
 // With permission from the Arm Mbed team to re-license
 
@@ -174,6 +179,17 @@ HCICordioTransportClass::~HCICordioTransportClass()
 {
 }
 
+#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+events::EventQueue eventQueue(10 * EVENTS_EVENT_SIZE);
+void scheduleMbedBleEvents(BLE::OnEventsToProcessCallbackContext *context) {
+  eventQueue.call(mbed::Callback<void()>(&context->ble, &BLE::processEvents));
+}
+
+void completeCallback(BLE::InitializationCompleteCallbackContext *context) {
+  eventQueue.break_dispatch();
+}
+#endif
+
 int HCICordioTransportClass::begin()
 {
   _rxBuf.clear();
@@ -183,8 +199,20 @@ int HCICordioTransportClass::begin()
   init_wsf(bufPoolDesc);
 #endif
 
+#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+  BLE &ble = BLE::Instance();
+  ble.onEventsToProcess(scheduleMbedBleEvents);
+
+  ble.init(completeCallback);
+  eventQueue.dispatch(10000);
+
+  if (!ble.hasInitialized()){
+    return 0;
+  } 
+#else 
   CordioHCIHook::getDriver().initialize();
   CordioHCIHook::getDriver().start_reset_sequence();
+#endif
 
   if (bleLoopThread == NULL) {
     bleLoopThread = new rtos::Thread();
@@ -205,7 +233,6 @@ void HCICordioTransportClass::end()
     delete bleLoopThread;
     bleLoopThread = NULL;
   }
-
   CordioHCIHook::getDriver().terminate();
 
   _begun = false;
