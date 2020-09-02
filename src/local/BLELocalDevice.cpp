@@ -193,6 +193,11 @@ void BLELocalDevice::setAdvertisedService(const BLEService& service)
   setAdvertisedServiceUuid(service.uuid());
 }
 
+void BLELocalDevice::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
+{
+  GAP.setAdvertisedServiceData(uuid, data, length);
+}
+
 void BLELocalDevice::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
 {
   GAP.setManufacturerData(manufacturerData, manufacturerDataLength);

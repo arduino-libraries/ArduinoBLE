@@ -30,6 +30,7 @@ public:
   virtual ~GAPClass();
 
   void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
+  void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
   void setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
   void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   void setLocalName(const char *localName);
@@ -53,7 +54,6 @@ public:
 protected:
   friend class BLELocalCharacteristic;
 
-  void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
 
 protected:
   friend class HCIClass;

@@ -43,6 +43,7 @@ public:
 
   void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
   void setAdvertisedService(const BLEService& service);
+  void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
   void setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
   void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   void setLocalName(const char *localName);
