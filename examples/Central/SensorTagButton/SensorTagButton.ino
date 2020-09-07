@@ -8,7 +8,7 @@
   outputted to the Serial Monitor when one is pressed.
 
   The circuit:
-  - STEVAL-MKSBOX1V1, B-L475E-IOT01A1, or a Nucleo board plus the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
+  - STEVAL-MKSBOX1V1, B-L475E-IOT01A1, B_L4S5I_IOT01A, or a Nucleo board plus the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
   - TI SensorTag
 
   This example code is in the public domain.
@@ -21,8 +21,8 @@
 SPIClass SpiHCI(PC3, PD3, PD1);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_1S, PD0, PD4, PA8, 1000000, SPI_MODE1);
 BLELocalDevice BLE(&HCISpiTransport);
-#elif defined(ARDUINO_DISCO_L475VG_IOT)
-/* B-L475E-IOT01A1 */
+#elif defined(ARDUINO_DISCO_L475VG_IOT) || defined(ARDUINO_B_L4S5I_IOT01A)
+/* B-L475E-IOT01A1 or B_L4S5I_IOT01A */
 SPIClass SpiHCI(PC12, PC11, PC10);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000, SPI_MODE0);
 BLELocalDevice BLE(&HCISpiTransport);
