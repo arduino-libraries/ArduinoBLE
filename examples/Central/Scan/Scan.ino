@@ -2,7 +2,7 @@
   Scan
 
   This example scans for BLE peripherals and prints out their advertising details:
-  address, local name, adverised service UUID's.
+  address, local name, advertised service UUID's.
 
   The circuit:
   - STEVAL-MKSBOX1V1, B-L475E-IOT01A1, or a Nucleo board plus the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
