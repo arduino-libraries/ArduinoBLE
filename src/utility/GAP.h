@@ -22,6 +22,7 @@
 
 #include "utility/BLELinkedList.h"
 
+#include "BLEAdvertisingData.h"
 #include "BLEDevice.h"
 
 class GAPClass {
@@ -68,16 +69,8 @@ private:
   bool _advertising;
   bool _scanning;
 
-  const char* _advertisedServiceUuid;
-  const uint8_t* _manufacturerData;
-  int _manufacturerDataLength;
-  const char* _localName;
   uint16_t _advertisingInterval;
   bool _connectable;
-
-  uint16_t _serviceDataUuid;
-  const uint8_t* _serviceData;
-  int _serviceDataLength;
 
   BLEDeviceEventHandler _discoverEventHandler;
   BLELinkedList<BLEDevice*> _discoveredDevices;
@@ -85,6 +78,9 @@ private:
   String _scanNameFilter;
   String _scanUuidFilter;
   String _scanAddressFilter;
+
+  BLEAdvertisingData _advertisingData;
+  BLEAdvertisingData _scanResponseData;
 };
 
 extern GAPClass GAP;
