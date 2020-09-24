@@ -26,7 +26,9 @@
 
 #define ATT_CID       0x0004
 
-#ifdef DM_CONN_MAX
+#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+#define ATT_MAX_PEERS 7
+#elif DM_CONN_MAX
 #define ATT_MAX_PEERS DM_CONN_MAX // Mbed + Cordio
 #else
 #define ATT_MAX_PEERS 3

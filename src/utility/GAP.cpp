@@ -56,7 +56,7 @@ void GAPClass::setManufacturerData(const uint8_t manufacturerData[], int manufac
 
 void GAPClass::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  uint8_t tmpManufacturerData[manufacturerDataLength + 2];
+  uint8_t* tmpManufacturerData = (uint8_t*)malloc(manufacturerDataLength + 2);
   tmpManufacturerData[0] = companyId & 0xff;
   tmpManufacturerData[1] = companyId >> 8;
   memcpy(&tmpManufacturerData[2], manufacturerData, manufacturerDataLength);
@@ -79,7 +79,7 @@ int GAPClass::advertise()
 
   uint8_t type = (_connectable) ? 0x00 : (_localName ? 0x02 : 0x03);
 
-  _advertising = false;
+  stopAdvertise();
 
   if (HCI.leSetAdvertisingParameters(_advertisingInterval, _advertisingInterval, type, 0x00, 0x00, directBdaddr, 0x07, 0) != 0) {
     return 0;
@@ -97,20 +97,20 @@ int GAPClass::advertise()
     BLEUuid uuid(_advertisedServiceUuid);
     int uuidLen = uuid.length();
 
-    advertisingData[3] = 1 + uuidLen;
-    advertisingData[4] = (uuidLen > 2) ? 0x06 : 0x02;
-    memcpy(&advertisingData[5], uuid.data(), uuidLen);
+    advertisingData[advertisingDataLen++] = 1 + uuidLen;
+    advertisingData[advertisingDataLen++] = (uuidLen > 2) ? 0x06 : 0x02;
+    memcpy(&advertisingData[advertisingDataLen], uuid.data(), uuidLen);
 
-    advertisingDataLen += (2 + uuidLen);
+    advertisingDataLen += uuidLen;
   } else if (_manufacturerData && _manufacturerDataLength) {
-    advertisingData[3] = 1 + _manufacturerDataLength;
-    advertisingData[4] = 0xff;
-    memcpy(&advertisingData[5], _manufacturerData, _manufacturerDataLength);
+    advertisingData[advertisingDataLen++] = 1 + _manufacturerDataLength;
+    advertisingData[advertisingDataLen++] = 0xff;
+    memcpy(&advertisingData[advertisingDataLen], _manufacturerData, _manufacturerDataLength);
 
-    advertisingDataLen += (2 + _manufacturerDataLength);
+    advertisingDataLen += _manufacturerDataLength;
   }
 
-  if (_serviceData && _serviceDataLength > 0 && advertisingDataLen >= (_serviceDataLength + 4)) {
+  if (_serviceData && _serviceDataLength > 0 && (sizeof(advertisingData) - advertisingDataLen) >= (_serviceDataLength + 4)) {
     advertisingData[advertisingDataLen++] = _serviceDataLength + 3;
     advertisingData[advertisingDataLen++] = 0x16;
 

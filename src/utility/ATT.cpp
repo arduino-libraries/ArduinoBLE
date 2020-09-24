@@ -756,7 +756,7 @@ void ATTClass::findByTypeReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dl
   } *findByTypeReq = (FindByTypeReq*)data;
 
   if (dlen < sizeof(FindByTypeReq)) {
-    sendError(connectionHandle, ATT_OP_FIND_BY_TYPE_RESP, findByTypeReq->startHandle, ATT_ECODE_INVALID_PDU);
+    sendError(connectionHandle, ATT_OP_FIND_BY_TYPE_REQ, findByTypeReq->startHandle, ATT_ECODE_INVALID_PDU);
     return;
   }
 
@@ -794,7 +794,7 @@ void ATTClass::findByTypeReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dl
   }
 
   if (responseLength == 1) {
-    sendError(connectionHandle, ATT_OP_FIND_BY_TYPE_RESP, findByTypeReq->startHandle, ATT_ECODE_ATTR_NOT_FOUND);
+    sendError(connectionHandle, ATT_OP_FIND_BY_TYPE_REQ, findByTypeReq->startHandle, ATT_ECODE_ATTR_NOT_FOUND);
   } else {
     HCI.sendAclPkt(connectionHandle, ATT_CID, responseLength, response);
   }
@@ -1561,7 +1561,7 @@ bool ATTClass::discoverDescriptors(uint16_t connectionHandle, BLERemoteDevice* d
 
     for (int j = 0; j < characteristicCount; j++) {
       BLERemoteCharacteristic* characteristic = service->characteristic(j);
-      BLERemoteCharacteristic* nextCharacteristic = (j == (characteristicCount - 1)) ? NULL : service->characteristic(j);
+      BLERemoteCharacteristic* nextCharacteristic = (j == (characteristicCount - 1)) ? NULL : service->characteristic(j + 1);
 
       reqStartHandle = characteristic->valueHandle() + 1;
       reqEndHandle = nextCharacteristic ? nextCharacteristic->valueHandle() : serviceEndHandle;
