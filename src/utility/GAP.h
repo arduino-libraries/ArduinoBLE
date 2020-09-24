@@ -77,7 +77,7 @@ private:
 
   uint16_t _serviceDataUuid;
   const uint8_t* _serviceData;
-  int _serviceDataLength;
+  uint32_t _serviceDataLength;
 
   BLEDeviceEventHandler _discoverEventHandler;
   BLELinkedList<BLEDevice*> _discoveredDevices;
