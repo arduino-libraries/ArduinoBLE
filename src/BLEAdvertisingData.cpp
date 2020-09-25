@@ -96,12 +96,12 @@ bool BLEAdvertisingData::updateData()
   return success;
 }
 
-uint8_t* BLEAdvertisingData::getData()
+uint8_t* BLEAdvertisingData::data() 
 {
   return _data;
 }
 
-int BLEAdvertisingData::getDataLength()
+int BLEAdvertisingData::dataLength() const
 {
   return _dataLength;
 }

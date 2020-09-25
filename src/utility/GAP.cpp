@@ -41,45 +41,16 @@ GAPClass::~GAPClass()
 {
 }
 
-void GAPClass::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
-{
-  _advertisingData.setAdvertisedServiceUuid(advertisedServiceUuid);
-}
-
-void GAPClass::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
-{
-  _advertisingData.setManufacturerData(manufacturerData, manufacturerDataLength);
-}
-
-void GAPClass::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
-{
-  _advertisingData.setManufacturerData(companyId, manufacturerData, manufacturerDataLength);
-}
-
-void GAPClass::setLocalName(const char *localName)
-{
-  _scanResponseData.setLocalName(localName);  
-}
-
-void GAPClass::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
-{
-  _advertisingData.setAdvertisedServiceData(uuid, data, length);
-}
-
 bool GAPClass::advertising()
 {
   return _advertising;
 }
 
-int GAPClass::advertise()
+int GAPClass::advertise(uint8_t* advData, uint8_t advDataLen, uint8_t* scanData, uint8_t scanDataLen)
 {
   uint8_t directBdaddr[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-  _advertisingData.updateData();
-  _scanResponseData.updateData();
-
-  uint8_t scanLength = _scanResponseData.getDataLength();
-  uint8_t type = (_connectable) ? GAP_ADV_IND : (scanLength ? GAP_ADV_SCAN_IND : GAP_ADV_NONCONN_IND);
+  uint8_t type = (_connectable) ? GAP_ADV_IND : (scanDataLen ? GAP_ADV_SCAN_IND : GAP_ADV_NONCONN_IND);
 
   stopAdvertise();
 
@@ -87,15 +58,11 @@ int GAPClass::advertise()
     return 0;
   }
 
-  uint8_t* advertisingData = _advertisingData.getData();
-  uint8_t advertisingDataLen = _advertisingData.getDataLength();
-  if (HCI.leSetAdvertisingData(advertisingDataLen, advertisingData) != 0) {
+  if (HCI.leSetAdvertisingData(advDataLen, advData) != 0) {
     return 0;
   }
 
-  uint8_t* scanResponseData = _scanResponseData.getData();
-  uint8_t scanResponseDataLen = _scanResponseData.getDataLength();
-  if (HCI.leSetScanResponseData(scanResponseDataLen, scanResponseData) != 0) {
+  if (HCI.leSetScanResponseData(scanDataLen, scanData) != 0) {
     return 0;
   }
 

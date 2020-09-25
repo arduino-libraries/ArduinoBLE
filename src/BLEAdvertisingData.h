@@ -48,9 +48,8 @@ public:
   void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
 
   bool updateData();
-
-  uint8_t* getData();
-  int getDataLength();
+  uint8_t* data();
+  int dataLength() const;
 
 private:
   bool addAdvertisedServiceUuid(const char* advertisedServiceUuid);
