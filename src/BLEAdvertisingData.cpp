@@ -21,6 +21,7 @@
 
 BLEAdvertisingData::BLEAdvertisingData() :
   _dataLength(0),
+  _rawDataLength(0),
   _advertisedServiceUuid(NULL),
   _manufacturerData(NULL),
   _manufacturerDataLength(0),
@@ -28,7 +29,9 @@ BLEAdvertisingData::BLEAdvertisingData() :
   _hasManufacturerCompanyId(false),
   _localName(NULL),
   _serviceData(NULL),
-  _serviceDataLength(0)
+  _serviceDataLength(0),
+  _flags(0),
+  _hasFlags(false)
 {
 }
 
@@ -68,11 +71,28 @@ void BLEAdvertisingData::setLocalName(const char *localName)
   _localName = localName;
 }
 
+void BLEAdvertisingData::setRawData(const uint8_t* data, uint8_t length)
+{
+  _rawData = data;
+  _rawDataLength = length;
+}
+
+void BLEAdvertisingData::setFlags(uint8_t flags)
+{
+  _hasFlags = true;
+  _flags = flags;
+}
+
 bool BLEAdvertisingData::updateData()
 {
+  // Success indicates whether all the fields have been inserted
   bool success = true;
   // Reset data 
   _dataLength = 0;
+  // Try to add flags into the current advertising packet
+  if (_hasFlags) {
+    success &= addFlags(_flags);
+  }
   // Try to add Advertised service uuid into the current advertising packet
   if (_advertisedServiceUuid) {
     success &= addAdvertisedServiceUuid(_advertisedServiceUuid);
@@ -92,6 +112,10 @@ bool BLEAdvertisingData::updateData()
   // Try to add Local name into the current advertising packet
   if (_localName) {
     success &= addLocalName(_localName);
+  }
+  // Try to add Raw data
+  if (_rawDataLength) {
+    success &= addRawData(_rawData, _rawDataLength);
   }
   return success;
 }
@@ -123,9 +147,9 @@ bool BLEAdvertisingData::addAdvertisedServiceUuid(const char* advertisedServiceU
   int uuidLen = uuid.length();
   BLEAdField advField;
   if (uuidLen > 2) {
-    advField = BLEFieldAdvertisedService128;
+    advField = BLEFieldIncompleteAdvertisedService128;
   } else {
-    advField = BLEFieldAdvertisedService16;
+    advField = BLEFieldIncompleteAdvertisedService16;
   }
   return addField(advField, uuid.data(), uuidLen);
 }
@@ -151,6 +175,23 @@ bool BLEAdvertisingData::addAdvertisedServiceData(uint16_t uuid, const uint8_t d
   memcpy(tempData, &uuid, sizeof(uuid));
   memcpy(&tempData[sizeof(uuid)], data, length);
   return addField(BLEFieldServiceData, tempData, tempDataLength);
+}
+
+bool BLEAdvertisingData::addRawData(const uint8_t* data, uint8_t length)
+{
+  // Bypass addField to add the integral raw data
+  if (length > (MAX_AD_DATA_LENGTH - _dataLength)) {
+    // Not enough space 
+    return false;
+  }
+  memcpy(&_data[_dataLength], data, length);
+  _dataLength += length;
+  return true;
+}
+
+bool BLEAdvertisingData::addFlags(uint8_t flags)
+{
+  return addField(BLEFieldFlags, &flags, 1);
 }
 
 bool BLEAdvertisingData::addField(BLEAdField field, const char* data)

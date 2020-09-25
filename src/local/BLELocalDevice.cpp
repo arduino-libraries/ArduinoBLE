@@ -33,6 +33,7 @@
 
 BLELocalDevice::BLELocalDevice()
 {
+  _advertisingData.setFlags(BLEFlagsGeneralDiscoverable | BLEFlagsBREDRNotSupported);
 }
 
 BLELocalDevice::~BLELocalDevice()

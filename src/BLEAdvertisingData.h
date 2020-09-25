@@ -25,11 +25,20 @@
 
 #define MAX_AD_DATA_LENGTH (31)
 
+enum BLEFlags {
+  BLEFlagsLimitedDiscoverable = 0x01,
+  BLEFlagsGeneralDiscoverable = 0x02,
+  BLEFlagsBREDRNotSupported   = 0x04
+};
+
 enum BLEAdField {
+  BLEFieldFlags = 0x01,
+  BLEFieldIncompleteAdvertisedService16 = 0x02,
+  BLEFieldCompleteAdvertisedService16 = 0x03,
+  BLEFieldIncompleteAdvertisedService128 = 0x06,
+  BLEFieldCompleteAdvertisedService128 = 0x07,
   BLEFieldShortLocalName = 0x08,
   BLEFieldCompleteLocalName = 0x09,
-  BLEFieldAdvertisedService16 = 0x02,
-  BLEFieldAdvertisedService128 = 0x06,
   BLEFieldServiceData = 0x16,
   BLEFieldManufacturerData = 0xFF,
 
@@ -46,7 +55,11 @@ public:
   void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   void setLocalName(const char *localName);
   void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
+  void setRawData(const uint8_t* data, uint8_t length);
+  void setFlags(uint8_t flags);
 
+protected:
+  friend class BLELocalDevice;
   bool updateData();
   uint8_t* data();
   int dataLength() const;
@@ -57,6 +70,8 @@ private:
   bool addManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   bool addLocalName(const char *localName);
   bool addAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
+  bool addRawData(const uint8_t* data, uint8_t length);
+  bool addFlags(uint8_t flags);
 
   bool addField(BLEAdField field, const char* data);
   bool addField(BLEAdField field, const uint8_t* data, uint8_t length);
@@ -64,12 +79,19 @@ private:
   uint8_t _data[MAX_AD_DATA_LENGTH];
   int _dataLength;
 
-  const char* _advertisedServiceUuid; 
+  const uint8_t* _rawData;
+  uint8_t _rawDataLength;
+
+  uint8_t _flags;
+  bool _hasFlags;
+  const char* _localName;
+
   const uint8_t* _manufacturerData;
   int _manufacturerDataLength;
   uint16_t _manufacturerCompanyId;
   bool _hasManufacturerCompanyId;
-  const char* _localName;
+
+  const char* _advertisedServiceUuid; 
   uint16_t _serviceDataUuid;
   const uint8_t* _serviceData;
   int _serviceDataLength;
