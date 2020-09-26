@@ -1,17 +1,19 @@
 name: Compile Examples
-on: [push, pull_request]
+on:
+  - push
+  - pull_request
+
 jobs:
  build:
    runs-on: ubuntu-latest
 
    strategy:
      matrix:
-       fqbn: [
-         "arduino:samd:mkrwifi1010",
-         "arduino:samd:nano_33_iot",
-         "arduino:megaavr:uno2018:mode=on",
-         "arduino:mbed:nano33ble"
-       ]
+       fqbn:
+         - arduino:samd:mkrwifi1010
+         - arduino:samd:nano_33_iot
+         - arduino:megaavr:uno2018:mode=on
+         - arduino:mbed:nano33ble
 
    steps:
      - uses: actions/checkout@v2
