@@ -19,6 +19,8 @@
 
 #include "BLEAdvertisingData.h"
 
+#define AD_FIELD_OVERHEAD (2)
+
 BLEAdvertisingData::BLEAdvertisingData() :
   _dataLength(0),
   _rawDataLength(0),
@@ -31,7 +33,8 @@ BLEAdvertisingData::BLEAdvertisingData() :
   _serviceData(NULL),
   _serviceDataLength(0),
   _flags(0),
-  _hasFlags(false)
+  _hasFlags(false),
+  _remainingLength(MAX_AD_DATA_LENGTH)
 {
 }
 
@@ -39,48 +42,103 @@ BLEAdvertisingData::~BLEAdvertisingData()
 {
 }
 
-void BLEAdvertisingData::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
+inline bool BLEAdvertisingData::updateRemainingLength(int fieldLength)
 {
-  _advertisedServiceUuid = advertisedServiceUuid;
+  if (fieldLength <= _remainingLength) {
+    _remainingLength -= fieldLength;
+    return true;
+  }
+  return false;
 }
 
-void BLEAdvertisingData::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
+int BLEAdvertisingData::remainingLength() const
 {
-  _manufacturerData = manufacturerData;
-  _manufacturerDataLength = manufacturerDataLength;
-  _hasManufacturerCompanyId = false;
+  return _remainingLength;
 }
 
-void BLEAdvertisingData::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
+int BLEAdvertisingData::availableForWrite()
 {
-  _manufacturerData = manufacturerData;
-  _manufacturerDataLength = manufacturerDataLength;
-  _manufacturerCompanyId = companyId;
-  _hasManufacturerCompanyId = true;
+  int available = (_remainingLength - AD_FIELD_OVERHEAD);
+  if (available < 0) available = 0;
+  return available; 
 }
 
-void BLEAdvertisingData::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
+bool BLEAdvertisingData::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
 {
-  _serviceDataUuid = uuid;
-  _serviceData = data;
-  _serviceDataLength = length;
+  BLEUuid uuid(advertisedServiceUuid);
+  bool success = updateRemainingLength(uuid.length() + AD_FIELD_OVERHEAD);
+  if (success) {
+    _advertisedServiceUuid = advertisedServiceUuid;
+  }
+  return success;
 }
 
-void BLEAdvertisingData::setLocalName(const char *localName)
+bool BLEAdvertisingData::setAdvertisedService(const BLEService& service)
 {
-  _localName = localName;
+  return setAdvertisedServiceUuid(service.uuid());
 }
 
-void BLEAdvertisingData::setRawData(const uint8_t* data, uint8_t length)
+bool BLEAdvertisingData::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  _rawData = data;
-  _rawDataLength = length;
+  bool success = updateRemainingLength(manufacturerDataLength + AD_FIELD_OVERHEAD);
+  if (success) {
+    _manufacturerData = manufacturerData;
+    _manufacturerDataLength = manufacturerDataLength;
+    _hasManufacturerCompanyId = false;
+  }
+  return success;
 }
 
-void BLEAdvertisingData::setFlags(uint8_t flags)
+bool BLEAdvertisingData::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  _hasFlags = true;
-  _flags = flags;
+  bool success = updateRemainingLength(manufacturerDataLength + sizeof(companyId) + AD_FIELD_OVERHEAD);
+  if (success) {
+    _manufacturerData = manufacturerData;
+    _manufacturerDataLength = manufacturerDataLength;
+    _manufacturerCompanyId = companyId;
+    _hasManufacturerCompanyId = true;
+  }
+  return success;
+}
+
+bool BLEAdvertisingData::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
+{
+  bool success = updateRemainingLength(length + sizeof(uuid) + AD_FIELD_OVERHEAD);
+  if (success) {
+    _serviceDataUuid = uuid;
+    _serviceData = data;
+    _serviceDataLength = length;
+  }
+  return success;
+}
+
+bool BLEAdvertisingData::setLocalName(const char *localName)
+{
+  bool success = updateRemainingLength(strlen(localName) + AD_FIELD_OVERHEAD);
+  if (success) {
+    _localName = localName;
+  }
+  return success;
+}
+
+bool BLEAdvertisingData::setRawData(const uint8_t* data, int length)
+{
+  bool success = updateRemainingLength(length);
+  if (success) {
+    _rawData = data;
+    _rawDataLength = length;
+  }
+  return success;
+}
+
+bool BLEAdvertisingData::setFlags(uint8_t flags)
+{
+  bool success = updateRemainingLength(sizeof(flags) + AD_FIELD_OVERHEAD);
+  if (success) {
+    _hasFlags = true;
+    _flags = flags;
+  }
+  return success;
 }
 
 bool BLEAdvertisingData::updateData()
@@ -133,8 +191,8 @@ int BLEAdvertisingData::dataLength() const
 bool BLEAdvertisingData::addLocalName(const char *localName)
 {
   bool success = false;
-  if (strlen(localName) > (MAX_AD_DATA_LENGTH - 2)) {
-    success = addField(BLEFieldShortLocalName, (uint8_t*)localName, (MAX_AD_DATA_LENGTH - 2));
+  if (strlen(localName) > (MAX_AD_DATA_LENGTH - AD_FIELD_OVERHEAD)) {
+    success = addField(BLEFieldShortLocalName, (uint8_t*)localName, (MAX_AD_DATA_LENGTH - AD_FIELD_OVERHEAD));
   } else {
     success = addField(BLEFieldCompleteLocalName, localName);
   }
@@ -161,7 +219,7 @@ bool BLEAdvertisingData::addManufacturerData(const uint8_t manufacturerData[], i
 
 bool BLEAdvertisingData::addManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  uint8_t tempDataLength = manufacturerDataLength + sizeof(companyId);
+  int tempDataLength = manufacturerDataLength + sizeof(companyId);
   uint8_t tempData[MAX_AD_DATA_LENGTH];
   memcpy(tempData, &companyId, sizeof(companyId));
   memcpy(&tempData[sizeof(companyId)], manufacturerData, manufacturerDataLength);
@@ -170,14 +228,14 @@ bool BLEAdvertisingData::addManufacturerData(const uint16_t companyId, const uin
 
 bool BLEAdvertisingData::addAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
 {
-  uint8_t tempDataLength = length + sizeof(uuid);
+  int tempDataLength = length + sizeof(uuid);
   uint8_t tempData[MAX_AD_DATA_LENGTH];
   memcpy(tempData, &uuid, sizeof(uuid));
   memcpy(&tempData[sizeof(uuid)], data, length);
   return addField(BLEFieldServiceData, tempData, tempDataLength);
 }
 
-bool BLEAdvertisingData::addRawData(const uint8_t* data, uint8_t length)
+bool BLEAdvertisingData::addRawData(const uint8_t* data, int length)
 {
   // Bypass addField to add the integral raw data
   if (length > (MAX_AD_DATA_LENGTH - _dataLength)) {
@@ -191,18 +249,18 @@ bool BLEAdvertisingData::addRawData(const uint8_t* data, uint8_t length)
 
 bool BLEAdvertisingData::addFlags(uint8_t flags)
 {
-  return addField(BLEFieldFlags, &flags, 1);
+  return addField(BLEFieldFlags, &flags, sizeof(flags));
 }
 
 bool BLEAdvertisingData::addField(BLEAdField field, const char* data)
 {
-  uint8_t dataLength = strlen(data);
+  int dataLength = strlen(data);
   return addField(field, (uint8_t *)data, dataLength);
 }
 
-bool BLEAdvertisingData::addField(BLEAdField field, const uint8_t* data, uint8_t length)
+bool BLEAdvertisingData::addField(BLEAdField field, const uint8_t* data, int length)
 {
-  uint8_t fieldLength = length + 2; // Considering data TYPE and LENGTH fields
+  int fieldLength = length + AD_FIELD_OVERHEAD; // Considering data TYPE and LENGTH fields
   if (fieldLength > (MAX_AD_DATA_LENGTH - _dataLength)) {
     // Not enough space for storing this field
     return false;

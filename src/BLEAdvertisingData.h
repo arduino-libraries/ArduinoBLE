@@ -22,6 +22,7 @@
 
 #include <Arduino.h>
 #include "utility/BLEUuid.h"
+#include "BLEService.h"
 
 #define MAX_AD_DATA_LENGTH (31)
 
@@ -50,37 +51,45 @@ public:
   BLEAdvertisingData(); 
   virtual ~BLEAdvertisingData();
 
-  void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
-  void setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
-  void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
-  void setLocalName(const char *localName);
-  void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
-  void setRawData(const uint8_t* data, uint8_t length);
-  void setFlags(uint8_t flags);
+  int availableForWrite(); 
+
+  bool setAdvertisedService(const BLEService& service);
+  bool setAdvertisedServiceUuid(const char* advertisedServiceUuid);
+  bool setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
+  bool setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
+  bool setLocalName(const char *localName);
+  bool setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
+  bool setRawData(const uint8_t* data, int length);
+  bool setFlags(uint8_t flags);
 
 protected:
   friend class BLELocalDevice;
   bool updateData();
   uint8_t* data();
   int dataLength() const;
+  int remainingLength() const;
 
 private:
+  bool updateRemainingLength(int fieldLength);
+
   bool addAdvertisedServiceUuid(const char* advertisedServiceUuid);
   bool addManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
   bool addManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   bool addLocalName(const char *localName);
   bool addAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
-  bool addRawData(const uint8_t* data, uint8_t length);
+  bool addRawData(const uint8_t* data, int length);
   bool addFlags(uint8_t flags);
 
   bool addField(BLEAdField field, const char* data);
-  bool addField(BLEAdField field, const uint8_t* data, uint8_t length);
+  bool addField(BLEAdField field, const uint8_t* data, int length);
 
   uint8_t _data[MAX_AD_DATA_LENGTH];
   int _dataLength;
 
+  int _remainingLength;
+
   const uint8_t* _rawData;
-  uint8_t _rawDataLength;
+  int _rawDataLength;
 
   uint8_t _flags;
   bool _hasFlags;
