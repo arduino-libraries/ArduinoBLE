@@ -46,6 +46,11 @@ enum BLEAdField {
   BLEAdFieldLast
 };
 
+struct BLEAdvertisingRawData {
+  uint8_t data[MAX_AD_DATA_LENGTH];
+  int length;
+};
+
 class BLEAdvertisingData {
 public:
   BLEAdvertisingData(); 
@@ -63,6 +68,7 @@ public:
   bool setLocalName(const char *localName);
   bool setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
   bool setRawData(const uint8_t* data, int length);
+  bool setRawData(const BLEAdvertisingRawData& data);
   bool setFlags(uint8_t flags);
 
 protected:

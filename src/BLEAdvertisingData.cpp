@@ -23,6 +23,7 @@
 
 BLEAdvertisingData::BLEAdvertisingData() :
   _dataLength(0),
+  _rawData(NULL),
   _rawDataLength(0),
   _advertisedServiceUuid(NULL),
   _manufacturerData(NULL),
@@ -162,12 +163,22 @@ bool BLEAdvertisingData::setLocalName(const char *localName)
 
 bool BLEAdvertisingData::setRawData(const uint8_t* data, int length)
 {
-  bool success = updateRemainingLength(length);
-  if (success) {
-    _rawData = data;
-    _rawDataLength = length;
+  if (length > MAX_AD_DATA_LENGTH) {
+    length = MAX_AD_DATA_LENGTH;
   }
-  return success;
+  _rawData = data;
+  _rawDataLength = length;
+  return true;
+}
+
+bool BLEAdvertisingData::setRawData(const BLEAdvertisingRawData& rawData)
+{
+  _rawData = rawData.data;
+  _rawDataLength = rawData.length;
+  if (_rawDataLength > MAX_AD_DATA_LENGTH) {
+    _rawDataLength = MAX_AD_DATA_LENGTH;
+  }
+  return true;
 }
 
 bool BLEAdvertisingData::setFlags(uint8_t flags)
@@ -186,6 +197,10 @@ bool BLEAdvertisingData::updateData()
   bool success = true;
   // Reset data 
   _dataLength = 0;
+  // If rawData is present, then only rawData is inserted in the advertising packet
+  if (_rawData && _rawDataLength) {
+    return addRawData(_rawData, _rawDataLength);
+  }
   // Try to add flags into the current advertising packet
   if (_hasFlags) {
     success &= addFlags(_flags);
@@ -209,10 +224,6 @@ bool BLEAdvertisingData::updateData()
   // Try to add Local name into the current advertising packet
   if (_localName) {
     success &= addLocalName(_localName);
-  }
-  // Try to add Raw data
-  if (_rawDataLength) {
-    success &= addRawData(_rawData, _rawDataLength);
   }
   return success;
 }
