@@ -52,6 +52,9 @@ public:
   virtual ~BLEAdvertisingData();
 
   int availableForWrite(); 
+  void clear();
+  void copy(const BLEAdvertisingData& adv);
+  BLEAdvertisingData& operator=(const BLEAdvertisingData &other);
 
   bool setAdvertisedService(const BLEService& service);
   bool setAdvertisedServiceUuid(const char* advertisedServiceUuid);

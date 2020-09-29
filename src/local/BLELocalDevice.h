@@ -49,6 +49,9 @@ public:
   void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   void setLocalName(const char *localName);
 
+  void setAdvertisingData(BLEAdvertisingData& advertisingData);
+  void setScanResponseData(BLEAdvertisingData& scanResponseData);
+
   void setDeviceName(const char* deviceName);
   void setAppearance(uint16_t appearance);
 
@@ -76,6 +79,10 @@ public:
 
   void debug(Stream& stream);
   void noDebug();
+  
+protected:
+  BLEAdvertisingData& getAdvertisingData();
+  BLEAdvertisingData& getScanResponseData();
 
 private:
   BLEAdvertisingData _advertisingData;

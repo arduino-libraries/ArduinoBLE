@@ -214,6 +214,26 @@ void BLELocalDevice::setLocalName(const char *localName)
   _scanResponseData.setLocalName(localName);  
 }
 
+void BLELocalDevice::setAdvertisingData(BLEAdvertisingData& advertisingData)
+{
+  _advertisingData = advertisingData;
+}
+
+void BLELocalDevice::setScanResponseData(BLEAdvertisingData& scanResponseData)
+{
+  _scanResponseData = scanResponseData;
+}
+
+BLEAdvertisingData& BLELocalDevice::getAdvertisingData()
+{
+  return _advertisingData;
+}
+
+BLEAdvertisingData& BLELocalDevice::getScanResponseData()
+{
+  return _scanResponseData;
+}
+
 void BLELocalDevice::setDeviceName(const char* deviceName)
 {
   GATT.setDeviceName(deviceName);

@@ -63,6 +63,45 @@ int BLEAdvertisingData::availableForWrite()
   return available; 
 }
 
+void BLEAdvertisingData::clear()
+{
+  _remainingLength = MAX_AD_DATA_LENGTH;
+  _rawData = NULL;
+  _rawDataLength = 0;
+  _hasFlags = false;
+  _localName = NULL;
+  _manufacturerData = NULL;
+  _manufacturerDataLength = 0;
+  _hasManufacturerCompanyId = false;
+  _advertisedServiceUuid = NULL;
+  _serviceData = NULL;
+  _serviceDataLength = 0;
+}
+
+void BLEAdvertisingData::copy(const BLEAdvertisingData& adv)
+{
+  _remainingLength = adv._remainingLength;
+  _rawData = adv._rawData;
+  _rawDataLength = adv._rawDataLength;
+  _flags = adv._flags;
+  _hasFlags = adv._hasFlags;
+  _localName = adv._localName;
+  _manufacturerData = adv._manufacturerData;
+  _manufacturerDataLength = adv._manufacturerDataLength;
+  _manufacturerCompanyId = adv._manufacturerCompanyId;
+  _hasManufacturerCompanyId = adv._hasManufacturerCompanyId;
+  _advertisedServiceUuid = adv._advertisedServiceUuid;
+  _serviceDataUuid = adv._serviceDataUuid;
+  _serviceData = adv._serviceData;
+  _serviceDataLength = adv._serviceDataLength;
+}
+
+BLEAdvertisingData& BLEAdvertisingData::operator=(const BLEAdvertisingData &other) 
+{
+  copy(other);
+  return *this;
+}
+
 bool BLEAdvertisingData::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
 {
   BLEUuid uuid(advertisedServiceUuid);
