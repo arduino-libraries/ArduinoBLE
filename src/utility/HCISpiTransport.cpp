@@ -66,7 +66,7 @@ int HCISpiTransportClass::begin()
   digitalWrite(_ble_rst, HIGH);
   delay(5);
 
-  if (_ble_chip == SPBTLE_RF)
+  if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0)
   {
     // Wait for Blue Initialize
     wait_for_blue_initialize();
@@ -102,7 +102,7 @@ void HCISpiTransportClass::wait(unsigned long timeout)
 
 int HCISpiTransportClass::available()
 {
-  if(_ble_chip != SPBTLE_RF && _ble_chip !=SPBTLE_1S && _ble_chip !=BLUENRG_M2SP)
+  if(_ble_chip != SPBTLE_RF && _ble_chip != SPBTLE_1S && _ble_chip != BLUENRG_M2SP && _ble_chip != BLUENRG_M0)
   {
     return 0;
   }
@@ -137,7 +137,7 @@ int HCISpiTransportClass::available()
       /* Write the header */
       _spi->transfer(header_master, 5);
 
-      if (_ble_chip == SPBTLE_RF)
+      if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0)
       {
         /* device is ready */
         if(header_master[0] == 0x02) 
@@ -262,7 +262,7 @@ int HCISpiTransportClass::available()
 
     if(ble_reset)
     {
-      if (_ble_chip == SPBTLE_RF)
+      if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0)
       {
         /* BLE chip was reset: we need to enable LL_ONLY */
         enable_ll_only();
@@ -330,14 +330,14 @@ size_t HCISpiTransportClass::write(const uint8_t* data, size_t length)
   int result = 0;
   uint32_t tickstart = millis();
 
-  if(_ble_chip != SPBTLE_RF && _ble_chip !=SPBTLE_1S && _ble_chip !=BLUENRG_M2SP)
+  if(_ble_chip != SPBTLE_RF && _ble_chip != SPBTLE_1S && _ble_chip != BLUENRG_M2SP && _ble_chip != BLUENRG_M0)
   {
     return 0;
   }
 
   do
   {
-    if (_ble_chip == SPBTLE_RF)
+    if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0)
     {
       result = 0;
 

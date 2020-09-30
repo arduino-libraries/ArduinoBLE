@@ -29,11 +29,21 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000,
 BLELocalDevice BLE(&HCISpiTransport);
 const int buttonPin = PC13; // set buttonPin to digital pin PC13
 #else
-/* Shield IDB05A1 with SPI clock on D3 */
+/* Shield IDB05A2 with SPI clock on D3 */
 SPIClass SpiHCI(D11, D12, D3);
-HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
+HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M0, A1, A0, D7, 8000000, SPI_MODE0);
 BLELocalDevice BLE(&HCISpiTransport);
 const int buttonPin = PC13; // set buttonPin to digital pin PC13
+/* Shield IDB05A2 with SPI clock on D13 */
+/*#define SpiHCI SPI
+HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M0, A1, A0, D7, 8000000, SPI_MODE0);
+BLELocalDevice BLE(&HCISpiTransport);
+const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
+/* Shield IDB05A1 with SPI clock on D3 */
+/*SPIClass SpiHCI(D11, D12, D3);
+HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
+BLELocalDevice BLE(&HCISpiTransport);
+const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
 /* Shield IDB05A1 with SPI clock on D13 */
 /*#define SpiHCI SPI
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
