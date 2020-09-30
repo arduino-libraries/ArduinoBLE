@@ -7,7 +7,7 @@
   reported for every single advertisement it makes.
 
   The circuit:
-  - STEVAL-MKSBOX1V1, B-L475E-IOT01A1, B_L4S5I_IOT01A, or a Nucleo board plus the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
+  - STEVAL-MKSBOX1V1, B-L475E-IOT01A1, B_L4S5I_IOT01A, or a Nucleo board plus the X-NUCLEO-IDB05A2 or the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
 
   This example code is in the public domain.
 */
