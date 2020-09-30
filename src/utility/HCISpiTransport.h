@@ -26,7 +26,8 @@
 typedef enum BLEChip_s {
   SPBTLE_RF,
   SPBTLE_1S,
-  BLUENRG_M2SP
+  BLUENRG_M2SP,
+  BLUENRG_M0
 } BLEChip_t;
 
 #ifndef BLE_SPI_BYTE_ORDER
