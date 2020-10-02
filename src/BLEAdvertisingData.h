@@ -80,7 +80,7 @@ protected:
   bool hasFlags() const;
 
 private:
-  bool updateRemainingLength(int fieldLength);
+  bool updateRemainingLength(int oldFieldLength, int newFieldLength);
 
   bool addAdvertisedServiceUuid(const char* advertisedServiceUuid);
   bool addManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
@@ -111,6 +111,7 @@ private:
   bool _hasManufacturerCompanyId;
 
   const char* _advertisedServiceUuid; 
+  int _advertisedServiceUuidLength;
   uint16_t _serviceDataUuid;
   const uint8_t* _serviceData;
   int _serviceDataLength;
