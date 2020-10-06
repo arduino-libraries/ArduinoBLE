@@ -60,11 +60,11 @@ private:
 private:
   BLELinkedList<BLELocalAttribute*> _attributes;
 
-  BLELocalService              _genericAccessService;
-  BLELocalCharacteristic       _deviceNameCharacteristic;
-  BLELocalCharacteristic       _appearanceCharacteristic;
-  BLELocalService              _genericAttributeService;
-  BLELocalCharacteristic       _servicesChangedCharacteristic;
+  BLELocalService*              _genericAccessService;
+  BLELocalCharacteristic*       _deviceNameCharacteristic;
+  BLELocalCharacteristic*       _appearanceCharacteristic;
+  BLELocalService*              _genericAttributeService;
+  BLELocalCharacteristic*       _servicesChangedCharacteristic;
 };
 
 extern GATTClass GATT;

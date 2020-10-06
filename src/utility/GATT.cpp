@@ -28,19 +28,12 @@
 #include "GATT.h"
 
 GATTClass::GATTClass() :
-  _genericAccessService("1800"),
-  _deviceNameCharacteristic("2a00", BLERead, 20),
-  _appearanceCharacteristic("2a01", BLERead, 2),
-  _genericAttributeService("1801"),
-  _servicesChangedCharacteristic("2a05", BLEIndicate, 4)
+  _genericAccessService(NULL),
+  _deviceNameCharacteristic(NULL),
+  _appearanceCharacteristic(NULL),
+  _genericAttributeService(NULL),
+  _servicesChangedCharacteristic(NULL)
 {
-  _genericAccessService.retain();
-  _genericAttributeService.retain();
-
-  _genericAccessService.addCharacteristic(&_deviceNameCharacteristic);
-  _genericAccessService.addCharacteristic(&_appearanceCharacteristic);
-
-  _genericAttributeService.addCharacteristic(&_servicesChangedCharacteristic);
 }
 
 GATTClass::~GATTClass()
@@ -50,13 +43,29 @@ GATTClass::~GATTClass()
 
 void GATTClass::begin()
 {
+  _genericAccessService = new BLELocalService("1800");
+  _deviceNameCharacteristic = new BLELocalCharacteristic("2a00", BLERead, 20);
+  _appearanceCharacteristic = new BLELocalCharacteristic("2a01", BLERead, 2);
+  _genericAttributeService = new BLELocalService("1801");
+  _servicesChangedCharacteristic = new BLELocalCharacteristic("2a05", BLEIndicate, 4);
+
+  _genericAccessService->retain();
+  _deviceNameCharacteristic->retain();
+  _appearanceCharacteristic->retain();
+  _genericAttributeService->retain();
+  _servicesChangedCharacteristic->retain();
+
+  _genericAccessService->addCharacteristic(_deviceNameCharacteristic);
+  _genericAccessService->addCharacteristic(_appearanceCharacteristic);
+  _genericAttributeService->addCharacteristic(_servicesChangedCharacteristic);
+
   setDeviceName("Arduino");
   setAppearance(0x000);
 
   clearAttributes();
 
-  addService(&_genericAccessService);
-  addService(&_genericAttributeService);
+  addService(_genericAccessService);
+  addService(_genericAttributeService);
 }
 
 void GATTClass::end()
@@ -66,12 +75,12 @@ void GATTClass::end()
 
 void GATTClass::setDeviceName(const char* deviceName)
 {
-  _deviceNameCharacteristic.writeValue(deviceName);
+  _deviceNameCharacteristic->writeValue(deviceName);
 }
 
 void GATTClass::setAppearance(uint16_t appearance)
 {
-  _appearanceCharacteristic.writeValue((uint8_t*)&appearance, sizeof(appearance));
+  _appearanceCharacteristic->writeValue((uint8_t*)&appearance, sizeof(appearance));
 }
 
 void GATTClass::addService(BLEService& service)
