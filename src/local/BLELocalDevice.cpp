@@ -343,4 +343,5 @@ void BLELocalDevice::noDebug()
   HCI.noDebug();
 }
 
-BLELocalDevice BLE;
+BLELocalDevice BLEObj;
+BLELocalDevice& BLE = BLEObj;

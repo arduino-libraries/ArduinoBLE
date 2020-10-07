@@ -89,6 +89,6 @@ private:
   BLEAdvertisingData _scanResponseData;
 };
 
-extern BLELocalDevice BLE;
+extern BLELocalDevice& BLE;
 
 #endif

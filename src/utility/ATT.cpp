@@ -1687,4 +1687,5 @@ void ATTClass::writeCmd(uint16_t connectionHandle, uint16_t handle, const uint8_
   sendReq(connectionHandle, &writeReq, 3 + dataLen, NULL);
 }
 
-ATTClass ATT;
+ATTClass ATTObj;
+ATTClass& ATT = ATTObj;
