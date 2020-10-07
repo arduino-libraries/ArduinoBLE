@@ -146,4 +146,5 @@ void L2CAPSignalingClass::connectionParameterUpdateResponse(uint16_t /*handle*/,
 {
 }
 
-L2CAPSignalingClass L2CAPSignaling;
+L2CAPSignalingClass L2CAPSignalingObj;
+L2CAPSignalingClass& L2CAPSignaling = L2CAPSignalingObj;

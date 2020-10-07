@@ -49,6 +49,6 @@ private:
   uint16_t _maxInterval;
 };
 
-extern L2CAPSignalingClass L2CAPSignaling;
+extern L2CAPSignalingClass& L2CAPSignaling;
 
 #endif

@@ -67,6 +67,6 @@ private:
   BLELocalCharacteristic*       _servicesChangedCharacteristic;
 };
 
-extern GATTClass GATT;
+extern GATTClass& GATT;
 
 #endif

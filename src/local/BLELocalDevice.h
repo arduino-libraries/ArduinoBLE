@@ -78,6 +78,6 @@ public:
 private:
 };
 
-extern BLELocalDevice BLE;
+extern BLELocalDevice& BLE;
 
 #endif

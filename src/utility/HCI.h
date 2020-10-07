@@ -96,6 +96,6 @@ private:
   uint8_t _aclPktBuffer[255];
 };
 
-extern HCIClass HCI;
+extern HCIClass& HCI;
 
 #endif

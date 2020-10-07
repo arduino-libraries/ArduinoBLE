@@ -172,4 +172,5 @@ void GATTClass::clearAttributes()
   _attributes.clear();
 }
 
-GATTClass GATT;
+GATTClass GATTObj;
+GATTClass& GATT = GATTObj;

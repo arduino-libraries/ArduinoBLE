@@ -137,6 +137,6 @@ private:
   BLEDeviceEventHandler _eventHandlers[2];
 };
 
-extern ATTClass ATT;
+extern ATTClass& ATT;
 
 #endif

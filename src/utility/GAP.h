@@ -87,6 +87,6 @@ private:
   String _scanAddressFilter;
 };
 
-extern GAPClass GAP;
+extern GAPClass& GAP;
 
 #endif
