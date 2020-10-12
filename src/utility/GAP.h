@@ -29,30 +29,30 @@ public:
   GAPClass();
   virtual ~GAPClass();
 
-  bool advertising();
-  int advertise(uint8_t* advData, uint8_t advDataLength, uint8_t* scanData, uint8_t scanDataLength);
-  void stopAdvertise();
+  virtual bool advertising();
+  virtual int advertise(uint8_t* advData, uint8_t advDataLength, uint8_t* scanData, uint8_t scanDataLength);
+  virtual void stopAdvertise();
 
-  int scan(bool withDuplicates);
-  int scanForName(String name, bool withDuplicates);
-  int scanForUuid(String uuid, bool withDuplicates);
-  int scanForAddress(String address, bool withDuplicates);
-  void stopScan();
-  BLEDevice available();
+  virtual int scan(bool withDuplicates);
+  virtual int scanForName(String name, bool withDuplicates);
+  virtual int scanForUuid(String uuid, bool withDuplicates);
+  virtual int scanForAddress(String address, bool withDuplicates);
+  virtual void stopScan();
+  virtual BLEDevice available();
 
-  void setAdvertisingInterval(uint16_t advertisingInterval);
-  void setConnectable(bool connectable);
+  virtual void setAdvertisingInterval(uint16_t advertisingInterval);
+  virtual void setConnectable(bool connectable);
 
-  void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
+  virtual void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
 
 protected:
   friend class HCIClass;
 
-  void handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint8_t address[6],
+  virtual void handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint8_t address[6],
                                   uint8_t eirLength, uint8_t eirData[], int8_t rssi);
 
 private:
-  bool matchesScanFilter(const BLEDevice& device);
+  virtual bool matchesScanFilter(const BLEDevice& device);
 
 private:
   bool _advertising;
