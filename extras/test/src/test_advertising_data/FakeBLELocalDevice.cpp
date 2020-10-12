@@ -17,36 +17,24 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <catch.hpp>
+#include "FakeBLELocalDevice.h"
 
-#define private public
-#define protected public
-#include "BLEDevice.h"
-
-TEST_CASE("BLE discovered device test", "[ArduinoBLE::BLEDevice]")
+FakeBLELocalDevice::FakeBLELocalDevice()
 {
 
-  WHEN("Retrieve local name from advertisement packet")
-  {
-    // Mocking advertisement packet
-    uint8_t advType = 0x03;
-    uint8_t eirLength = 6;
-    uint8_t eirData[] = {0x05, 0x09, 't', 'e', 's', 't'};
-    uint8_t rssi = 0;
+}
 
-    // Expected results
-    String goldenName = "test";
-
-    // Simulate device discovery
-    BLEDevice device = BLEDevice();
-    device.setAdvertisementData(0x03, eirLength, eirData, rssi); 
-
-    bool hasName = device.hasLocalName();
-    REQUIRE(hasName);
-
-    String name = device.localName();
-    REQUIRE(goldenName == name);
-
-  }
+FakeBLELocalDevice::~FakeBLELocalDevice()
+{
 
 }
+
+int FakeBLELocalDevice::advertise()
+{
+  _advertisingData.updateData();
+  _scanResponseData.updateData();
+  return 1;
+}
+
+FakeBLELocalDevice FakeBLEObj;
+BLELocalDevice& BLE = FakeBLEObj;
