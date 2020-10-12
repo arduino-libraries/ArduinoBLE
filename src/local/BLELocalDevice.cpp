@@ -343,5 +343,7 @@ void BLELocalDevice::noDebug()
   HCI.noDebug();
 }
 
+#if !defined(FAKE_BLELOCALDEVICE)
 BLELocalDevice BLEObj;
 BLELocalDevice& BLE = BLEObj;
+#endif

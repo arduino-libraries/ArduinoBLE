@@ -686,5 +686,7 @@ void HCIClass::dumpPkt(const char* prefix, uint8_t plen, uint8_t pdata[])
   }
 }
 
+#if !defined(FAKE_HCI)
 HCIClass HCIObj;
 HCIClass& HCI = HCIObj;
+#endif

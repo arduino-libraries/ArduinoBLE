@@ -258,5 +258,7 @@ bool GAPClass::matchesScanFilter(const BLEDevice& device)
   return true;
 }
 
+#if !defined(FAKE_GAP)
 GAPClass GAPObj;
 GAPClass& GAP = GAPObj;
+#endif

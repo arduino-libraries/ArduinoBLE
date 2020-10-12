@@ -172,5 +172,7 @@ void GATTClass::clearAttributes()
   _attributes.clear();
 }
 
+#if !defined(FAKE_GATT)
 GATTClass GATTObj;
 GATTClass& GATT = GATTObj;
+#endif

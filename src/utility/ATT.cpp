@@ -1687,5 +1687,7 @@ void ATTClass::writeCmd(uint16_t connectionHandle, uint16_t handle, const uint8_
   sendReq(connectionHandle, &writeReq, 3 + dataLen, NULL);
 }
 
+#if !defined(FAKE_ATT)
 ATTClass ATTObj;
 ATTClass& ATT = ATTObj;
+#endif
