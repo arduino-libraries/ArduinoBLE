@@ -217,6 +217,9 @@ void BLELocalDevice::setLocalName(const char *localName)
 void BLELocalDevice::setAdvertisingData(BLEAdvertisingData& advertisingData)
 {
   _advertisingData = advertisingData;
+  if (!_advertisingData.hasFlags()) {
+    _advertisingData.setFlags(BLEFlagsGeneralDiscoverable | BLEFlagsBREDRNotSupported);
+  }
 }
 
 void BLELocalDevice::setScanResponseData(BLEAdvertisingData& scanResponseData)

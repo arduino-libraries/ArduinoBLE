@@ -71,6 +71,7 @@ protected:
   uint8_t* data();
   int dataLength() const;
   int remainingLength() const;
+  bool hasFlags() const;
 
 private:
   bool updateRemainingLength(int fieldLength);

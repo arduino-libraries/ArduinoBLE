@@ -227,6 +227,11 @@ int BLEAdvertisingData::dataLength() const
   return _dataLength;
 }
 
+bool BLEAdvertisingData::hasFlags() const
+{
+  return _hasFlags;
+}
+
 bool BLEAdvertisingData::addLocalName(const char *localName)
 {
   bool success = false;
