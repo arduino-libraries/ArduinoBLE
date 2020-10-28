@@ -26,12 +26,12 @@
 
 #define ATT_CID       0x0004
 
-#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
-#define ATT_MAX_PEERS 7
-#elif DM_CONN_MAX
+#if DM_CONN_MAX
 #define ATT_MAX_PEERS DM_CONN_MAX // Mbed + Cordio
-#else
+#elif __AVR__
 #define ATT_MAX_PEERS 3
+#else
+#define ATT_MAX_PEERS 8
 #endif
 
 class BLERemoteDevice;
