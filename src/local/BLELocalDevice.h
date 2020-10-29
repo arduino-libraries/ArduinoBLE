@@ -76,10 +76,6 @@ public:
 
   virtual void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
 
-  virtual void setAdvertisingInterval(uint16_t advertisingInterval);
-  virtual void setConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
-  virtual void setConnectable(bool connectable); 
-
   virtual void setTimeout(unsigned long timeout);
 
   virtual void debug(Stream& stream);
