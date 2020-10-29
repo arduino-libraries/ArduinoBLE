@@ -33,6 +33,7 @@
 
 BLELocalDevice::BLELocalDevice()
 {
+  _advertisingData.setFlags(BLEFlagsGeneralDiscoverable | BLEFlagsBREDRNotSupported);
 }
 
 BLELocalDevice::~BLELocalDevice()
@@ -185,7 +186,7 @@ int BLELocalDevice::rssi()
 
 void BLELocalDevice::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
 {
-  GAP.setAdvertisedServiceUuid(advertisedServiceUuid);
+  _advertisingData.setAdvertisedServiceUuid(advertisedServiceUuid);
 }
 
 void BLELocalDevice::setAdvertisedService(const BLEService& service)
@@ -193,19 +194,47 @@ void BLELocalDevice::setAdvertisedService(const BLEService& service)
   setAdvertisedServiceUuid(service.uuid());
 }
 
+void BLELocalDevice::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
+{
+  _advertisingData.setAdvertisedServiceData(uuid, data, length);
+}
+
 void BLELocalDevice::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  GAP.setManufacturerData(manufacturerData, manufacturerDataLength);
+  _advertisingData.setManufacturerData(manufacturerData, manufacturerDataLength);
 }
 
 void BLELocalDevice::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  GAP.setManufacturerData(companyId, manufacturerData, manufacturerDataLength);
+  _advertisingData.setManufacturerData(companyId, manufacturerData, manufacturerDataLength);
 }
 
 void BLELocalDevice::setLocalName(const char *localName)
 {
-  GAP.setLocalName(localName);
+  _scanResponseData.setLocalName(localName);  
+}
+
+void BLELocalDevice::setAdvertisingData(BLEAdvertisingData& advertisingData)
+{
+  _advertisingData = advertisingData;
+  if (!_advertisingData.hasFlags()) {
+    _advertisingData.setFlags(BLEFlagsGeneralDiscoverable | BLEFlagsBREDRNotSupported);
+  }
+}
+
+void BLELocalDevice::setScanResponseData(BLEAdvertisingData& scanResponseData)
+{
+  _scanResponseData = scanResponseData;
+}
+
+BLEAdvertisingData& BLELocalDevice::getAdvertisingData()
+{
+  return _advertisingData;
+}
+
+BLEAdvertisingData& BLELocalDevice::getScanResponseData()
+{
+  return _scanResponseData;
 }
 
 void BLELocalDevice::setDeviceName(const char* deviceName)
@@ -225,7 +254,10 @@ void BLELocalDevice::addService(BLEService& service)
 
 int BLELocalDevice::advertise()
 {
-  return GAP.advertise();
+  _advertisingData.updateData();
+  _scanResponseData.updateData();
+  return GAP.advertise( _advertisingData.data(), _advertisingData.dataLength(), 
+                        _scanResponseData.data(), _scanResponseData.dataLength());
 }
 
 void BLELocalDevice::stopAdvertise()
@@ -311,4 +343,7 @@ void BLELocalDevice::noDebug()
   HCI.noDebug();
 }
 
-BLELocalDevice BLE;
+#if !defined(FAKE_BLELOCALDEVICE)
+BLELocalDevice BLEObj;
+BLELocalDevice& BLE = BLEObj;
+#endif
