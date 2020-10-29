@@ -69,6 +69,11 @@ public:
   virtual BLEDevice central();
   virtual BLEDevice available();
 
+  virtual void setAdvertisingInterval(uint16_t advertisingInterval);
+  virtual void setConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
+  virtual void setSupervisionTimeout(uint16_t supervisionTimeout);
+  virtual void setConnectable(bool connectable); 
+
   virtual void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
 
   virtual void setAdvertisingInterval(uint16_t advertisingInterval);
