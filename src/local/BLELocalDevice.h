@@ -42,12 +42,12 @@ public:
 
   virtual int rssi();
 
-  virtual void setAdvertisedServiceUuid(const char* advertisedServiceUuid);
-  virtual void setAdvertisedService(const BLEService& service);
-  virtual void setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
-  virtual void setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
-  virtual void setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
-  virtual void setLocalName(const char *localName);
+  virtual bool setAdvertisedServiceUuid(const char* advertisedServiceUuid);
+  virtual bool setAdvertisedService(const BLEService& service);
+  virtual bool setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
+  virtual bool setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
+  virtual bool setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
+  virtual bool setLocalName(const char *localName);
 
   virtual void setAdvertisingData(BLEAdvertisingData& advertisingData);
   virtual void setScanResponseData(BLEAdvertisingData& scanResponseData);
