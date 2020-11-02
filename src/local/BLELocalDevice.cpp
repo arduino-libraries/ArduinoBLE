@@ -184,34 +184,34 @@ int BLELocalDevice::rssi()
   return 127;
 }
 
-void BLELocalDevice::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
+bool BLELocalDevice::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
 {
-  _advertisingData.setAdvertisedServiceUuid(advertisedServiceUuid);
+  return _advertisingData.setAdvertisedServiceUuid(advertisedServiceUuid);
 }
 
-void BLELocalDevice::setAdvertisedService(const BLEService& service)
+bool BLELocalDevice::setAdvertisedService(const BLEService& service)
 {
-  setAdvertisedServiceUuid(service.uuid());
+  return setAdvertisedServiceUuid(service.uuid());
 }
 
-void BLELocalDevice::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
+bool BLELocalDevice::setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length)
 {
-  _advertisingData.setAdvertisedServiceData(uuid, data, length);
+  return _advertisingData.setAdvertisedServiceData(uuid, data, length);
 }
 
-void BLELocalDevice::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
+bool BLELocalDevice::setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  _advertisingData.setManufacturerData(manufacturerData, manufacturerDataLength);
+  return _advertisingData.setManufacturerData(manufacturerData, manufacturerDataLength);
 }
 
-void BLELocalDevice::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
+bool BLELocalDevice::setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength)
 {
-  _advertisingData.setManufacturerData(companyId, manufacturerData, manufacturerDataLength);
+  return _advertisingData.setManufacturerData(companyId, manufacturerData, manufacturerDataLength);
 }
 
-void BLELocalDevice::setLocalName(const char *localName)
+bool BLELocalDevice::setLocalName(const char *localName)
 {
-  _scanResponseData.setLocalName(localName);  
+  return _scanResponseData.setLocalName(localName);  
 }
 
 void BLELocalDevice::setAdvertisingData(BLEAdvertisingData& advertisingData)
