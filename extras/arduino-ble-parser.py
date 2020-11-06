@@ -33,24 +33,21 @@ def buildBinaryPacket(hciMessage, hciDirection, hciType):
   flagHex = ("0" * 7) + str((commandFlag * 2) + directionFlag)
   timestampHex = "0" * 16
   packetDropHex = "0" * 8
-  dataLengthHex = format( (len(hciMessage) / 2), 'x')
+  dataLengthHex = format( (int(len(hciMessage) / 2)), 'x')
   packetLengthHex = ("0" * (8 - len(dataLengthHex))) + dataLengthHex
   binaryPacket = bytearray.fromhex(packetLengthHex + packetLengthHex + flagHex + packetDropHex + timestampHex + hciMessage)
   if DEBUG:
-    print(binaryPacket)
-    print
     print(len(hciMessage))
     print(dataLengthHex)
     print(packetLengthHex)
-    print (flagHex)
-    print
-    print(binaryPacket)
+    print(flagHex)
+    print('\n')
   return binaryPacket
 
 def buildBinaryHeader():
   defaultHeader = "6274736e6f6f700000000001000003ea"
   binaryHeader = bytearray.fromhex(defaultHeader)
-  return binaryHeader;
+  return binaryHeader
 
 def convertToBtsnoop(inputPath, outputPath):
   # Open output file and write the Btsnoop header
@@ -74,7 +71,7 @@ def convertToBtsnoop(inputPath, outputPath):
       print(hciDirection)
       print(hciMessage)
       print(hciType)
-      print()
+      print('\n')
   outputFile.close()
 
 inputPath = args.inputPath
