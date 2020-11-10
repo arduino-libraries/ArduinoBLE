@@ -19,11 +19,11 @@
 
 #if defined(ARDUINO_ARCH_MBED)
 
-#include <driver/CordioHCITransportDriver.h>
-#include <driver/CordioHCIDriver.h>
-
 #include <Arduino.h>
 #include <mbed.h>
+
+#include <driver/CordioHCITransportDriver.h>
+#include <driver/CordioHCIDriver.h>
 
 #if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
 #include "ble/BLE.h"
