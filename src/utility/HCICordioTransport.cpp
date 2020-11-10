@@ -47,6 +47,12 @@
 
 #include "HCICordioTransport.h"
 
+#if (MBED_VERSION > MBED_ENCODE_VERSION(6, 2, 0))
+#define BLE_NAMESPACE ble 
+#else
+#define BLE_NAMESPACE ble::cordio::vendor
+#endif
+
 extern ble::CordioHCIDriver& ble_cordio_get_hci_driver();
 
 namespace ble {
