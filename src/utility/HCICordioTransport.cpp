@@ -47,35 +47,31 @@
 
 #include "HCICordioTransport.h"
 
-extern ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver();
+extern ble::CordioHCIDriver& ble_cordio_get_hci_driver();
 
 namespace ble {
-  namespace vendor {
-    namespace cordio {
-      struct CordioHCIHook {
-          static CordioHCIDriver& getDriver() {
-              return ble_cordio_get_hci_driver();
-          }
-
-          static CordioHCITransportDriver& getTransportDriver() {
-              return getDriver()._transport_driver;
-          }
-
-          static void setDataReceivedHandler(void (*handler)(uint8_t*, uint8_t)) {
-              getTransportDriver().set_data_received_handler(handler);
-          }
-      };
+  struct CordioHCIHook {
+    static CordioHCIDriver& getDriver() {
+      return ble_cordio_get_hci_driver();
     }
-  }
+
+    static CordioHCITransportDriver& getTransportDriver() {
+      return getDriver()._transport_driver;
+    }
+
+    static void setDataReceivedHandler(void (*handler)(uint8_t*, uint8_t)) {
+      getTransportDriver().set_data_received_handler(handler);
+    }
+  };
 }
 
-using ble::vendor::cordio::CordioHCIHook;
+using ble::CordioHCIHook;
 
 #if CORDIO_ZERO_COPY_HCI
 extern uint8_t *SystemHeapStart;
 extern uint32_t SystemHeapSize;
 
-void init_wsf(ble::vendor::cordio::buf_pool_desc_t& buf_pool_desc) {
+void init_wsf(ble::buf_pool_desc_t& buf_pool_desc) {
     static bool init = false;
 
     if (init) {
@@ -195,7 +191,7 @@ int HCICordioTransportClass::begin()
   _rxBuf.clear();
 
 #if CORDIO_ZERO_COPY_HCI
-  ble::vendor::cordio::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
+  ble::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
   init_wsf(bufPoolDesc);
 #endif
 
