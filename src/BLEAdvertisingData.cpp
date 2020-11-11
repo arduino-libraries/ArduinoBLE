@@ -23,20 +23,20 @@
 
 BLEAdvertisingData::BLEAdvertisingData() :
   _dataLength(0),
+  _remainingLength(MAX_AD_DATA_LENGTH),
   _rawData(NULL),
   _rawDataLength(0),
-  _advertisedServiceUuid(NULL),
-  _advertisedServiceUuidLength(0),
+  _flags(0),
+  _hasFlags(false),
+  _localName(NULL),
   _manufacturerData(NULL),
   _manufacturerDataLength(0),
   _manufacturerCompanyId(0),
   _hasManufacturerCompanyId(false),
-  _localName(NULL),
+  _advertisedServiceUuid(NULL),
+  _advertisedServiceUuidLength(0),
   _serviceData(NULL),
-  _serviceDataLength(0),
-  _flags(0),
-  _hasFlags(false),
-  _remainingLength(MAX_AD_DATA_LENGTH)
+  _serviceDataLength(0)
 {
 }
 
