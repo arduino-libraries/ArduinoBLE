@@ -50,12 +50,12 @@
 #if (MBED_VERSION > MBED_ENCODE_VERSION(6, 2, 0))
 #define BLE_NAMESPACE ble 
 #else
-#define BLE_NAMESPACE ble::cordio::vendor
+#define BLE_NAMESPACE ble::vendor::cordio
 #endif
 
-extern ble::CordioHCIDriver& ble_cordio_get_hci_driver();
+extern BLE_NAMESPACE::CordioHCIDriver& ble_cordio_get_hci_driver();
 
-namespace ble {
+namespace BLE_NAMESPACE {
   struct CordioHCIHook {
     static CordioHCIDriver& getDriver() {
       return ble_cordio_get_hci_driver();
@@ -71,13 +71,13 @@ namespace ble {
   };
 }
 
-using ble::CordioHCIHook;
+using BLE_NAMESPACE::CordioHCIHook;
 
 #if CORDIO_ZERO_COPY_HCI
 extern uint8_t *SystemHeapStart;
 extern uint32_t SystemHeapSize;
 
-void init_wsf(ble::buf_pool_desc_t& buf_pool_desc) {
+void init_wsf(BLE_NAMESPACE::buf_pool_desc_t& buf_pool_desc) {
     static bool init = false;
 
     if (init) {
@@ -197,7 +197,7 @@ int HCICordioTransportClass::begin()
   _rxBuf.clear();
 
 #if CORDIO_ZERO_COPY_HCI
-  ble::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
+  BLE_NAMESPACE::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
   init_wsf(bufPoolDesc);
 #endif
 
