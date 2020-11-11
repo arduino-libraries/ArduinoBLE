@@ -47,6 +47,6 @@ TEST_CASE("BLE uuid test", "[ArduinoBLE::BLEUuid]")
     REQUIRE(verify);
 
     // print the uuid
-    WARN("test: " << testUuid << ",  golden: " << goldenUuid);
+    //WARN("test: " << testUuid << ",  golden: " << goldenUuid);
   }
 }

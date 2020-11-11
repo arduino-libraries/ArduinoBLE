@@ -50,12 +50,13 @@ TEST_CASE("Test advertised service id setting", "[ArduinoBLE::BLEAdvertisingData
     const char* service = "00112233445566770011223344556677";
     advData.setLocalName(name);
     oldRemainingLength = advData.remainingLength();
-    retVal = advData.setAdvertisedServiceUuid(service);
-    REQUIRE(!retVal);
-
-    REQUIRE( oldRemainingLength == advData.remainingLength() );
-    advData.updateData();
-    REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH - oldRemainingLength) );
+    THEN("Check that the too long parameter has not been set")
+    {
+      REQUIRE(!advData.setAdvertisedServiceUuid(service)); 
+      REQUIRE( oldRemainingLength == advData.remainingLength() );
+      advData.updateData();
+      REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH - oldRemainingLength) );
+    }
   }
 
   WHEN("Fill to maximum an advertising packet with a service id")
@@ -64,8 +65,7 @@ TEST_CASE("Test advertised service id setting", "[ArduinoBLE::BLEAdvertisingData
     const char* name = "11 char str";
     const char* service = "00112233445566770011223344556677";
     advData.setLocalName(name);
-    retVal = advData.setAdvertisedServiceUuid(service);
-    REQUIRE(retVal);
+    REQUIRE(advData.setAdvertisedServiceUuid(service));
 
     advData.updateData();
     REQUIRE(advData.dataLength() == (MAX_AD_DATA_LENGTH));
@@ -76,7 +76,7 @@ TEST_CASE("Test advertised service id setting", "[ArduinoBLE::BLEAdvertisingData
 
   WHEN("Check consistency when setting the external advertising data")
   {
-    auto goldenData = advData.data();
+    const auto goldenData = advData.data();
     BLE.setAdvertisingData(advData);
     BLE.advertise();
     REQUIRE( 0 == memcmp(goldenData, BLE.getAdvertisingData().data(), advData.dataLength()) );
@@ -91,7 +91,7 @@ TEST_CASE("Test service data setting", "[ArduinoBLE::BLEAdvertisingData]")
 {
   BLEAdvertisingData advData;
   int oldRemainingLength = advData.remainingLength();
-  uint16_t uuid = 0x1100;
+  const uint16_t uuid = 0x1100;
   bool retVal;
 
   WHEN("Set correct service data")
@@ -100,14 +100,20 @@ TEST_CASE("Test service data setting", "[ArduinoBLE::BLEAdvertisingData]")
     const uint8_t goldenData[] = {(sizeof(data) + sizeof(uuid) + 1), BLEFieldServiceData, 
                                   0x00, 0x11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     retVal = advData.setAdvertisedServiceData(uuid, data, sizeof(data));
-    REQUIRE(retVal);
-    REQUIRE( (sizeof(data) + 2 + sizeof(uuid)) == (oldRemainingLength - advData.remainingLength()) );
+    THEN("Correctly set parameter")
+    {
+      REQUIRE(retVal);
+      REQUIRE( (sizeof(data) + 2 + sizeof(uuid)) == (oldRemainingLength - advData.remainingLength()) );
+    }
     oldRemainingLength = advData.remainingLength();
 
     advData.updateData();
-    REQUIRE(advData.dataLength() == (sizeof(data) + 2 + sizeof(uuid)));
-    REQUIRE(advData.dataLength() == sizeof(goldenData));
-    REQUIRE( 0 == memcmp(goldenData, advData.data(), sizeof(goldenData)) );
+    THEN("Check parameter analyzing advertising raw data")
+    {
+      REQUIRE(advData.dataLength() == (sizeof(data) + 2 + sizeof(uuid)));
+      REQUIRE(advData.dataLength() == sizeof(goldenData));
+      REQUIRE( 0 == memcmp(goldenData, advData.data(), sizeof(goldenData)) );
+    }
   }
 
   WHEN("Set too long service data")
@@ -116,7 +122,10 @@ TEST_CASE("Test service data setting", "[ArduinoBLE::BLEAdvertisingData]")
     const uint8_t data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27};
     retVal = advData.setAdvertisedServiceData(uuid, data, sizeof(data));
-    REQUIRE(!retVal);
+    THEN("Check that the too long parameter has not been set")
+    {
+      REQUIRE(!retVal);
+    }
     REQUIRE( oldRemainingLength == advData.remainingLength() );
     advData.updateData();
     REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH - oldRemainingLength) );
@@ -127,17 +136,23 @@ TEST_CASE("Test service data setting", "[ArduinoBLE::BLEAdvertisingData]")
     const uint8_t data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
     retVal = advData.setAdvertisedServiceData(uuid, data, sizeof(data));
-    REQUIRE(retVal);
+    THEN("Check correctly set parameter")
+    {
+      REQUIRE(retVal);
+    }
 
     advData.updateData();
     // advData should be full now
-    REQUIRE( 0 == advData.remainingLength() );
-    REQUIRE( 0 == advData.availableForWrite() );
+    THEN("advData should be full now")
+    {
+      REQUIRE( 0 == advData.remainingLength() );
+      REQUIRE( 0 == advData.availableForWrite() );
+    }
   }
 
   WHEN("Check consistency when setting the external advertising data")
   {
-    auto goldenData = advData.data();
+    const auto goldenData = advData.data();
     BLE.setAdvertisingData(advData);
     BLE.advertise();
     REQUIRE( 0 == memcmp(goldenData, BLE.getAdvertisingData().data(), advData.dataLength()) );
