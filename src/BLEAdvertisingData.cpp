@@ -186,7 +186,7 @@ bool BLEAdvertisingData::setLocalName(const char *localName)
 bool BLEAdvertisingData::setRawData(const uint8_t* data, int length)
 {
   if (length > MAX_AD_DATA_LENGTH) {
-    length = MAX_AD_DATA_LENGTH;
+    return false;
   }
   _rawData = data;
   _rawDataLength = length;
@@ -195,11 +195,11 @@ bool BLEAdvertisingData::setRawData(const uint8_t* data, int length)
 
 bool BLEAdvertisingData::setRawData(const BLEAdvertisingRawData& rawData)
 {
+  if (rawData.length > MAX_AD_DATA_LENGTH) {
+    return false;
+  }
   _rawData = rawData.data;
   _rawDataLength = rawData.length;
-  if (_rawDataLength > MAX_AD_DATA_LENGTH) {
-    _rawDataLength = MAX_AD_DATA_LENGTH;
-  }
   return true;
 }
 
