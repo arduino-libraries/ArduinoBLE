@@ -616,7 +616,7 @@ int HCIClass::tryResolveAddress(uint8_t* BDAddr, uint8_t* address){
   return 0;
 }
 
-int HCIClass::sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data)
+int HCIClass::sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, const void* data)
 {
   while (_pendingPkt >= _maxPkt) {
     poll();
@@ -673,7 +673,7 @@ void HCIClass::noDebug()
   _debug = NULL;
 }
 
-int HCIClass::sendCommand(uint16_t opcode, uint8_t plen, void* parameters)
+int HCIClass::sendCommand(uint16_t opcode, uint8_t plen, const void* parameters)
 {
   struct __attribute__ ((packed)) {
     uint8_t pktType;
