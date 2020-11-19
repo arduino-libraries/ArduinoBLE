@@ -211,7 +211,6 @@ int HCICordioTransportClass::begin()
   } 
 #else 
   CordioHCIHook::getDriver().initialize();
-  CordioHCIHook::getDriver().start_reset_sequence();
 #endif
 
   if (bleLoopThread == NULL) {
