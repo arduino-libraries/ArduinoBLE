@@ -31,41 +31,41 @@ typedef enum BLEChip_s {
 } BLEChip_t;
 
 #ifndef BLE_SPI_BYTE_ORDER
-#define BLE_SPI_BYTE_ORDER  MSBFIRST
+  #define BLE_SPI_BYTE_ORDER  MSBFIRST
 #endif
 #define BLE_MODULE_SPI_BUFFER_SIZE 128
 
 class HCISpiTransportClass : public HCITransportInterface {
-public:
-  HCISpiTransportClass(SPIClass& spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, uint32_t frequency, uint8_t spi_mode);
-  virtual ~HCISpiTransportClass();
+  public:
+    HCISpiTransportClass(SPIClass &spi, BLEChip_t ble_chip, uint8_t cs_pin, uint8_t spi_irq, uint8_t ble_rst, uint32_t frequency, uint8_t spi_mode);
+    virtual ~HCISpiTransportClass();
 
-  virtual int begin();
-  virtual void end();
+    virtual int begin();
+    virtual void end();
 
-  virtual void wait(unsigned long timeout);
+    virtual void wait(unsigned long timeout);
 
-  virtual int available();
-  virtual int peek();
-  virtual int read();
+    virtual int available();
+    virtual int peek();
+    virtual int read();
 
-  virtual size_t write(const uint8_t* data, size_t length);
+    virtual size_t write(const uint8_t *data, size_t length);
 
-private:
-  void wait_for_blue_initialize();
-  void wait_for_enable_ll_only();
-  void enable_ll_only();
-  SPIClass* _spi;
-  SPISettings _spiSettings;
-  BLEChip_t _ble_chip;
-  uint8_t _cs_pin;
-  uint8_t _spi_irq;
-  uint8_t _ble_rst;
-  uint8_t _rxbuff[BLE_MODULE_SPI_BUFFER_SIZE];
-  uint16_t _read_index;
-  uint16_t _write_index;
-  uint16_t _write_index_initial;
-  uint8_t _initial_phase;
+  private:
+    void wait_for_blue_initialize();
+    void wait_for_enable_ll_only();
+    void enable_ll_only();
+    SPIClass *_spi;
+    SPISettings _spiSettings;
+    BLEChip_t _ble_chip;
+    uint8_t _cs_pin;
+    uint8_t _spi_irq;
+    uint8_t _ble_rst;
+    uint8_t _rxbuff[BLE_MODULE_SPI_BUFFER_SIZE];
+    uint16_t _read_index;
+    uint16_t _write_index;
+    uint16_t _write_index_initial;
+    uint8_t _initial_phase;
 };
 
 #endif /* _HCI_SPI_TRANSPORT_H_ */

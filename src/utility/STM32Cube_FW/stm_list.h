@@ -23,10 +23,14 @@
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "stdint.h"
 #include "stdbool.h"
+#include "stm32_wpan_common.h"
 
-typedef  struct _tListNode {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef PACKED_STRUCT _tListNode {
   struct _tListNode *next;
   struct _tListNode *prev;
 } tListNode;
@@ -54,5 +58,9 @@ int LST_get_size(tListNode *listHead);
 void LST_get_next_node(tListNode *ref_node, tListNode **node);
 
 void LST_get_prev_node(tListNode *ref_node, tListNode **node);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _STM_LIST_H_ */
