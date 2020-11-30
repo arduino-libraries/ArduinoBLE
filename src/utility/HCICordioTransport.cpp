@@ -19,11 +19,11 @@
 
 #if defined(ARDUINO_ARCH_MBED)
 
-#include <driver/CordioHCITransportDriver.h>
-#include <driver/CordioHCIDriver.h>
-
 #include <Arduino.h>
 #include <mbed.h>
+
+#include <driver/CordioHCITransportDriver.h>
+#include <driver/CordioHCIDriver.h>
 
 #if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
 #include "ble/BLE.h"
@@ -47,35 +47,37 @@
 
 #include "HCICordioTransport.h"
 
-extern ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver();
+#if (MBED_VERSION > MBED_ENCODE_VERSION(6, 2, 0))
+#define BLE_NAMESPACE ble 
+#else
+#define BLE_NAMESPACE ble::vendor::cordio
+#endif
 
-namespace ble {
-  namespace vendor {
-    namespace cordio {
-      struct CordioHCIHook {
-          static CordioHCIDriver& getDriver() {
-              return ble_cordio_get_hci_driver();
-          }
+extern BLE_NAMESPACE::CordioHCIDriver& ble_cordio_get_hci_driver();
 
-          static CordioHCITransportDriver& getTransportDriver() {
-              return getDriver()._transport_driver;
-          }
-
-          static void setDataReceivedHandler(void (*handler)(uint8_t*, uint8_t)) {
-              getTransportDriver().set_data_received_handler(handler);
-          }
-      };
+namespace BLE_NAMESPACE {
+  struct CordioHCIHook {
+    static CordioHCIDriver& getDriver() {
+      return ble_cordio_get_hci_driver();
     }
-  }
+
+    static CordioHCITransportDriver& getTransportDriver() {
+      return getDriver()._transport_driver;
+    }
+
+    static void setDataReceivedHandler(void (*handler)(uint8_t*, uint8_t)) {
+      getTransportDriver().set_data_received_handler(handler);
+    }
+  };
 }
 
-using ble::vendor::cordio::CordioHCIHook;
+using BLE_NAMESPACE::CordioHCIHook;
 
 #if CORDIO_ZERO_COPY_HCI
 extern uint8_t *SystemHeapStart;
 extern uint32_t SystemHeapSize;
 
-void init_wsf(ble::vendor::cordio::buf_pool_desc_t& buf_pool_desc) {
+void init_wsf(BLE_NAMESPACE::buf_pool_desc_t& buf_pool_desc) {
     static bool init = false;
 
     if (init) {
@@ -195,7 +197,7 @@ int HCICordioTransportClass::begin()
   _rxBuf.clear();
 
 #if CORDIO_ZERO_COPY_HCI
-  ble::vendor::cordio::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
+  BLE_NAMESPACE::buf_pool_desc_t bufPoolDesc = CordioHCIHook::getDriver().get_buffer_pool_description();
   init_wsf(bufPoolDesc);
 #endif
 
