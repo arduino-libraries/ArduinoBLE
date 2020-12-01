@@ -28,6 +28,11 @@ SPIClass SpiHCI(PC12, PC11, PC10);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000, SPI_MODE0);
 BLELocalDevice BLE(&HCISpiTransport);
 const int buttonPin = PC13; // set buttonPin to digital pin PC13
+#elif defined(ARDUINO_PNUCLEO_WB55RG)
+/* PNUCLEO_WB55RG */
+HCISharedMemTransportClass HCISharedMemTransport;
+BLELocalDevice BLE(&HCISharedMemTransport);
+const int buttonPin = PC4; // set buttonPin to digital pin PC4
 #else
 /* Shield IDB05A2 with SPI clock on D3 */
 SPIClass SpiHCI(D11, D12, D3);

@@ -27,6 +27,10 @@ BLELocalDevice BLE(&HCISpiTransport);
 SPIClass SpiHCI(PC12, PC11, PC10);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000, SPI_MODE0);
 BLELocalDevice BLE(&HCISpiTransport);
+#elif defined(ARDUINO_PNUCLEO_WB55RG)
+/* PNUCLEO_WB55RG */
+HCISharedMemTransportClass HCISharedMemTransport;
+BLELocalDevice BLE(&HCISharedMemTransport);
 #else
 /* Shield IDB05A2 with SPI clock on D3 */
 SPIClass SpiHCI(D11, D12, D3);
