@@ -683,7 +683,8 @@ void ATTClass::findInfoReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen
     BLELocalAttribute* attribute = GATT.attribute(i);
     uint16_t handle = (i + 1);
     bool isValueHandle = (attribute->type() == BLETypeCharacteristic) && (((BLELocalCharacteristic*)attribute)->valueHandle() == handle);
-    int uuidLen = isValueHandle ? 2 : attribute->uuidLength();
+    bool isDescriptor = attribute->type() == BLETypeDescriptor;
+    int uuidLen = (isValueHandle || isDescriptor) ? attribute->uuidLength() : BLE_ATTRIBUTE_TYPE_SIZE;
     int infoType = (uuidLen == 2) ? 0x01 : 0x02;
 
     if (response[1] == 0) {
@@ -699,7 +700,7 @@ void ATTClass::findInfoReq(uint16_t connectionHandle, uint16_t mtu, uint8_t dlen
     memcpy(&response[responseLength], &handle, sizeof(handle));
     responseLength += sizeof(handle);
 
-    if (isValueHandle || attribute->type() == BLETypeDescriptor) {
+    if (isValueHandle || isDescriptor) {
       // add the UUID
       memcpy(&response[responseLength], attribute->uuidData(), uuidLen);
       responseLength += uuidLen;
