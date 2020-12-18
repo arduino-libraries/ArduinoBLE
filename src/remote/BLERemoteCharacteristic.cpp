@@ -85,7 +85,7 @@ uint8_t BLERemoteCharacteristic::operator[] (int offset) const
   return 0;
 }
 
-int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length)
+int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length, bool withResponse)
 {
   if (!ATT.connected(_connectionHandle)) {
     return false;
@@ -104,7 +104,7 @@ int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length)
     return 0;
   }
 
-  if (_properties & BLEWrite) {
+  if ((_properties & BLEWrite) && withResponse) {
     uint8_t resp[4];
     int respLength = ATT.writeReq(_connectionHandle, _valueHandle, value, length, resp);
 
@@ -133,9 +133,9 @@ int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length)
   return 0;
 }
 
-int BLERemoteCharacteristic::writeValue(const char* value)
+int BLERemoteCharacteristic::writeValue(const char* value, bool withResponse)
 {
-  return writeValue((uint8_t*)value, strlen(value));
+  return writeValue((uint8_t*)value, strlen(value), withResponse);
 }
 
 bool BLERemoteCharacteristic::valueUpdated()

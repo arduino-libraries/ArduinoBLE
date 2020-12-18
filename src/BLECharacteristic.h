@@ -68,15 +68,15 @@ public:
   int readValue(uint32_t& value);
   int readValue(int32_t& value);
 
-  int writeValue(const uint8_t value[], int length);
-  int writeValue(const void* value, int length);
-  int writeValue(const char* value);
-  int writeValue(uint8_t value);
-  int writeValue(int8_t value);
-  int writeValue(uint16_t value);
-  int writeValue(int16_t value);
-  int writeValue(uint32_t value);
-  int writeValue(int32_t value);
+  int writeValue(const uint8_t value[], int length, bool withResponse = true);
+  int writeValue(const void* value, int length, bool withResponse = true);
+  int writeValue(const char* value, bool withResponse = true);
+  int writeValue(uint8_t value, bool withResponse = true);
+  int writeValue(int8_t value, bool withResponse = true);
+  int writeValue(uint16_t value, bool withResponse = true);
+  int writeValue(int16_t value, bool withResponse = true);
+  int writeValue(uint32_t value, bool withResponse = true);
+  int writeValue(int32_t value, bool withResponse = true);
 
   // deprecated, use writeValue(...)
   int setValue(const uint8_t value[], int length) { return writeValue(value, length); }
