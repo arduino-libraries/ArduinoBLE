@@ -59,6 +59,8 @@ public:
   String advertisedServiceUuid() const;
   String advertisedServiceUuid(int index) const;
 
+  int advertisementData(uint8_t value[], int length);
+
   virtual int rssi();
 
   bool connect();
