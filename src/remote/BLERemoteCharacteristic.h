@@ -38,8 +38,8 @@ public:
   int valueLength() const;
   uint8_t operator[] (int offset) const;
 
-  int writeValue(const uint8_t value[], int length);
-  int writeValue(const char* value);
+  int writeValue(const uint8_t value[], int length, bool withResponse = true);
+  int writeValue(const char* value, bool withResponse = true);
 
   bool valueUpdated();
   bool updatedValueRead();

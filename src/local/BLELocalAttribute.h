@@ -22,6 +22,8 @@
 
 #include "utility/BLEUuid.h"
 
+#define BLE_ATTRIBUTE_TYPE_SIZE 2
+
 enum BLEAttributeType {
   BLETypeUnknown        = 0x0000,
 

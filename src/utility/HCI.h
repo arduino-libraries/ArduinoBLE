@@ -51,54 +51,54 @@ public:
   HCIClass();
   virtual ~HCIClass();
 
-  int begin();
-  void end();
+  virtual int begin();
+  virtual void end();
 
-  void poll();
-  void poll(unsigned long timeout);
+  virtual void poll();
+  virtual void poll(unsigned long timeout);
 
-  int reset();
-  int readLocalVersion(uint8_t& hciVer, uint16_t& hciRev, uint8_t& lmpVer,
+  virtual int reset();
+  virtual int readLocalVersion(uint8_t& hciVer, uint16_t& hciRev, uint8_t& lmpVer,
                        uint16_t& manufacturer, uint16_t& lmpSubVer);
-  int readBdAddr(uint8_t addr[6]);
-  int readBdAddr();
 
-  int readRssi(uint16_t handle);
+  virtual int readBdAddr(uint8_t addr[6]);
+  virtual int readBdAddr();
 
-  int setEventMask(uint64_t eventMask);
-  int setLeEventMask(uint64_t leEventMask);
+  virtual int readRssi(uint16_t handle);
 
-  int readLeBufferSize(uint16_t& pktLen, uint8_t& maxPkt);
-  int leSetRandomAddress(uint8_t addr[6]);
-  int leSetAdvertisingParameters(uint16_t minInterval, uint16_t maxInterval,
+  virtual int setEventMask(uint64_t eventMask);
+  virtual int setLeEventMask(uint64_t leEventMask);
+  virtual int readLeBufferSize(uint16_t& pktLen, uint8_t& maxPkt);
+  virtual int leSetRandomAddress(uint8_t addr[6]);
+  virtual int leSetAdvertisingParameters(uint16_t minInterval, uint16_t maxInterval,
                                  uint8_t advType, uint8_t ownBdaddrType,
                                  uint8_t directBdaddrType, uint8_t directBdaddr[6],
                                  uint8_t chanMap,
                                  uint8_t filter);
-  int leSetAdvertisingData(uint8_t length, uint8_t data[]);
-  int leSetScanResponseData(uint8_t length, uint8_t data[]);
-  int leSetAdvertiseEnable(uint8_t enable);
-  int leSetScanParameters(uint8_t type, uint16_t interval, uint16_t window, 
+  virtual int leSetAdvertisingData(uint8_t length, uint8_t data[]);
+  virtual int leSetScanResponseData(uint8_t length, uint8_t data[]);
+  virtual int leSetAdvertiseEnable(uint8_t enable);
+  virtual int leSetScanParameters(uint8_t type, uint16_t interval, uint16_t window, 
                           uint8_t ownBdaddrType, uint8_t filter);
-  int leSetScanEnable(uint8_t enabled, uint8_t duplicates);
-  int leCreateConn(uint16_t interval, uint16_t window, uint8_t initiatorFilter,
+  virtual int leSetScanEnable(uint8_t enabled, uint8_t duplicates);
+  virtual int leCreateConn(uint16_t interval, uint16_t window, uint8_t initiatorFilter,
                   uint8_t peerBdaddrType, uint8_t peerBdaddr[6], uint8_t ownBdaddrType,
                   uint16_t minInterval, uint16_t maxInterval, uint16_t latency,
                   uint16_t supervisionTimeout, uint16_t minCeLength, uint16_t maxCeLength);
-  int leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxInterval, 
+  virtual int leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxInterval, 
                   uint16_t latency, uint16_t supervisionTimeout);
-  int leCancelConn();
-  int leEncrypt(uint8_t* Key, uint8_t* plaintext, uint8_t* status, uint8_t* ciphertext);
+  virtual int leCancelConn();
+  virtual int leEncrypt(uint8_t* Key, uint8_t* plaintext, uint8_t* status, uint8_t* ciphertext);
 
-  int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
+  virtual int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
 
-  int disconnect(uint16_t handle);
+  virtual int disconnect(uint16_t handle);
 
-  void debug(Stream& stream);
-  void noDebug();
+  virtual void debug(Stream& stream);
+  virtual void noDebug();
 
   // TODO: Send command be private again & use ATT implementation within ATT.
-  int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
+  virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
   uint8_t remotePublicKeyBuffer[64];
   uint8_t Na[16];
   uint8_t Nb[16];
@@ -107,11 +107,11 @@ public:
   uint8_t LTK[16];
 private:
 
-  void handleAclDataPkt(uint8_t plen, uint8_t pdata[]);
-  void handleNumCompPkts(uint16_t handle, uint16_t numPkts);
-  void handleEventPkt(uint8_t plen, uint8_t pdata[]);
+  virtual void handleAclDataPkt(uint8_t plen, uint8_t pdata[]);
+  virtual void handleNumCompPkts(uint16_t handle, uint16_t numPkts);
+  virtual void handleEventPkt(uint8_t plen, uint8_t pdata[]);
 
-  void dumpPkt(const char* prefix, uint8_t plen, uint8_t pdata[]);
+  virtual void dumpPkt(const char* prefix, uint8_t plen, uint8_t pdata[]);
 
   Stream* _debug;
 
@@ -129,6 +129,6 @@ private:
   uint8_t _aclPktBuffer[255];
 };
 
-extern HCIClass HCI;
+extern HCIClass& HCI;
 
 #endif
