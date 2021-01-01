@@ -95,7 +95,10 @@ public:
   virtual int setPeerIOCap(uint16_t connectionHandle, uint8_t IOCap[]);
   virtual int getPeerIOCap(uint16_t connectionHandle, uint8_t IOCap[]);
   uint8_t holdBuffer[64];
+  uint8_t writeBuffer[64];
   uint8_t holdBufferSize;
+  uint8_t writeBufferSize;
+  virtual int processWriteBuffer();
 private:
   virtual void error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
   virtual void mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
