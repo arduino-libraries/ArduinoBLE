@@ -666,12 +666,19 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
 #endif
     if(encryptionChange->enabled>0){
       ATT.setPeerEncryption(encryptionChange->connectionHandle, PEER_ENCRYPTION::ENCRYPTED_AES);
+      if(ATT.writeBufferSize > 0){
+        ATT.processWriteBuffer();
+      }
+      if(ATT.holdBufferSize>0){
+#ifdef _BLE_TRACE_
+        Serial.print("Sending queued response size: ");
+        Serial.println(ATT.holdBufferSize);
+#endif
+        HCI.sendAclPkt(encryptionChange->connectionHandle, ATT_CID, ATT.holdBufferSize, ATT.holdBuffer);
+        ATT.holdBufferSize = 0;
+      }
     }else{
       ATT.setPeerEncryption(encryptionChange->connectionHandle, PEER_ENCRYPTION::NO_ENCRYPTION);
-    }
-    if(ATT.holdBufferSize>0){
-      HCI.sendAclPkt(encryptionChange->connectionHandle, ATT_CID, ATT.holdBufferSize, ATT.holdBuffer);
-      ATT.holdBufferSize = 0;
     }
   }
   else if (eventHdr->evt == EVT_CMD_COMPLETE)
@@ -940,6 +947,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
 
           uint8_t Z = 0;
           for(int i=0; i<16; i++){
+            /// TODO: Implement secure random
             Nb[i] = rand(); //// Should use ESP or ECCx08
           }
 #ifdef _BLE_TRACE_

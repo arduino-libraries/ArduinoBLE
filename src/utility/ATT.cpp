@@ -276,6 +276,8 @@ void ATTClass::handleData(uint16_t connectionHandle, uint8_t dlen, uint8_t data[
     case ATT_OP_ERROR:
 #ifdef _BLE_TRACE_
       Serial.println("[Info] data error");
+      // Serial.print("Error: ");
+      // btct.printBytes(data, dlen);
 #endif
       error(connectionHandle, dlen, data);
       break;
@@ -559,6 +561,7 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
     memcpy(&notification[notificationLength], value, length);
     notificationLength += length;
 
+    /// TODO: Set encyption requirement on notify.
     HCI.sendAclPkt(_peers[i].connectionHandle, ATT_CID, notificationLength, notification);
 
     numNotifications++;
@@ -1214,6 +1217,7 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
   uint8_t* value = &data[sizeof(handle)];
 
   BLELocalAttribute* attribute = GATT.attribute(handle - 1);
+  bool holdResponse = false;
 
   if (attribute->type() == BLETypeCharacteristic) {
     BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)attribute;
@@ -1226,10 +1230,33 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
       }
       return;
     }
+    // Check permssion
+    if((characteristic->properties() & BLEProperty::BLEAuth)> 0 && (getPeerEncryption(connectionHandle) & PEER_ENCRYPTION::ENCRYPTED_AES) == 0){
+      holdResponse = true;
+      sendError(connectionHandle, ATT_OP_WRITE_REQ, handle, ATT_ECODE_INSUFF_ENC);
+    }
 
     for (int i = 0; i < ATT_MAX_PEERS; i++) {
       if (_peers[i].connectionHandle == connectionHandle) {
-        characteristic->writeValue(BLEDevice(_peers[i].addressType, _peers[i].address), value, valueLength);
+        if(holdResponse){
+          
+          writeBufferSize = 0;
+          memcpy(writeBuffer, &handle, 2);
+          writeBufferSize+=2;
+
+          writeBuffer[writeBufferSize++] = _peers[i].addressType;
+
+          memcpy(&writeBuffer[writeBufferSize], _peers[i].address, sizeof(_peers[i].address));
+          writeBufferSize += sizeof(_peers[i].address);
+          
+          writeBuffer[writeBufferSize] = valueLength;
+          writeBufferSize += sizeof(valueLength);
+
+          memcpy(&writeBuffer[writeBufferSize], value, valueLength);
+          writeBufferSize += valueLength;
+        }else{
+          characteristic->writeValue(BLEDevice(_peers[i].addressType, _peers[i].address), value, valueLength);
+        }
         break;
       }
     }
@@ -1276,8 +1303,36 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
     response[0] = ATT_OP_WRITE_RESP;
     responseLength = 1;
 
-    HCI.sendAclPkt(connectionHandle, ATT_CID, responseLength, response);
+    if(holdResponse){
+      memcpy(holdBuffer, response, responseLength);
+      holdBufferSize = responseLength;
+    }else{
+      HCI.sendAclPkt(connectionHandle, ATT_CID, responseLength, response);
+    }
   }
+}
+int ATTClass::processWriteBuffer(){
+  if(writeBufferSize==0){
+    return 0;
+  }
+
+  struct __attribute__ ((packed)) WriteBuffer {
+    uint16_t handle;
+    uint8_t addressType;
+    uint8_t address[6];
+    uint8_t valueLength;
+    uint8_t value[];
+  } *writeBufferStruct = (WriteBuffer*)&ATT.writeBuffer;
+  // uint8_t value[writeBufferStruct->valueLength];
+  // memcpy(value, writeBufferStruct->value, writeBufferStruct->valueLength);
+  BLELocalAttribute* attribute = GATT.attribute(writeBufferStruct->handle-1);
+  BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)attribute;
+#ifdef _BLE_TRACE_
+  Serial.println("Writing value");
+#endif
+  characteristic->writeValue(BLEDevice(writeBufferStruct->addressType, writeBufferStruct->address), writeBufferStruct->value, writeBufferStruct->valueLength);
+  writeBufferSize = 0;
+  return 1;
 }
 
 void ATTClass::writeResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
