@@ -108,6 +108,10 @@ int BLELocalDevice::begin()
     end();
     return 0;
   }
+  if (HCI.setLeEventMask(0x00000000000001FF) != 0) {
+    end();
+    return 0;
+  }
 
   uint16_t pktLen;
   uint8_t maxPkt;

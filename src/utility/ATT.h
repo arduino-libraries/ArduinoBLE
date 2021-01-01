@@ -25,6 +25,7 @@
 #include "BLEDevice.h"
 
 #define ATT_CID       0x0004
+#define BLE_CTL       0x0008
 
 #if DM_CONN_MAX
 #define ATT_MAX_PEERS DM_CONN_MAX // Mbed + Cordio
@@ -33,6 +34,16 @@
 #else
 #define ATT_MAX_PEERS 8
 #endif
+
+enum PEER_ENCRYPTION {
+  NO_ENCRYPTION         = 0,
+  REQUESTED_ENCRYPTION  = 1 << 0,
+  SENT_PUBKEY           = 1 << 1,
+  DH_KEY_CALULATED      = 1 << 2,
+  RECEIVED_DH_CHECK     = 1 << 3,
+  SENT_DH_CHECK         = 1 << 4,
+  ENCRYPTED_AES         = 1 << 7
+};
 
 class BLERemoteDevice;
 
@@ -76,7 +87,15 @@ public:
   virtual int readReq(uint16_t connectionHandle, uint16_t handle, uint8_t responseBuffer[]);
   virtual int writeReq(uint16_t connectionHandle, uint16_t handle, const uint8_t* data, uint8_t dataLen, uint8_t responseBuffer[]);
   virtual void writeCmd(uint16_t connectionHandle, uint16_t handle, const uint8_t* data, uint8_t dataLen);
-
+  virtual int setPeerEncryption(uint16_t connectionHandle, uint8_t encryption);
+  uint8_t getPeerEncryption(uint16_t connectionHandle);
+  uint16_t getPeerEncrptingConnectionHandle();
+  virtual int getPeerAddr(uint16_t connectionHandle, uint8_t peerAddr[]);
+  virtual int getPeerAddrWithType(uint16_t connectionHandle, uint8_t peerAddr[]);
+  virtual int setPeerIOCap(uint16_t connectionHandle, uint8_t IOCap[]);
+  virtual int getPeerIOCap(uint16_t connectionHandle, uint8_t IOCap[]);
+  uint8_t holdBuffer[64];
+  uint8_t holdBufferSize;
 private:
   virtual void error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
   virtual void mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
@@ -119,6 +138,8 @@ private:
     uint8_t address[6];
     uint16_t mtu;
     BLERemoteDevice* device;
+    uint8_t encryption;
+    uint8_t IOCap[3];
   } _peers[ATT_MAX_PEERS];
 
   volatile bool _cnf;

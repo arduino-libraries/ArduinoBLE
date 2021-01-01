@@ -81,6 +81,8 @@ public:
   virtual void debug(Stream& stream);
   virtual void noDebug();
   
+  uint8_t BDaddress[6];
+  
 protected:
   virtual BLEAdvertisingData& getAdvertisingData();
   virtual BLEAdvertisingData& getScanResponseData();
