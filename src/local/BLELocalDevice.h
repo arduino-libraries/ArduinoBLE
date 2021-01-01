@@ -74,6 +74,7 @@ public:
 
   void debug(Stream& stream);
   void noDebug();
+  uint8_t BDaddress[6];
 
 private:
 };

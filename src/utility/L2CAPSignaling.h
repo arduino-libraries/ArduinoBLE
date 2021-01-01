@@ -23,6 +23,26 @@
 #include <Arduino.h>
 
 #define SIGNALING_CID 0x0005
+#define SECURITY_CID 0x0006
+
+
+#define CONNECTION_PAIRING_REQUEST        0x01
+#define CONNECTION_PAIRING_RESPONSE       0x02
+#define CONNECTION_PAIRING_CONFIRM        0x03
+#define CONNECTION_PAIRING_RANDOM         0x04
+#define CONNECTION_PAIRING_FAILED         0x05
+#define CONNECTION_ENCRYPTION_INFORMATION 0x06
+#define CONNECTION_MASTER_IDENTIFICATION  0x07
+#define CONNECTION_IDENTITY_INFORMATION   0x08
+#define CONNECTION_IDENTITY_ADDRESS       0x09
+#define CONNECTION_SIGNING_INFORMATION    0x0A
+#define CONNECTION_SECURITY_REQUEST       0x0B
+#define CONNECTION_PAIRING_PUBLIC_KEY     0x0C
+#define CONNECTION_PAIRING_DHKEY_CHECK    0x0D
+#define CONNECTION_PAIRING_KEYPRESS       0x0E
+
+#define LOCAL_AUTHREQ 0b00101101
+#define LOCAL_IOCAP   0x3
 
 class L2CAPSignalingClass {
 public:
@@ -35,6 +55,8 @@ public:
                     uint8_t masterClockAccuracy);
 
   void handleData(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
+
+  void handleSecurityData(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
 
   void removeConnection(uint8_t handle, uint16_t reason);
 

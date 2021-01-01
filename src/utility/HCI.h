@@ -22,6 +22,30 @@
 
 #include <Arduino.h>
 
+#define OGF_LINK_CTL           0x01
+#define OGF_HOST_CTL           0x03
+#define OGF_INFO_PARAM         0x04
+#define OGF_STATUS_PARAM       0x05
+#define OGF_LE_CTL             0x08
+
+enum LE_COMMAND {
+  ENCRYPT             = 0x0017,
+  LONG_TERM_KEY_REPLY = 0x001A,
+  READ_LOCAL_P256     = 0x0025,
+  GENERATE_DH_KEY_V1  = 0x0026,
+  GENERATE_DH_KEY_V2  = 0x005E
+};
+enum LE_META_EVENT {
+  CONN_COMPLETE             = 0x01,
+  ADVERTISING_REPORT        = 0x02,
+  LONG_TERM_KEY_REQUEST     = 0x05,
+  REMOTE_CONN_PARAM_REQ     = 0x06,
+  READ_LOCAL_P256_COMPLETE  = 0x08,
+  GENERATE_DH_KEY_COMPLETE  = 0x09
+};
+String metaEventToString(LE_META_EVENT event);
+String commandToString(LE_COMMAND command);
+
 class HCIClass {
 public:
   HCIClass();
@@ -37,10 +61,12 @@ public:
   int readLocalVersion(uint8_t& hciVer, uint16_t& hciRev, uint8_t& lmpVer,
                        uint16_t& manufacturer, uint16_t& lmpSubVer);
   int readBdAddr(uint8_t addr[6]);
+  int readBdAddr();
 
   int readRssi(uint16_t handle);
 
   int setEventMask(uint64_t eventMask);
+  int setLeEventMask(uint64_t leEventMask);
 
   int readLeBufferSize(uint16_t& pktLen, uint8_t& maxPkt);
   int leSetRandomAddress(uint8_t addr[6]);
@@ -62,7 +88,7 @@ public:
   int leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxInterval, 
                   uint16_t latency, uint16_t supervisionTimeout);
   int leCancelConn();
-
+  int leEncrypt(uint8_t* Key, uint8_t* plaintext, uint8_t* status, uint8_t* ciphertext);
 
   int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
 
@@ -71,8 +97,15 @@ public:
   void debug(Stream& stream);
   void noDebug();
 
-private:
+  // TODO: Send command be private again & use ATT implementation within ATT.
   int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
+  uint8_t remotePublicKeyBuffer[64];
+  uint8_t Na[16];
+  uint8_t Nb[16];
+  uint8_t DHKey[32];
+  uint8_t localAddr[6];
+  uint8_t LTK[16];
+private:
 
   void handleAclDataPkt(uint8_t plen, uint8_t pdata[]);
   void handleNumCompPkts(uint16_t handle, uint16_t numPkts);
