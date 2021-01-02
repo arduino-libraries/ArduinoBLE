@@ -22,7 +22,7 @@
 #include "btct.h"
 #include "L2CAPSignaling.h"
 #include "keyDistribution.h"
-
+#include "bitDescriptions.h"
 #define CONNECTION_PARAMETER_UPDATE_REQUEST  0x12
 #define CONNECTION_PARAMETER_UPDATE_RESPONSE 0x13
 
@@ -143,6 +143,15 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     ATT.remoteKeyDistribution = KeyDistribution(pairingRequest->initiatorKeyDistribution);
     ATT.localKeyDistribution = KeyDistribution(pairingRequest->responderKeyDistribution);
     KeyDistribution rkd(pairingRequest->responderKeyDistribution);
+    AuthReq req(pairingRequest->authReq);
+#ifdef _BLE_TRACE_
+    Serial.print("Req has properties: ");
+    Serial.print(req.Bonding()?"bonding, ":"no bonding, ");
+    Serial.print(req.CT2()?"CT2, ":"no CT2, ");
+    Serial.print(req.KeyPress()?"KeyPress, ":"no KeyPress, ");
+    Serial.print(req.MITM()?"MITM, ":"no MITM, ");
+    Serial.print(req.SC()?"SC, ":"no SC, ");
+#endif
     
     uint8_t peerIOCap[3];
     peerIOCap[0] = pairingRequest->authReq;
@@ -152,7 +161,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::PAIRING_REQUEST);
 #ifdef _BLE_TRACE_
     Serial.print("Peer encryption : 0b");
-    Serial.print(ATT.getPeerEncryption(connectionHandle), BIN);
+    Serial.println(ATT.getPeerEncryption(connectionHandle), BIN);
 #endif
     struct __attribute__ ((packed)) PairingResponse {
       uint8_t code;
