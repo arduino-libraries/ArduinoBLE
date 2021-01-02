@@ -90,6 +90,17 @@ public:
   virtual int leCancelConn();
   virtual int leEncrypt(uint8_t* Key, uint8_t* plaintext, uint8_t* status, uint8_t* ciphertext);
 
+  virtual int saveNewAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* remoteIrk);
+  virtual int leAddResolvingAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* remoteIrk);
+  virtual int leStopResolvingAddresses();
+  virtual int leStartResolvingAddresses();
+  virtual int leReadPeerResolvableAddress(uint8_t peerAddressType, uint8_t* peerIdentityAddress, uint8_t* peerResolvableAddress);
+
+  virtual int readStoredLKs();
+  virtual int readStoredLK(uint8_t BD_ADDR[], uint8_t read_all = 0);
+  virtual int writeLK(uint8_t peerAddress[], uint8_t LK[]);
+  virtual int tryResolveAddress(uint8_t* BDAddr, uint8_t* address);
+
   virtual int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
 
   virtual int disconnect(uint16_t handle);
@@ -105,6 +116,12 @@ public:
   uint8_t DHKey[32];
   uint8_t localAddr[6];
   uint8_t LTK[16];
+
+  int (*_storeIRK)(uint8_t* address, uint8_t* peerIrk);
+  int (*_getIRKs)(uint8_t* nIRKs,uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs);
+  int (*_storeLTK)(uint8_t*, uint8_t*);
+  int (*_getLTK)(uint8_t*, uint8_t*);
+
 private:
 
   virtual void handleAclDataPkt(uint8_t plen, uint8_t pdata[]);

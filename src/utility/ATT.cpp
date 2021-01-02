@@ -253,6 +253,15 @@ void ATTClass::addConnection(uint16_t handle, uint8_t role, uint8_t peerBdaddrTy
   _peers[peerIndex].mtu = 23;
   _peers[peerIndex].addressType = peerBdaddrType;
   memcpy(_peers[peerIndex].address, peerBdaddr, sizeof(_peers[peerIndex].address));
+  uint8_t BDADDr[6];
+  for(int i=0; i<6; i++) BDADDr[5-i] = peerBdaddr[i];
+  if(HCI.tryResolveAddress(BDADDr,_peers[peerIndex].resolvedAddress)){
+#ifdef _BLE_TRACE_
+    Serial.println("Found match.");
+#endif
+  }else{
+    memset(_peers[peerIndex].resolvedAddress, 0, 6);
+  }
 
   if (_eventHandlers[BLEConnected]) {
     _eventHandlers[BLEConnected](BLEDevice(peerBdaddrType, peerBdaddr));
@@ -515,6 +524,7 @@ bool ATTClass::disconnect()
     _peers[i].role = 0x00;
     _peers[i].addressType = 0x00;
     memset(_peers[i].address, 0x00, sizeof(_peers[i].address));
+    memset(_peers[i].resolvedAddress, 0x00, sizeof(_peers[i].resolvedAddress));
     _peers[i].mtu = 23;
 
     if (_peers[i].device) {
@@ -1007,7 +1017,8 @@ void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint16_t mtu, uint8_
         return;
       }
       // If characteristic requires encryption send error & hold response until encrypted
-      if ((characteristic->properties() & BLEAuth) > 0 && (getPeerEncryption(connectionHandle) & PEER_ENCRYPTION::ENCRYPTED_AES)==0) {
+      if ((characteristic->permissions() & (BLEPermission::BLEEncryption >> 8)) > 0 &&
+          (getPeerEncryption(connectionHandle) & PEER_ENCRYPTION::ENCRYPTED_AES)==0 ) {
         holdResponse = true;
         sendError(connectionHandle, opcode, handle, ATT_ECODE_INSUFF_ENC);
       }
@@ -1231,7 +1242,8 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
       return;
     }
     // Check permssion
-    if((characteristic->properties() & BLEProperty::BLEAuth)> 0 && (getPeerEncryption(connectionHandle) & PEER_ENCRYPTION::ENCRYPTED_AES) == 0){
+    if((characteristic->permissions() &( BLEPermission::BLEEncryption >> 8)) > 0 && 
+       (getPeerEncryption(connectionHandle) & PEER_ENCRYPTION::ENCRYPTED_AES) == 0){
       holdResponse = true;
       sendError(connectionHandle, ATT_OP_WRITE_REQ, handle, ATT_ECODE_INSUFF_ENC);
     }
@@ -1817,7 +1829,7 @@ int ATTClass::setPeerIOCap(uint16_t connectionHandle, uint8_t IOCap[3]){
 // Return the connection handle for the first peer that is requesting encryption
 uint16_t ATTClass::getPeerEncrptingConnectionHandle(){
   for(int i=0; i<ATT_MAX_PEERS; i++){
-    if(_peers[i].encryption & PEER_ENCRYPTION::REQUESTED_ENCRYPTION > 0){
+    if((_peers[i].encryption & PEER_ENCRYPTION::REQUESTED_ENCRYPTION) > 0){
       return _peers[i].connectionHandle;
     }
   }
@@ -1861,10 +1873,35 @@ int ATTClass::getPeerAddrWithType(uint16_t connectionHandle, uint8_t peerAddr[])
       peerAddr[6-k] = _peers[i].address[k];
     }
     if(_peers[i].addressType){
-      peerAddr[0] = 0x01;
+      peerAddr[0] = _peers[i].addressType;
     }else{
       peerAddr[0] = 0x00;
     }
+    return 1;
+  }
+  return 0;
+}
+// Get the resolved address for a peer if it exists
+int ATTClass::getPeerResolvedAddress(uint16_t connectionHandle, uint8_t resolvedAddress[]){
+  for(int i=0; i<ATT_MAX_PEERS; i++)
+  {
+    if(_peers[i].connectionHandle != connectionHandle){continue;}
+
+    bool allZero=true;
+    for(int k=0; k<6; k++){
+      if(_peers[i].resolvedAddress[k] == 0){
+        continue;
+      }else{
+        allZero = false;
+        break;
+      }
+    }
+
+    if(allZero){
+      return 0;
+    }
+
+    memcpy(resolvedAddress, _peers[i].resolvedAddress, 6);
     return 1;
   }
   return 0;

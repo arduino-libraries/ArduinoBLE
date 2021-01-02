@@ -24,11 +24,12 @@
 #include "BLERemoteCharacteristic.h"
 
 BLERemoteCharacteristic::BLERemoteCharacteristic(const uint8_t uuid[], uint8_t uuidLen, uint16_t connectionHandle,
-                                                  uint16_t startHandle, uint8_t properties, uint16_t valueHandle) :
+                                                  uint16_t startHandle, uint16_t permissions, uint16_t valueHandle) :
   BLERemoteAttribute(uuid, uuidLen),
   _connectionHandle(connectionHandle),
   _startHandle(startHandle),
-  _properties(properties),
+  _properties((uint8_t)(permissions & 0x00FF)),
+  _permissions((uint8_t)((permissions & 0xFF00)>>8)),
   _valueHandle(valueHandle),
   _value(NULL),
   _valueLength(0),

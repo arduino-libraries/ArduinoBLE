@@ -13,9 +13,11 @@ public:
     int f5(uint8_t DHKey[],uint8_t N_master[], uint8_t N_slave[],
             uint8_t BD_ADDR_master[], uint8_t BD_ADDR_slave[], uint8_t MacKey[], uint8_t LTK[]);
     int f6(uint8_t W[], uint8_t N1[],uint8_t N2[],uint8_t R[], uint8_t IOCap[], uint8_t A1[], uint8_t A2[], uint8_t Ex[]);
+    int ah(uint8_t k[16], uint8_t r[3], uint8_t result[3]);
     void test();
     void testF5();
     void testF6();
+    void testAh();
 private:
     int AES_128(uint8_t key[], uint8_t data_in[], uint8_t data_out[]);
     void leftshift_onebit(unsigned char *input,unsigned char *output);

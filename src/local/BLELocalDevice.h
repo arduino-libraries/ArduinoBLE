@@ -80,7 +80,12 @@ public:
 
   virtual void debug(Stream& stream);
   virtual void noDebug();
-  
+
+/// TODO: Put in actual variable names
+  virtual void setStoreIRK(int (*storeIRK)(uint8_t*, uint8_t*));
+  virtual void setGetIRKs(int (*getIRKs)(uint8_t* nIRKs, uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs));
+  virtual void setStoreLTK(int (*storeLTK)(uint8_t*, uint8_t*));
+  virtual void setGetLTK(int (*getLTK)(uint8_t*, uint8_t*));
   uint8_t BDaddress[6];
   
 protected:

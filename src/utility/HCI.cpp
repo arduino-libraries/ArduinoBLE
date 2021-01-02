@@ -34,6 +34,7 @@
 #define EVT_CMD_COMPLETE      0x0e
 #define EVT_CMD_STATUS        0x0f
 #define EVT_NUM_COMP_PKTS     0x13
+#define EVT_RETURN_LINK_KEYS  0x15
 #define EVT_UNKNOWN           0x10
 #define EVT_LE_META_EVENT     0x3e
 
@@ -449,6 +450,161 @@ int HCIClass::leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxIn
 
   return sendCommand(OGF_LE_CTL << 10 | OCF_LE_CONN_UPDATE, sizeof(leConnUpdateData), &leConnUpdateData);
 }
+int HCIClass::saveNewAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* localIrk){
+  if(_storeIRK!=0){
+    _storeIRK(address, peerIrk);
+  }
+  // Again... this should work 
+  // leAddResolvingAddress(addressType, address, peerIrk, localIrk);
+}
+int HCIClass::leAddResolvingAddress(uint8_t addressType, uint8_t* peerAddress, uint8_t* peerIrk, uint8_t* localIrk){
+  leStopResolvingAddresses();
+
+  struct __attribute__ ((packed)) AddDevice {
+    uint8_t peerAddressType;
+    uint8_t peerAddress[6];
+    uint8_t peerIRK[16];
+    uint8_t localIRK[16];
+  } addDevice;
+  addDevice.peerAddressType = addressType;
+  for(int i=0; i<6; i++) addDevice.peerAddress[5-i] = peerAddress[i];
+  for(int i=0; i<16; i++) {
+    addDevice.peerIRK[15-i]  = peerIrk[i];
+    addDevice.localIRK[15-i] = localIrk[i];
+  }
+  Serial.print("ADDTYPE    :");
+  btct.printBytes(&addDevice.peerAddressType,1);
+  Serial.print("adddddd    :");
+  btct.printBytes(addDevice.peerAddress,6);
+  Serial.print("Peer IRK   :");
+  btct.printBytes(addDevice.peerIRK,16);
+  Serial.print("localIRK   :");
+  btct.printBytes(addDevice.localIRK,16);
+  sendCommand(OGF_LE_CTL << 10 | 0x27, sizeof(addDevice), &addDevice); 
+
+  leStartResolvingAddresses();
+}
+int HCIClass::leStopResolvingAddresses(){
+    uint8_t enable = 0;
+    return HCI.sendCommand(OGF_LE_CTL << 10 | 0x2D, 1,&enable); // Disable address resolution
+}
+int HCIClass::leStartResolvingAddresses(){
+  uint8_t enable = 1;
+  return HCI.sendCommand(OGF_LE_CTL << 10 | 0x2D, 1,&enable); // Disable address resolution
+}
+int HCIClass::leReadPeerResolvableAddress(uint8_t peerAddressType, uint8_t* peerIdentityAddress, uint8_t* peerResolvableAddress){
+  struct __attribute__ ((packed)) Request {
+    uint8_t addressType;
+    uint8_t identityAddress[6];
+  } request;
+  request.addressType = peerAddressType;
+  for(int i=0; i<6; i++) request.identityAddress[5-i] = peerIdentityAddress[i];
+  
+
+  int res = sendCommand(OGF_LE_CTL << 10 | 0x2B, sizeof(request), &request);
+  Serial.print("res: 0x");
+  Serial.println(res, HEX);
+  if(res==0){
+    struct __attribute__ ((packed)) Response {
+      uint8_t status;
+      uint8_t peerResolvableAddress[6];
+    } *response = (Response*)_cmdResponse;
+    Serial.print("Address resolution status: 0x");
+    Serial.println(response->status, HEX);
+    Serial.print("peer resolvable address: ");
+    btct.printBytes(response->peerResolvableAddress,6);
+  }
+  return res;
+}
+
+int HCIClass::writeLK(uint8_t peerAddress[], uint8_t LK[]){
+  struct __attribute__ ((packed)) StoreLK {
+    uint8_t nKeys;
+    uint8_t BD_ADDR[6];
+    uint8_t LTK[16];
+  } storeLK;
+  storeLK.nKeys = 1;
+  memcpy(storeLK.BD_ADDR, peerAddress, 6);
+  for(int i=0; i<16; i++) storeLK.LTK[15-i] = LK[i];
+  HCI.sendCommand(OGF_HOST_CTL << 10 | 0x11, sizeof(storeLK), &storeLK);
+}
+int HCIClass::readStoredLKs(){
+  uint8_t BD_ADDR[6];
+  readStoredLK(BD_ADDR, 1);
+}
+int HCIClass::readStoredLK(uint8_t BD_ADDR[], uint8_t read_all ){
+  struct __attribute__ ((packed)) Request {
+    uint8_t BD_ADDR[6];
+    uint8_t read_a;
+  } request = {0,0};
+  for(int i=0; i<6; i++) request.BD_ADDR[5-i] = BD_ADDR[i];
+  request.read_a = read_all;
+  return sendCommand(OGF_HOST_CTL << 10 | 0xD, sizeof(request), &request);
+}
+
+int HCIClass::tryResolveAddress(uint8_t* BDAddr, uint8_t* address){
+  uint8_t iphone[16] = {0xA6, 0xD2, 0xD, 0xD3, 0x4F, 0x13, 0x42, 0x4F, 0xE1, 0xC1, 0xFD, 0x22, 0x2E, 0xC5, 0x6A, 0x2D};
+  uint8_t irk[16];
+  for(int i=0; i<16; i++) irk[15-i] = iphone[i];
+  bool foundMatch = false;
+  if(HCI._getIRKs!=0){
+    uint8_t nIRKs = 0;
+    uint8_t** BDAddrType = new uint8_t*;
+    uint8_t*** BADDRs = new uint8_t**;
+    uint8_t*** IRKs = new uint8_t**;
+    uint8_t* memcheck;
+
+
+    if(!HCI._getIRKs(&nIRKs, BDAddrType, BADDRs, IRKs)){
+      Serial.println("error getting IRKs.");
+    }
+    for(int i=0; i<nIRKs; i++){
+      if(!foundMatch){
+#ifdef _BLE_TRACE_
+        Serial.print("BDAddr type:      : 0x");
+        Serial.println((*BDAddrType)[i],HEX);
+        Serial.print("BDAddr            : ");
+        btct.printBytes((*BADDRs)[i],6);
+        Serial.print("IRK               : ");
+        btct.printBytes((*IRKs)[i],16);
+#endif
+        uint8_t hashresult[3];
+        btct.ah((*IRKs)[i], BDAddr, hashresult);
+#ifdef _BLE_TRACE_
+        Serial.print("hash match        : ");
+        btct.printBytes(hashresult,3);
+        Serial.print("                  : ");
+        btct.printBytes(&BDAddr[3],3);
+#endif
+
+        for(int k=0; k<3; k++){
+          if(hashresult[k] == BDAddr[3 + k]){
+            foundMatch = true;
+          }else{
+            foundMatch = false;
+            break;
+          }
+        }
+        if(foundMatch){
+          memcpy(address, (*BADDRs)[i],6);
+        }
+      }
+      delete[] (*BADDRs)[i];
+      delete[] (*IRKs)[i];
+    }
+    delete[] (*BDAddrType);
+    delete BDAddrType;
+    delete[] (*BADDRs);
+    delete BADDRs;
+    delete[] (*IRKs);
+    delete IRKs;
+    
+    if(foundMatch){
+      return 1;
+    }
+  }
+  return 0;
+}
 
 int HCIClass::sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data)
 {
@@ -665,6 +821,58 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
     btct.printBytes(&encryptionChange->enabled,1);
 #endif
     if(encryptionChange->enabled>0){
+      // 0001 1110
+      if((ATT.getPeerEncryption(encryptionChange->connectionHandle)&PEER_ENCRYPTION::PAIRING_REQUEST)>0){
+        if(ATT.localKeyDistribution.EncKey()){
+#ifdef _BLE_TRACE_
+          Serial.println("Enc key set but sould be ignored");
+#endif
+        }else{
+#ifdef _BLE_TRACE_
+          Serial.println("No enc key distribution");
+#endif
+        }
+        // From page 1681 bluetooth standard - order matters
+        if(ATT.localKeyDistribution.IdKey()){
+          /// We shall distribute IRK and address using identity information 
+          {
+            uint8_t response[17];
+            response[0] = CONNECTION_IDENTITY_INFORMATION; // Identity information.
+            for(int i=0; i<16; i++) response[16-i] = ATT.localIRK[i];
+            HCI.sendAclPkt(encryptionChange->connectionHandle, SECURITY_CID, sizeof(response), response);
+#ifdef _BLE_TRACE_
+            Serial.println("Distribute ID Key");
+#endif
+          }
+          {
+            uint8_t response[8];
+            response[0] = CONNECTION_IDENTITY_ADDRESS; // Identity address information
+            response[1] = 0x00; // Static local address
+            for(int i=0; i<6; i++) response[7-i] = HCI.localAddr[i];
+            HCI.sendAclPkt(encryptionChange->connectionHandle, SECURITY_CID, sizeof(response), response);
+          }
+        }
+        if(ATT.localKeyDistribution.SignKey()){
+          /// We shall distribut CSRK
+#ifdef _BLE_TRACE_
+          Serial.println("We shall distribute CSRK // not implemented");
+#endif
+
+        }else{
+          // Serial.println("We don't want to distribute CSRK");
+        }
+        if(ATT.localKeyDistribution.LinkKey()){
+#ifdef _BLE_TRACE_
+          Serial.println("We would like to use LTK to generate BR/EDR // not implemented");
+#endif
+        }
+      }else{
+#ifdef _BLE_TRACE_
+        Serial.println("Reconnection, not pairing so no keys");
+        Serial.println(ATT.getPeerEncryption(encryptionChange->connectionHandle),HEX);
+#endif
+      }
+
       ATT.setPeerEncryption(encryptionChange->connectionHandle, PEER_ENCRYPTION::ENCRYPTED_AES);
       if(ATT.writeBufferSize > 0){
         ATT.processWriteBuffer();
@@ -740,6 +948,27 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
       data += 2;
     }
   }
+  else if(eventHdr->evt == EVT_RETURN_LINK_KEYS)
+  {
+    uint8_t num_keys = (uint8_t)pdata[sizeof(HCIEventHdr)];
+    // Serial.print("N keys: ");
+    // Serial.println(num_keys);
+    uint8_t BD_ADDRs[num_keys][6];
+    uint8_t LKs[num_keys][16];
+    auto nAddresss = [pdata](uint8_t nAddr)->uint8_t*{
+      return (uint8_t*) &pdata[sizeof(HCIEventHdr)] + 1 + nAddr*6 + nAddr*16;
+    };
+    auto nLK = [pdata](uint8_t nLK)->uint8_t*{
+      return (uint8_t*) &pdata[sizeof(HCIEventHdr)] + 1 + (nLK+1)*6 + nLK*16;
+    };
+    // Serial.println("Stored LKs are: ");
+    // for(int i=0; i<num_keys; i++){
+    //   Serial.print("Address : ");
+    //   btct.printBytes(nAddresss(i),6);
+    //   Serial.print("LK      : ");
+    //   btct.printBytes(nLK(i),16);
+    // }
+  }
   else if(eventHdr->evt == 0x10)
   {
     struct __attribute__ ((packed)) CmdHardwareError {
@@ -761,6 +990,57 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
     Serial.println(leMetaHeader->subevent,HEX);
 #endif
     switch((LE_META_EVENT)leMetaHeader->subevent){
+      case 0x0A:{
+        struct __attribute__ ((packed)) EvtLeConnectionComplete {
+          uint8_t status;
+          uint16_t handle;
+          uint8_t role;
+          uint8_t peerBdaddrType;
+          uint8_t peerBdaddr[6];
+          uint8_t localResolvablePrivateAddress[6];
+          uint8_t peerResolvablePrivateAddress[6];
+          uint16_t interval;
+          uint16_t latency;
+          uint16_t supervisionTimeout;
+          uint8_t masterClockAccuracy;
+        } *leConnectionComplete = (EvtLeConnectionComplete*)&pdata[sizeof(HCIEventHdr) + sizeof(LeMetaEventHeader)];
+      
+        if (leConnectionComplete->status == 0x00) {
+          ATT.addConnection(leConnectionComplete->handle,
+                            leConnectionComplete->role,
+                            leConnectionComplete->peerBdaddrType,
+                            leConnectionComplete->peerBdaddr,
+                            leConnectionComplete->interval,
+                            leConnectionComplete->latency,
+                            leConnectionComplete->supervisionTimeout,
+                            leConnectionComplete->masterClockAccuracy);
+
+          L2CAPSignaling.addConnection(leConnectionComplete->handle,
+                                leConnectionComplete->role,
+                                leConnectionComplete->peerBdaddrType,
+                                leConnectionComplete->peerBdaddr,
+                                leConnectionComplete->interval,
+                                leConnectionComplete->latency,
+                                leConnectionComplete->supervisionTimeout,
+                                leConnectionComplete->masterClockAccuracy);
+        }
+        // uint8_t address[6];
+        // uint8_t BDAddr[6];
+        // for(int i=0; i<6; i++) BDAddr[5-i] = leConnectionComplete->peerBdaddr[i];
+        // leReadPeerResolvableAddress(leConnectionComplete->peerBdaddrType,BDAddr,address);
+        // Serial.print("Resolving address: ");
+        // btct.printBytes(BDAddr, 6);
+        // Serial.print("BT answer         : ");
+        // btct.printBytes(address, 6);
+
+#ifdef _BLE_TRACE_
+        Serial.print("Resolved peer     : ");
+        btct.printBytes(leConnectionComplete->peerResolvablePrivateAddress,6);
+        Serial.print("Resolved local    : ");
+        btct.printBytes(leConnectionComplete->localResolvablePrivateAddress,6);
+#endif
+        break;
+      }
       case CONN_COMPLETE:{
         struct __attribute__ ((packed)) EvtLeConnectionComplete {
           uint8_t status;
@@ -793,6 +1073,14 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
                                 leConnectionComplete->supervisionTimeout,
                                 leConnectionComplete->masterClockAccuracy);
         }
+        uint8_t address[6];
+        uint8_t BDAddr[6];
+        for(int i=0; i<6; i++) BDAddr[5-i] = leConnectionComplete->peerBdaddr[i];
+        // leReadPeerResolvableAddress(leConnectionComplete->peerBdaddrType,BDAddr,address);
+        // Serial.print("Resolving address: ");
+        // btct.printBytes(BDAddr, 6);
+        // Serial.print("BT answer         : ");
+        // btct.printBytes(address, 6);
         break;
       }
       case ADVERTISING_REPORT:{
@@ -818,8 +1106,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
         }
         break;
       }
-      case LONG_TERM_KEY_REQUEST:
-      {
+      case LONG_TERM_KEY_REQUEST:{
         struct __attribute__ ((packed)) LTKRequest
         {
           uint8_t subEventCode;
@@ -836,14 +1123,25 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
         Serial.print("EDIV           : ");
         btct.printBytes(ltkRequest->encryptedDiversifier,2);
 #endif
-
+        // Load our LTK for this connection.
+        uint8_t peerAddr[7];
+        uint8_t resolvableAddr[6];
+        ATT.getPeerAddrWithType(ltkRequest->connectionHandle, peerAddr);
+        
+        if(ATT.getPeerResolvedAddress(ltkRequest->connectionHandle, resolvableAddr)
+          && !((ATT.getPeerEncryption(ltkRequest->connectionHandle) & PEER_ENCRYPTION::PAIRING_REQUEST)>0)){
+          _getLTK(resolvableAddr, HCI.LTK);
+        }else{
+          _getLTK(&peerAddr[1], HCI.LTK);
+        }
+        // }
         // Send our LTK back
         struct __attribute__ ((packed)) LTKReply
         {
           uint16_t connectionHandle;
           uint8_t LTK[16];
         } ltkReply = {0,0};
-        ltkReply.connectionHandle = ATT.getPeerEncrptingConnectionHandle();
+        ltkReply.connectionHandle = ltkRequest->connectionHandle;
         for(int i=0; i<16; i++) ltkReply.LTK[15-i] = HCI.LTK[i];
         int result = sendCommand(OGF_LE_CTL << 10 | LE_COMMAND::LONG_TERM_KEY_REPLY,sizeof(ltkReply), &ltkReply);
 
@@ -875,8 +1173,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
         }
         break;
       }
-      case REMOTE_CONN_PARAM_REQ:
-      {
+      case REMOTE_CONN_PARAM_REQ:{
         struct __attribute__ ((packed)) RemoteConnParamReq {
           uint8_t subEventCode;
           uint16_t connectionHandle;
@@ -914,8 +1211,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
         sendCommand(OGF_LE_CTL << 10 | 0x20, sizeof(remoteConnParamReqReply), &remoteConnParamReqReply);
         break;
       }
-      case READ_LOCAL_P256_COMPLETE:
-      {
+      case READ_LOCAL_P256_COMPLETE:{
         struct __attribute__ ((packed)) EvtReadLocalP256Complete{
           uint8_t subEventCode;
           uint8_t status;
@@ -1007,8 +1303,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
         }
         break;
       }
-      case GENERATE_DH_KEY_COMPLETE:
-      {
+      case GENERATE_DH_KEY_COMPLETE:{
         struct __attribute__ ((packed)) EvtLeDHKeyComplete{
           uint8_t subEventCode;
           uint8_t status;
