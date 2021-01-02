@@ -29,8 +29,17 @@ enum BLEProperty {
   BLEWrite                = 0x08,
   BLENotify               = 0x10,
   BLEIndicate             = 0x20,
-  BLEAuth                 = 1 << 6,
+  BLEAuthSignedWrite      = 1 << 6,
   BLEExtProp              = 1 << 7,
+};
+
+enum BLEPermission {
+  BLEEncryption         = 1 << 9,
+  BLEAuthentication     = 1 << 10,
+  BLEAuthorization      = 1 << 11,
+  // BLEWriteEncryption        = 1 << 11,
+  // BLEWriteAuthentication    = 1 << 12,
+  // BLEWriteAuthorization     = 1 << 13,
 };
 
 #define    ESP_GATT_CHAR_PROP_BIT_BROADCAST    (1 << 0)       /* 0x01 */    /* relate to BTA_GATT_CHAR_PROP_BIT_BROADCAST in bta/bta_gatt_api.h */

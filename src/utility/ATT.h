@@ -23,6 +23,7 @@
 #include <Arduino.h>
 
 #include "BLEDevice.h"
+#include "keyDistribution.h"
 
 #define ATT_CID       0x0004
 #define BLE_CTL       0x0008
@@ -37,11 +38,12 @@
 
 enum PEER_ENCRYPTION {
   NO_ENCRYPTION         = 0,
-  REQUESTED_ENCRYPTION  = 1 << 0,
-  SENT_PUBKEY           = 1 << 1,
-  DH_KEY_CALULATED      = 1 << 2,
-  RECEIVED_DH_CHECK     = 1 << 3,
-  SENT_DH_CHECK         = 1 << 4,
+  PAIRING_REQUEST       = 1 << 0,
+  REQUESTED_ENCRYPTION  = 1 << 1,
+  SENT_PUBKEY           = 1 << 2,
+  DH_KEY_CALULATED      = 1 << 3,
+  RECEIVED_DH_CHECK     = 1 << 4,
+  SENT_DH_CHECK         = 1 << 5,
   ENCRYPTED_AES         = 1 << 7
 };
 
@@ -94,11 +96,17 @@ public:
   virtual int getPeerAddrWithType(uint16_t connectionHandle, uint8_t peerAddr[]);
   virtual int setPeerIOCap(uint16_t connectionHandle, uint8_t IOCap[]);
   virtual int getPeerIOCap(uint16_t connectionHandle, uint8_t IOCap[]);
+  virtual int getPeerResolvedAddress(uint16_t connectionHandle, uint8_t* resolvedAddress);
   uint8_t holdBuffer[64];
   uint8_t writeBuffer[64];
   uint8_t holdBufferSize;
   uint8_t writeBufferSize;
   virtual int processWriteBuffer();
+  KeyDistribution remoteKeyDistribution;
+  KeyDistribution localKeyDistribution;
+  uint8_t peerIRK[16];
+  /// This is just a random number... Not sure it has use unless privacy mode is active.
+  uint8_t localIRK[16] = {0x54,0x83,0x63,0x7c,0xc5,0x1e,0xf7,0xec,0x32,0xdd,0xad,0x51,0x89,0x4b,0x9e,0x07};
 private:
   virtual void error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
   virtual void mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
@@ -139,6 +147,7 @@ private:
     uint8_t role;
     uint8_t addressType;
     uint8_t address[6];
+    uint8_t resolvedAddress[6];
     uint16_t mtu;
     BLERemoteDevice* device;
     uint8_t encryption;

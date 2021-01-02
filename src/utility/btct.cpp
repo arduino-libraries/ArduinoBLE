@@ -119,6 +119,38 @@ int BluetoothCryptoToolbox::f6(uint8_t W[], uint8_t N1[],uint8_t N2[],uint8_t R[
     return 1;
 }
 // AES_CMAC from RFC
+int BluetoothCryptoToolbox::ah(uint8_t k[16], uint8_t r[3], uint8_t* result)
+{
+    uint8_t r_[16];
+    int i=0;
+    for(i=0; i<16; i++) r_[i] = 0;
+    for(i=0; i<3; i++)  r_[i+13] = r[i];
+    uint8_t intermediate[16];
+    AES_128(k,r_,intermediate);
+    for(i=0; i<3; i++){
+        result[i] = intermediate[i+13];
+    }
+    return 1;
+}
+void BluetoothCryptoToolbox::testAh()
+{
+    uint8_t irk[16] = {0xec,0x02,0x34,0xa3,0x57,0xc8,0xad,0x05,0x34,0x10,0x10,0xa6,0x0a,0x39,0x7d,0x9b};         
+    uint8_t r[3]   = {0x70,0x81,0x94};
+    uint8_t expected_AES[16] = {0x15,0x9d,0x5f,0xb7,0x2e,0xbe,0x23,0x11,0xa4,0x8c,0x1b,0xdc,0xc4,0x0d,0xfb,0xaa};
+    uint8_t expected_final[3] = {0x0d,0xfb,0xaa};
+    
+    for(int i=0; i<3; i++) r[2-i] = expected_final[3+i];
+    uint8_t ourResult[3];
+    ah(irk, expected_final, ourResult);
+
+
+    Serial.print("Expected   : ");
+    printBytes(&expected_final[3], 3);
+    Serial.print("Actual     : ");
+    printBytes(ourResult, 3);
+}
+
+
 void BluetoothCryptoToolbox::AES_CMAC ( unsigned char *key, unsigned char *input, int length,
                   unsigned char *mac )
 {

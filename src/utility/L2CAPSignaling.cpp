@@ -21,6 +21,7 @@
 #include "ATT.h"
 #include "btct.h"
 #include "L2CAPSignaling.h"
+#include "keyDistribution.h"
 
 #define CONNECTION_PARAMETER_UPDATE_REQUEST  0x12
 #define CONNECTION_PARAMETER_UPDATE_RESPONSE 0x13
@@ -137,13 +138,22 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       uint8_t initiatorKeyDistribution;
       uint8_t responderKeyDistribution;
     } *pairingRequest = (PairingRequest*)l2capSignalingHdr->data;
+
+
+    ATT.remoteKeyDistribution = KeyDistribution(pairingRequest->initiatorKeyDistribution);
+    ATT.localKeyDistribution = KeyDistribution(pairingRequest->responderKeyDistribution);
+    KeyDistribution rkd(pairingRequest->responderKeyDistribution);
     
     uint8_t peerIOCap[3];
     peerIOCap[0] = pairingRequest->authReq;
     peerIOCap[1] = pairingRequest->oobDataFlag;
     peerIOCap[2] = pairingRequest->ioCapability;
     ATT.setPeerIOCap(connectionHandle, peerIOCap);
-
+    ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::PAIRING_REQUEST);
+#ifdef _BLE_TRACE_
+    Serial.print("Peer encryption : 0b");
+    Serial.print(ATT.getPeerEncryption(connectionHandle), BIN);
+#endif
     struct __attribute__ ((packed)) PairingResponse {
       uint8_t code;
       uint8_t ioCapability;
@@ -154,7 +164,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       uint8_t responderKeyDistribution;
     } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, LOCAL_AUTHREQ, 0x10, 0b1011, 0b1011};
 
-    HCI.sendAclPkt(connectionHandle, 0x06, sizeof(response), &response);
+    HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
   }
   else if (code == CONNECTION_PAIRING_RANDOM)
   {
@@ -173,7 +183,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     } response = { CONNECTION_PAIRING_RANDOM, 0};
     for(int i=0; i< 16; i++) response.Nb[15-i] = HCI.Nb[i];
 
-    HCI.sendAclPkt(connectionHandle, 0x06, sizeof(response), &response);
+    HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
   }
   else if (code == CONNECTION_PAIRING_RESPONSE)
   {
@@ -189,6 +199,31 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     Serial.print("Pairing failed with code: 0x");
     Serial.println(pairingFailed->reason,HEX);
 #endif
+  }
+  else if (code == CONNECTION_IDENTITY_INFORMATION){
+    struct __attribute__ ((packed)) IdentityInformation {
+      uint8_t code;
+      uint8_t PeerIRK[16];
+    } *identityInformation = (IdentityInformation*)data;
+    for(int i=0; i<16; i++) ATT.peerIRK[15-i] = identityInformation->PeerIRK[i];
+#ifdef _BLE_TRACE_
+    Serial.println("Saved peer IRK");
+#endif
+  }
+  else if (code == CONNECTION_IDENTITY_ADDRESS){
+    struct __attribute__ ((packed)) IdentityAddress {
+      uint8_t code;
+      uint8_t addressType;
+      uint8_t address[6];
+    } *identityAddress = (IdentityAddress*)data;
+    // we can save this information now.
+    uint8_t peerAddress[6];
+    for(int i; i<6; i++) peerAddress[5-i] = identityAddress->address[i];
+
+    HCI.saveNewAddress(identityAddress->addressType, peerAddress, ATT.peerIRK, ATT.localIRK);
+    if(HCI._storeLTK!=0){
+      HCI._storeLTK(peerAddress, HCI.LTK);
+    }
   }
   else if (code == CONNECTION_PAIRING_PUBLIC_KEY){
     /// Received a public key
@@ -211,7 +246,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       LE_COMMAND::READ_LOCAL_P256,
     };
 
-    if(ATT.setPeerEncryption(connectionHandle,PEER_ENCRYPTION::REQUESTED_ENCRYPTION)){
+    if(ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::REQUESTED_ENCRYPTION)){
 #ifdef _BLE_TRACE_
       Serial.println("[Info] Pairing public key");
       Serial.println("Requested encryption stored.");
@@ -244,7 +279,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
 
     HCI.readBdAddr();
     ATT.setPeerEncryption(connectionHandle, encryptionState);
-    if(encryptionState & PEER_ENCRYPTION::DH_KEY_CALULATED > 0){
+    if((encryptionState & PEER_ENCRYPTION::DH_KEY_CALULATED) > 0){
       // We've already calculated the DHKey so we can calculate our check and send it.
       
       uint8_t MacKey[16];
