@@ -1,6 +1,6 @@
 #include "keyDistribution.h"
 
-KeyDistribution::KeyDistribution(){}
+KeyDistribution::KeyDistribution():_octet(0){}
 KeyDistribution::KeyDistribution(uint8_t octet):_octet(octet){}
 
 #define ENCKEY  0b00000001

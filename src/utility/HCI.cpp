@@ -707,9 +707,7 @@ void HCIClass::handleAclDataPkt(uint8_t /*plen*/, uint8_t pdata[])
     uint16_t cid;
   } *aclHdr = (HCIACLHdr*)pdata;
 
-#ifdef _BLE_TRACE_
-  Serial.println("Received data");
-#endif
+
   uint16_t aclFlags = (aclHdr->handle & 0xf000) >> 12;
 
   if ((aclHdr->dlen - 4) != aclHdr->len) {
@@ -729,6 +727,17 @@ void HCIClass::handleAclDataPkt(uint8_t /*plen*/, uint8_t pdata[])
   }
 
   if ((aclHdr->dlen - 4) != aclHdr->len) {
+#ifdef _BLE_TRACE_
+    Serial.println("Don't have full packet yet");
+    Serial.print("Handle: ");
+    btct.printBytes((uint8_t*)&aclHdr->handle,2);
+    Serial.print("dlen: ");
+    btct.printBytes((uint8_t*)&aclHdr->dlen,2);
+    Serial.print("len: ");
+    btct.printBytes((uint8_t*)&aclHdr->len,2);
+    Serial.print("cid: ");
+    btct.printBytes((uint8_t*)&aclHdr->cid,2);
+#endif
     // don't have the full packet yet
     return;
   }
@@ -751,7 +760,11 @@ void HCIClass::handleAclDataPkt(uint8_t /*plen*/, uint8_t pdata[])
 #ifdef _BLE_TRACE_
     Serial.println("Security data");
 #endif
-    L2CAPSignaling.handleSecurityData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
+    if (aclFlags == 0x1){
+      L2CAPSignaling.handleSecurityData(aclHdr->handle & 0x0fff, aclHdr->len, &_aclPktBuffer[sizeof(HCIACLHdr)]);
+    }else{
+      L2CAPSignaling.handleSecurityData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
+    }
 
   }else {
     struct __attribute__ ((packed)) {
