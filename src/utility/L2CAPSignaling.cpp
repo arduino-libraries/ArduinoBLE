@@ -144,6 +144,8 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     ATT.localKeyDistribution = KeyDistribution(pairingRequest->responderKeyDistribution);
     KeyDistribution rkd(pairingRequest->responderKeyDistribution);
     AuthReq req(pairingRequest->authReq);
+    KeyDistribution responseKD = KeyDistribution();
+    responseKD.setIdKey(true);
 #ifdef _BLE_TRACE_
     Serial.print("Req has properties: ");
     Serial.print(req.Bonding()?"bonding, ":"no bonding, ");
@@ -171,7 +173,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       uint8_t maxEncSize;
       uint8_t initiatorKeyDistribution;
       uint8_t responderKeyDistribution;
-    } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, LOCAL_AUTHREQ, 0x10, 0b1011, 0b1011};
+    } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, LOCAL_AUTHREQ, 0x10, responseKD.getOctet(), responseKD.getOctet()};
 
     HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
   }
@@ -316,9 +318,9 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       Serial.println("Calculate f5, f6:");
       Serial.print("DH          : ");
       btct.printBytes(HCI.DHKey,32);
-      Serial.println("Na        : ");
+      Serial.print("Na        : ");
       btct.printBytes(HCI.Na,16);
-      Serial.println("Nb        : ");
+      Serial.print("Nb        : ");
       btct.printBytes(HCI.Nb,16);
       Serial.print("MAC         : ");
       btct.printBytes(MacKey,16);

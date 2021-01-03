@@ -260,7 +260,10 @@ void ATTClass::addConnection(uint16_t handle, uint8_t role, uint8_t peerBdaddrTy
     Serial.println("Found match.");
 #endif
   }else{
-    memset(_peers[peerIndex].resolvedAddress, 0, 6);
+#ifdef _BLE_TRACE_
+    Serial.println("No matching MAC");
+#endif
+    memset(&_peers[peerIndex].resolvedAddress, 0, 6);
   }
 
   if (_eventHandlers[BLEConnected]) {

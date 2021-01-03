@@ -44,34 +44,34 @@ void setup() {
 
   // IRKs are keys that identify the true owner of a random mac address.
   // Add IRKs of devices you are bonded with.
-  BLE.setGetIRKs([](uint8_t* nIRKs, uint8_t** BADDR_TYPES, uint8_t*** BDAddrs, uint8_t*** IRKs){
+  BLE.setGetIRKs([](uint8_t* nIRKs, uint8_t** BDaddrTypes, uint8_t*** BDAddrs, uint8_t*** IRKs){
     // Set to number of devices
     *nIRKs       = 2;
 
     *BDAddrs     = new uint8_t*[*nIRKs];
     *IRKs        = new uint8_t*[*nIRKs];
-    *BADDR_TYPES = new uint8_t[*nIRKs];
+    *BDaddrTypes = new uint8_t[*nIRKs];
 
     // Set these to the mac and IRK for your bonded devices as printed in the serial console after bonding.
-    uint8_t iPhoneMac [6]   =  {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint8_t iPhoneIRK[16]   = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t device1Mac[6]    = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t device1IRK[16]   = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-    uint8_t iPadMac[6]      = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint8_t iPadIRK[16]     = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+    uint8_t device2Mac[6]    = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t device2IRK[16]   = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 
-    (*BADDR_TYPES)[0] = 0;
-    (*IRKs)[0] = new uint8_t[16];
-    memcpy((*IRKs)[0],iPhoneIRK,16);
+    (*BDaddrTypes)[0] = 0; // Type 0 is for pubc address, type 1 is for static random
     (*BDAddrs)[0] = new uint8_t[6]; 
-    memcpy((*BDAddrs)[0], iPhoneMac, 6);
+    (*IRKs)[0]    = new uint8_t[16];
+    memcpy((*IRKs)[0]   , device1IRK,16);
+    memcpy((*BDAddrs)[0], device1Mac, 6);
 
 
-    (*BADDR_TYPES)[1] = 0;
-    (*IRKs)[1] = new uint8_t[16];
-    memcpy((*IRKs)[1],iPadIRK,16);
+    (*BDaddrTypes)[1] = 0;
     (*BDAddrs)[1] = new uint8_t[6];
-    memcpy((*BDAddrs)[1], iPadMac, 6);
+    (*IRKs)[1]    = new uint8_t[16];
+    memcpy((*IRKs)[1]   , device2IRK,16);
+    memcpy((*BDAddrs)[1], device2Mac, 6);
 
 
     return 1;
@@ -83,17 +83,18 @@ void setup() {
     btct.printBytes(address,6);
 
     // Set these to the MAC and LTK of your devices after bonding.
-    uint8_t iPhoneMac [6]   = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint8_t iPhoneLTK[16]   = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint8_t iPadMac [6]     = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint8_t iPadLTK[16]     = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t device1Mac[6]  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t device1LTK[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t device2Mac[6]  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t device2LTK[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     
 
-    if(memcmp(iPhoneMac, address, 6)==0){
-      memcpy(LTK, iPhoneLTK, 16);
+    if(memcmp(device1Mac, address, 6) == 0) {
+      memcpy(LTK, device1LTK, 16);
       return 1;
-    }else if(memcmp(iPadMac, address, 6)==0){
-      memcpy(LTK, iPadLTK, 16);
+    }else if(memcmp(device2Mac, address, 6) == 0) {
+      memcpy(LTK, device2LTK, 16);
+      return 1;
     }
     return 0;
   });
@@ -112,7 +113,8 @@ void setup() {
     return 1;
   });
 
-  while(1){// begin initialization
+  while(1){
+    // begin initialization
     if (!BLE.begin()) {
       Serial.println("starting BLE failed!");
       delay(200);
@@ -135,7 +137,7 @@ void setup() {
     batteryService.addCharacteristic(stringcharacteristic);
     batteryService.addCharacteristic(secretValue);
 
-    BLE.addService(batteryService); // Add the battery service
+    BLE.addService(batteryService);               // Add the battery service
     batteryLevelChar.writeValue(oldBatteryLevel); // set initial value for this characteristic
     char* stringCharValue = new char[32];
     stringCharValue = "string";
