@@ -290,7 +290,14 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
 
     HCI.readBdAddr();
     ATT.setPeerEncryption(connectionHandle, encryptionState);
-    if((encryptionState & PEER_ENCRYPTION::DH_KEY_CALULATED) > 0){
+    if((encryptionState & PEER_ENCRYPTION::DH_KEY_CALULATED) == 0){
+#ifdef _BLE_TRACE_
+      Serial.println("DHKey not yet ready, will calculate f5, f6 later");
+#endif
+      // store RemoteDHKeyCheck for later check
+      memcpy(HCI.remoteDHKeyCheckBuffer,RemoteDHKeyCheck,16);
+
+    } else {
       // We've already calculated the DHKey so we can calculate our check and send it.
       
       uint8_t MacKey[16];
@@ -312,7 +319,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       
       btct.f6(MacKey, HCI.Na,HCI.Nb,R, MasterIOCap, BD_ADDR_REMOTE, localAddress, Ea);
       btct.f6(MacKey, HCI.Nb,HCI.Na,R, SlaveIOCap, localAddress, BD_ADDR_REMOTE, Eb);
-
+      
 
 #ifdef _BLE_TRACE_
       Serial.println("Calculate f5, f6:");
@@ -353,6 +360,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
         ret[sizeof(Eb)-i] = Eb[i];
       }
       HCI.sendAclPkt(connectionHandle, 0x06, sizeof(ret), ret );
+      ATT.setPeerEncryption(connectionHandle, encryptionState | PEER_ENCRYPTION::SENT_DH_CHECK);
     }
   }
 }

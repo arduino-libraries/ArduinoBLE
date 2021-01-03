@@ -1345,13 +1345,83 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
 #endif
           encryption |= PEER_ENCRYPTION::DH_KEY_CALULATED;
           ATT.setPeerEncryption(connectionHandle, encryption);
+
+          if((encryption & PEER_ENCRYPTION::RECEIVED_DH_CHECK) > 0){
 #ifdef _BLE_TRACE_
-          if(encryption | PEER_ENCRYPTION::RECEIVED_DH_CHECK){
-            Serial.println("Recieved DHKey check already so calculate f5, f6.");
+            Serial.println("Recieved DHKey check already so calculate f5, f6 now.");
+#endif
+	  
+	  uint8_t BD_ADDR_REMOTE[7];
+            ATT.getPeerAddrWithType(connectionHandle, BD_ADDR_REMOTE);
+    
+	  
+	  uint8_t MacKey[16];
+            uint8_t localAddress[7];
+            
+            memcpy(&localAddress[1],HCI.localAddr,6);
+            localAddress[0] = 0; // IOT 33 uses a static address
+            
+            btct.f5(HCI.DHKey,HCI.Na,HCI.Nb,BD_ADDR_REMOTE,localAddress,MacKey,HCI.LTK);
+            
+            uint8_t Ea[16];
+            uint8_t Eb[16];
+            uint8_t R[16];
+            uint8_t MasterIOCap[3];
+            uint8_t SlaveIOCap[3] = {LOCAL_AUTHREQ, 0x0, LOCAL_IOCAP};
+            
+            ATT.getPeerIOCap(connectionHandle, MasterIOCap);
+            for(int i=0; i<16; i++) R[i] = 0;
+            
+            btct.f6(MacKey, HCI.Na,HCI.Nb,R, MasterIOCap, BD_ADDR_REMOTE, localAddress, Ea);
+            btct.f6(MacKey, HCI.Nb,HCI.Na,R, SlaveIOCap, localAddress, BD_ADDR_REMOTE, Eb);
+
+
+#ifdef _BLE_TRACE_
+            Serial.println("Calculate f5, f6:");
+            Serial.print("DH          : ");
+            btct.printBytes(HCI.DHKey,32);
+            Serial.print("Na        : ");
+            btct.printBytes(HCI.Na,16);
+            Serial.print("Nb        : ");
+            btct.printBytes(HCI.Nb,16);
+            Serial.print("MAC         : ");
+            btct.printBytes(MacKey,16);
+            // Serial.print("Expected MAC: ");
+            // printBytes(EXPECTED_MAC, 16);
+            Serial.print("LTK         : ");
+            btct.printBytes(HCI.LTK,16);
+            // Serial.print("Expected LTK: ");
+            // printBytes(EXPECTED_LTK, 16);
+            Serial.print("Expected Ex : ");
+            btct.printBytes(HCI.remoteDHKeyCheckBuffer, 16);
+            Serial.print("Ea          : ");
+            btct.printBytes(Ea, 16);
+            Serial.print("Eb          : ");
+            btct.printBytes(Eb,16);
+            Serial.print("Local Addr  : ");
+            btct.printBytes(localAddress, 7);
+            Serial.print("LocalIOCap  : ");
+            btct.printBytes(SlaveIOCap, 3);
+            Serial.print("MasterAddr  : ");
+            btct.printBytes(BD_ADDR_REMOTE, 7);
+            Serial.print("MasterIOCAP : ");
+            btct.printBytes(MasterIOCap, 3);
+            Serial.println("Send Eb Back.");
+#endif
+            uint8_t ret[17];
+            ret[0] = 0x0d;
+            for(int i=0; i<sizeof(Eb); i++){
+              ret[sizeof(Eb)-i] = Eb[i];
+            }
+            HCI.sendAclPkt(connectionHandle, 0x06, sizeof(ret), ret );
+            ATT.setPeerEncryption(connectionHandle, encryption | PEER_ENCRYPTION::SENT_DH_CHECK);
           }else{
+#ifdef _BLE_TRACE_
             Serial.println("Waiting on other DHKey check before calculating.");
+#endif
           }
         }else{
+#ifdef _BLE_TRACE_
           Serial.print("Key generation error: 0x");
           Serial.println(evtLeDHKeyComplete->status, HEX);
 #endif

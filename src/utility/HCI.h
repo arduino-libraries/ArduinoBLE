@@ -111,6 +111,7 @@ public:
   // TODO: Send command be private again & use ATT implementation within ATT.
   virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
   uint8_t remotePublicKeyBuffer[64];
+  uint8_t remoteDHKeyCheckBuffer[16];
   uint8_t Na[16];
   uint8_t Nb[16];
   uint8_t DHKey[32];
