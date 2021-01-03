@@ -1218,10 +1218,11 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
           uint16_t minLength;
           uint16_t maxLength;
         } remoteConnParamReqReply;
-        memcpy(&remoteConnParamReqReply, &remoteConnParamReq->connectionHandle, sizeof(remoteConnParamReq-1));
+        memcpy(&remoteConnParamReqReply, &remoteConnParamReq->connectionHandle, sizeof(RemoteConnParamReq)-1);
+
         remoteConnParamReqReply.minLength = 0x000F;
         remoteConnParamReqReply.maxLength = 0x0FFF;
-        sendCommand(OGF_LE_CTL << 10 | 0x20, sizeof(remoteConnParamReqReply), &remoteConnParamReqReply);
+        sendCommand(OGF_LE_CTL << 10 | 0x20, sizeof(RemoteConnParamReqReply), &remoteConnParamReqReply);
         break;
       }
       case READ_LOCAL_P256_COMPLETE:{
@@ -1381,7 +1382,7 @@ int HCIClass::leEncrypt(uint8_t* key, uint8_t* plaintext, uint8_t* status, uint8
     leEncryptCommand.plaintext[15-i] = plaintext[i];
   }
   
-  int res = sendCommand(OGF_LE_CTL << 10 | LE_COMMAND::ENCRYPT, sizeof(leEncryptCommand), &leEncryptCommand);
+  int res = sendCommand(OGF_LE_CTL << 10 | LE_COMMAND::ENCRYPT, 32, &leEncryptCommand);
   if(res == 0){
 #ifdef _BLE_TRACE_
     Serial.print("Copying from command Response length: ");
