@@ -26,6 +26,8 @@
 #define CONNECTION_PARAMETER_UPDATE_REQUEST  0x12
 #define CONNECTION_PARAMETER_UPDATE_RESPONSE 0x13
 
+//#define _BLE_TRACE_
+
 L2CAPSignalingClass::L2CAPSignalingClass() :
   _minInterval(0),
   _maxInterval(0),
@@ -353,14 +355,34 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       btct.printBytes(MasterIOCap, 3);
       Serial.println("Send Eb Back.");
 #endif
-
-      uint8_t ret[17];
-      ret[0] = 0x0d;
-      for(int i=0; i<sizeof(Eb); i++){
-        ret[sizeof(Eb)-i] = Eb[i];
+      
+      // Check if RemoteDHKeyCheck = Ea
+      bool EaCheck = true;
+      for(int i = 0; i < 16; i++){
+        if (Ea[i] != RemoteDHKeyCheck[i]){	        
+	EaCheck = false;
+        }
       }
-      HCI.sendAclPkt(connectionHandle, 0x06, sizeof(ret), ret );
-      ATT.setPeerEncryption(connectionHandle, encryptionState | PEER_ENCRYPTION::SENT_DH_CHECK);
+      
+      if (EaCheck){
+        // Send our confirmation value to complete authentication stage 2
+        uint8_t ret[17];
+        ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
+        for(int i=0; i<sizeof(Eb); i++){
+          ret[sizeof(Eb)-i] = Eb[i];
+        }
+        HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret );
+        ATT.setPeerEncryption(connectionHandle, encryptionState | PEER_ENCRYPTION::SENT_DH_CHECK);
+      
+      } else {
+        // If check fails, abort
+#ifdef _BLE_TRACE_
+        Serial.println("Error: DHKey check failed - Aborting");
+#endif
+        uint8_t ret[2] = {CONNECTION_PAIRING_FAILED, 0x0B}; // DHKey Check Faile
+        HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret);
+        ATT.setPeerEncryption(connectionHandle, NO_ENCRYPTION);
+      }
     }
   }
 }
