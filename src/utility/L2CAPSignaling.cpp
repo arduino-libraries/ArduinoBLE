@@ -31,8 +31,8 @@
 L2CAPSignalingClass::L2CAPSignalingClass() :
   _minInterval(0),
   _maxInterval(0),
-  _supervisionTimeout(0)
-  ,_pairing_enabled(1)
+  _supervisionTimeout(0),
+  _pairing_enabled(1)
 {
 }
 
@@ -145,14 +145,14 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
         uint8_t initiatorKeyDistribution;
         uint8_t responderKeyDistribution;
       } *pairingRequest = (PairingRequest*)l2capSignalingHdr->data;
-     
-     
-      ATT.remoteKeyDistribution = KeyDistribution(pairingRequest->initiatorKeyDistribution);
-      ATT.localKeyDistribution = KeyDistribution(pairingRequest->responderKeyDistribution);
-      KeyDistribution rkd(pairingRequest->responderKeyDistribution);
-      AuthReq req(pairingRequest->authReq);
+
       KeyDistribution responseKD = KeyDistribution();
       responseKD.setIdKey(true);
+
+      ATT.remoteKeyDistribution = responseKD;// KeyDistribution(pairingRequest->initiatorKeyDistribution);
+      ATT.localKeyDistribution = responseKD; //KeyDistribution(pairingRequest->responderKeyDistribution);
+      // KeyDistribution rkd(pairingRequest->responderKeyDistribution);
+      AuthReq req(pairingRequest->authReq);
 #ifdef _BLE_TRACE_
       Serial.print("Req has properties: ");
       Serial.print(req.Bonding()?"bonding, ":"no bonding, ");
@@ -180,7 +180,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
         uint8_t maxEncSize;
         uint8_t initiatorKeyDistribution;
         uint8_t responderKeyDistribution;
-      } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, LOCAL_AUTHREQ, 0x10, responseKD.getOctet(), responseKD.getOctet()};
+      } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, HCI.localAuthreq().getOctet(), 0x10, responseKD.getOctet(), responseKD.getOctet()};
      
       HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
       
@@ -338,7 +338,7 @@ void L2CAPSignalingClass::smCalculateLTKandConfirm(uint16_t handle, uint8_t expe
   uint8_t Eb[16];
   uint8_t R[16];
   uint8_t MasterIOCap[3];
-  uint8_t SlaveIOCap[3] = {LOCAL_AUTHREQ, 0x0, LOCAL_IOCAP};
+  uint8_t SlaveIOCap[3] = {HCI.localAuthreq().getOctet(), 0x0, LOCAL_IOCAP};
   
   ATT.getPeerIOCap(handle, MasterIOCap);
   for(int i=0; i<16; i++) R[i] = 0;
