@@ -18,6 +18,14 @@
 #include <ArduinoBLE.h>
 
 
+#define PAIR_BUTTON D3        // button for pairing
+#define PAIR_LED 24           // LED used to signal pairing
+#define PAIR_LED_ON LOW       // Blue LED on Nano BLE has inverted logic
+#define PAIR_INTERVAL 30000   // interval for pairing after button press in ms
+
+#define CTRL_LED LED_BUILTIN
+
+
  // BLE Battery Service
 BLEService batteryService("180F");
 
@@ -31,13 +39,17 @@ BLEStringCharacteristic stringcharacteristic("183E", BLERead | BLEWrite, 31);
 BLEUnsignedCharCharacteristic secretValue("2a3F", BLERead | BLEWrite | BLEEncryption);
 
 int oldBatteryLevel = 0;  // last battery level reading from analog input
-long previousMillis = 0;  // last time the battery level was checked, in ms
+unsigned long previousMillis = 0;  // last time the battery level was checked, in ms
+unsigned long pairingStarted = 0;  // pairing start time when button is pressed
+bool wasConnected = 0;
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
   while (!Serial);
 
-  pinMode(LED_BUILTIN, OUTPUT); // initialize the built-in LED pin to indicate when a central is connected
+  pinMode(CTRL_LED, OUTPUT); // initialize the built-in LED pin to indicate when a central is connected
+  pinMode(PAIR_LED, OUTPUT);
+  pinMode(PAIR_BUTTON, INPUT_PULLUP);
 
 
   Serial.println("Serial connected");
@@ -145,6 +157,9 @@ void setup() {
     secretValue.writeValue(0);
     
     delay(1000);
+
+    // prevent pairing until button is pressed (will show a pairing rejected message)
+    BLE.setPairable(false);
   
     /* Start advertising BLE.  It will start continuously transmitting BLE
        advertising packets and will be visible to remote BLE central devices
@@ -169,30 +184,44 @@ void loop() {
   // wait for a BLE central
   BLEDevice central = BLE.central();
 
+
+  // If button is pressed, allow pairing for 30 sec
+  if (!BLE.pairable() && digitalRead(PAIR_BUTTON) == LOW){
+    pairingStarted = millis();
+    BLE.setPairable(Pairable::ONCE);
+    Serial.println("Accepting pairing for 30s");
+  } else if (BLE.pairable() && millis() > pairingStarted + PAIR_INTERVAL){
+    BLE.setPairable(false);
+    Serial.println("No longer accepting pairing");
+  }
+  // Make LED blink while pairing is allowed
+  digitalWrite(PAIR_LED, (BLE.pairable() ? (millis()%400)<200 : BLE.paired()) ? PAIR_LED_ON : !PAIR_LED_ON); 
+
+
   // if a central is connected to the peripheral:
-  if (central) {
-    Serial.print("Connected to central: ");
-    // print the central's BT address:
-    Serial.println(central.address());
+  if (central && central.connected()) {
+    if (!wasConnected){
+      wasConnected = true;
+      Serial.print("Connected to central: ");
+      // print the central's BT address:
+      Serial.println(central.address());
+    }
 
     // check the battery level every 200ms
     // while the central is connected:
-    while (central.connected()) {
-      long currentMillis = millis();
-      // if 200ms have passed, check the battery level:
-      if (currentMillis - previousMillis >= 1000) {
-        previousMillis = currentMillis;
-        updateBatteryLevel();
-        if(secretValue.value()>0){
-          digitalWrite(13,HIGH);
-        }else{
-          digitalWrite(13,LOW);
-        }
-      }
+    long currentMillis = millis();
+    // if 200ms have passed, check the battery level:
+    if (currentMillis - previousMillis >= 1000) {
+      previousMillis = currentMillis;
+      updateBatteryLevel();
+      digitalWrite(CTRL_LED, secretValue.value()>0 ? HIGH : LOW);
     }
+  } else if (wasConnected){
+    wasConnected = false;
     Serial.print("Disconnected from central: ");
     Serial.println(central.address());
   }
+    
 }
 
 void updateBatteryLevel() {

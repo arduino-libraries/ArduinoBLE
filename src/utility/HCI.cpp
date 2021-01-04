@@ -24,6 +24,8 @@
 #include "btct.h"
 #include "HCI.h"
 
+//#define _BLE_TRACE_
+
 #define HCI_COMMAND_PKT   0x01
 #define HCI_ACLDATA_PKT   0x02
 #define HCI_EVENT_PKT     0x04
@@ -1335,7 +1337,6 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
             break;
           }
           
-          uint8_t encryption = ATT.getPeerEncryption(connectionHandle);
           
           for(int i=0; i<32; i++) DHKey[31-i] = evtLeDHKeyComplete->DHKey[i];
 
@@ -1343,15 +1344,22 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
           Serial.println("Stored our DHKey:");
           btct.printBytes(DHKey,32);
 #endif
-          encryption |= PEER_ENCRYPTION::DH_KEY_CALULATED;
+          uint8_t encryption = ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::DH_KEY_CALULATED;
           ATT.setPeerEncryption(connectionHandle, encryption);
+
+          if((encryption & PEER_ENCRYPTION::RECEIVED_DH_CHECK) > 0){
 #ifdef _BLE_TRACE_
-          if(encryption | PEER_ENCRYPTION::RECEIVED_DH_CHECK){
-            Serial.println("Recieved DHKey check already so calculate f5, f6.");
+            Serial.println("Recieved DHKey check already so calculate f5, f6 now.");
+#endif
+            L2CAPSignaling.smCalculateLTKandConfirm(connectionHandle, HCI.remoteDHKeyCheckBuffer);
+	  
           }else{
+#ifdef _BLE_TRACE_
             Serial.println("Waiting on other DHKey check before calculating.");
+#endif
           }
         }else{
+#ifdef _BLE_TRACE_
           Serial.print("Key generation error: 0x");
           Serial.println(evtLeDHKeyComplete->status, HEX);
 #endif

@@ -41,8 +41,15 @@
 #define CONNECTION_PAIRING_DHKEY_CHECK    0x0D
 #define CONNECTION_PAIRING_KEYPRESS       0x0E
 
+#define IOCAP_DISPLAY_ONLY         0x00
+#define IOCAP_DISPLAY_YES_NO       0x01
+#define IOCAP_KEYBOARD_ONLY        0x02
+#define IOCAP_NO_INPUT_NO_OUTPUT   0x03
+#define IOCAP_KEYBOARD_DISPLAY     0x04
+
+
 #define LOCAL_AUTHREQ 0b00101101
-#define LOCAL_IOCAP   0x3
+#define LOCAL_IOCAP   IOCAP_NO_INPUT_NO_OUTPUT // will use JustWorks pairing
 
 class L2CAPSignalingClass {
 public:
@@ -63,15 +70,25 @@ public:
   virtual void setConnectionInterval(uint16_t minInterval, uint16_t maxInterval);
 
   virtual void setSupervisionTimeout(uint16_t supervisionTimeout);
+  
+  virtual void setPairingEnabled(uint8_t enabled);
+  virtual bool isPairingEnabled();
+
+
+
+  virtual void smCalculateLTKandConfirm(uint16_t handle, uint8_t expectedEa[]);
+
 
 private:
   virtual void connectionParameterUpdateRequest(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[]);
   virtual void connectionParameterUpdateResponse(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[]);
 
+
 private:
   uint16_t _minInterval;
   uint16_t _maxInterval;
   uint16_t _supervisionTimeout;
+  uint8_t _pairing_enabled;
 };
 
 extern L2CAPSignalingClass& L2CAPSignaling;

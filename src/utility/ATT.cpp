@@ -497,6 +497,32 @@ bool ATTClass::connected(uint16_t handle) const
   return false;
 }
 
+/*
+ * Return true if any of the known devices is paired (peer encrypted)
+ * Does not check if the paired device is also connected
+ */
+bool ATTClass::paired() const
+{
+  for(int i=0; i<ATT_MAX_PEERS; i++){
+    if((_peers[i].encryption & PEER_ENCRYPTION::ENCRYPTED_AES) > 0){
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Return true if the specified device is paired (peer encrypted)
+ */
+bool ATTClass::paired(uint16_t handle) const
+{  
+  for(int i=0; i<ATT_MAX_PEERS; i++){
+    if(_peers[i].connectionHandle != handle){continue;}
+    return (_peers[i].encryption & PEER_ENCRYPTION::ENCRYPTED_AES) > 0;
+  }
+  return false; // unknown handle
+}
+
 uint16_t ATTClass::mtu(uint16_t handle) const
 {
   for (int i = 0; i < ATT_MAX_PEERS; i++) {
