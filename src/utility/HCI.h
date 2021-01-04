@@ -23,6 +23,8 @@
 #include <Arduino.h>
 #include "bitDescriptions.h"
 
+#include "L2CAPSignaling.h"
+
 #define OGF_LINK_CTL           0x01
 #define OGF_HOST_CTL           0x03
 #define OGF_INFO_PARAM         0x04
@@ -117,6 +119,7 @@ public:
   // TODO: Send command be private again & use ATT implementation of send command within ATT.
   virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
   uint8_t remotePublicKeyBuffer[64];
+  uint8_t remoteDHKeyCheckBuffer[16];
   uint8_t Na[16];
   uint8_t Nb[16];
   uint8_t DHKey[32];

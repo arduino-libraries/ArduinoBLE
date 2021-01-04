@@ -26,13 +26,13 @@
 #define CONNECTION_PARAMETER_UPDATE_REQUEST  0x12
 #define CONNECTION_PARAMETER_UPDATE_RESPONSE 0x13
 
-
-// #define _BLE_TRACE_
+//#define _BLE_TRACE_
 
 L2CAPSignalingClass::L2CAPSignalingClass() :
   _minInterval(0),
   _maxInterval(0),
-  _supervisionTimeout(0)
+  _supervisionTimeout(0),
+  _pairing_enabled(1)
 {
 }
 
@@ -132,54 +132,64 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
   btct.printBytes(data,dlen);
 #endif
   if (code == CONNECTION_PAIRING_REQUEST) {
-    // 0x1
-    struct __attribute__ ((packed)) PairingRequest {
-      uint8_t ioCapability;
-      uint8_t oobDataFlag;
-      uint8_t authReq;
-      uint8_t maxEncSize;
-      uint8_t initiatorKeyDistribution;
-      uint8_t responderKeyDistribution;
-    } *pairingRequest = (PairingRequest*)l2capSignalingHdr->data;
+	  
+    if (isPairingEnabled()){
+      if (_pairing_enabled >= 2) _pairing_enabled = 0;  // 2 = pair once only
+      
+      // 0x1
+      struct __attribute__ ((packed)) PairingRequest {
+        uint8_t ioCapability;
+        uint8_t oobDataFlag;
+        uint8_t authReq;
+        uint8_t maxEncSize;
+        uint8_t initiatorKeyDistribution;
+        uint8_t responderKeyDistribution;
+      } *pairingRequest = (PairingRequest*)l2capSignalingHdr->data;
 
-    KeyDistribution responseKD = KeyDistribution();
-    responseKD.setIdKey(true);
+      KeyDistribution responseKD = KeyDistribution();
+      responseKD.setIdKey(true);
 
-    ATT.remoteKeyDistribution = responseKD;// KeyDistribution(pairingRequest->initiatorKeyDistribution);
-    ATT.localKeyDistribution = responseKD; //KeyDistribution(pairingRequest->responderKeyDistribution);
-    // KeyDistribution rkd(pairingRequest->responderKeyDistribution);
-    AuthReq req(pairingRequest->authReq);
-    
+      ATT.remoteKeyDistribution = responseKD;// KeyDistribution(pairingRequest->initiatorKeyDistribution);
+      ATT.localKeyDistribution = responseKD; //KeyDistribution(pairingRequest->responderKeyDistribution);
+      // KeyDistribution rkd(pairingRequest->responderKeyDistribution);
+      AuthReq req(pairingRequest->authReq);
 #ifdef _BLE_TRACE_
-    Serial.print("Req has properties: ");
-    Serial.print(req.Bonding()?"bonding, ":"no bonding, ");
-    Serial.print(req.CT2()?"CT2, ":"no CT2, ");
-    Serial.print(req.KeyPress()?"KeyPress, ":"no KeyPress, ");
-    Serial.print(req.MITM()?"MITM, ":"no MITM, ");
-    Serial.print(req.SC()?"SC, ":"no SC, ");
+      Serial.print("Req has properties: ");
+      Serial.print(req.Bonding()?"bonding, ":"no bonding, ");
+      Serial.print(req.CT2()?"CT2, ":"no CT2, ");
+      Serial.print(req.KeyPress()?"KeyPress, ":"no KeyPress, ");
+      Serial.print(req.MITM()?"MITM, ":"no MITM, ");
+      Serial.print(req.SC()?"SC, ":"no SC, ");
 #endif
     
-    uint8_t peerIOCap[3];
-    peerIOCap[0] = pairingRequest->authReq;
-    peerIOCap[1] = pairingRequest->oobDataFlag;
-    peerIOCap[2] = pairingRequest->ioCapability;
-    ATT.setPeerIOCap(connectionHandle, peerIOCap);
-    ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::PAIRING_REQUEST);
+      uint8_t peerIOCap[3];
+      peerIOCap[0] = pairingRequest->authReq;
+      peerIOCap[1] = pairingRequest->oobDataFlag;
+      peerIOCap[2] = pairingRequest->ioCapability;
+      ATT.setPeerIOCap(connectionHandle, peerIOCap);
+      ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::PAIRING_REQUEST);
 #ifdef _BLE_TRACE_
-    Serial.print("Peer encryption : 0b");
-    Serial.println(ATT.getPeerEncryption(connectionHandle), BIN);
+      Serial.print("Peer encryption : 0b");
+      Serial.println(ATT.getPeerEncryption(connectionHandle), BIN);
 #endif
-    struct __attribute__ ((packed)) PairingResponse {
-      uint8_t code;
-      uint8_t ioCapability;
-      uint8_t oobDataFlag;
-      uint8_t authReq;
-      uint8_t maxEncSize;
-      uint8_t initiatorKeyDistribution;
-      uint8_t responderKeyDistribution;
-    } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, HCI.localAuthreq().getOctet(), 0x10, responseKD.getOctet(), responseKD.getOctet()};
-
-    HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
+      struct __attribute__ ((packed)) PairingResponse {
+        uint8_t code;
+        uint8_t ioCapability;
+        uint8_t oobDataFlag;
+        uint8_t authReq;
+        uint8_t maxEncSize;
+        uint8_t initiatorKeyDistribution;
+        uint8_t responderKeyDistribution;
+      } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, HCI.localAuthreq().getOctet(), 0x10, responseKD.getOctet(), responseKD.getOctet()};
+     
+      HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
+      
+    } else {
+      // Pairing not enabled
+      uint8_t ret[2] = {CONNECTION_PAIRING_FAILED, 0x05}; // reqect pairing
+      HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret);
+      ATT.setPeerEncryption(connectionHandle, NO_ENCRYPTION);
+    }
   }
   else if (code == CONNECTION_PAIRING_RANDOM)
   {
@@ -280,11 +290,8 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
   else if(code == CONNECTION_PAIRING_DHKEY_CHECK)
   {
     uint8_t RemoteDHKeyCheck[16];
-    uint8_t BD_ADDR_REMOTE[7];
-    ATT.getPeerAddrWithType(connectionHandle, BD_ADDR_REMOTE);
     for(int i=0; i<16; i++) RemoteDHKeyCheck[15-i] = l2capSignalingHdr->data[i];
-    uint8_t encryptionState = ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::RECEIVED_DH_CHECK;
-
+    
 
 #ifdef _BLE_TRACE_
     Serial.println("[Info] DH Key check");
@@ -292,72 +299,93 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     btct.printBytes(RemoteDHKeyCheck, 16);
 #endif
 
-    HCI.readBdAddr();
+    
+    
+    uint8_t encryptionState = ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::RECEIVED_DH_CHECK;
     ATT.setPeerEncryption(connectionHandle, encryptionState);
-    if((encryptionState & PEER_ENCRYPTION::DH_KEY_CALULATED) > 0){
+    if((encryptionState & PEER_ENCRYPTION::DH_KEY_CALULATED) == 0){
+#ifdef _BLE_TRACE_
+      Serial.println("DHKey not yet ready, will calculate f5, f6 later");
+#endif
+      // store RemoteDHKeyCheck for later check
+      memcpy(HCI.remoteDHKeyCheckBuffer,RemoteDHKeyCheck,16);
+
+    } else {
       // We've already calculated the DHKey so we can calculate our check and send it.
+      smCalculateLTKandConfirm(connectionHandle, RemoteDHKeyCheck);
       
-      uint8_t MacKey[16];
-      uint8_t localAddress[7];
-      
-      memcpy(&localAddress[1],HCI.localAddr,6);
-      localAddress[0] = 0; // IOT 33 uses a static address
+    }
+  }
+}
 
-      btct.f5(HCI.DHKey,HCI.Na,HCI.Nb,BD_ADDR_REMOTE,localAddress,MacKey,HCI.LTK);
+void L2CAPSignalingClass::smCalculateLTKandConfirm(uint16_t handle, uint8_t expectedEa[])
+{ // Authentication stage 2: LTK Calculation
+  
+  uint8_t localAddress[7];
+  uint8_t remoteAddress[7];
+  ATT.getPeerAddrWithType(handle, remoteAddress);
+  
+  HCI.readBdAddr();
+  memcpy(&localAddress[1],HCI.localAddr,6);
+  localAddress[0] = 0; // IOT 33 uses a static address // TODO: confirm for Nano BLE
 
-      uint8_t Ea[16];
-      uint8_t Eb[16];
-      uint8_t R[16];
-      uint8_t MasterIOCap[3];
-      uint8_t SlaveIOCap[3] = {HCI.localAuthreq().getOctet(), 0x0, LOCAL_IOCAP};
-      
-      ATT.getPeerIOCap(connectionHandle, MasterIOCap);
-      for(int i=0; i<16; i++) R[i] = 0;
-      
-      btct.f6(MacKey, HCI.Na,HCI.Nb,R, MasterIOCap, BD_ADDR_REMOTE, localAddress, Ea);
-      btct.f6(MacKey, HCI.Nb,HCI.Na,R, SlaveIOCap, localAddress, BD_ADDR_REMOTE, Eb);
+  // Compute the LTK and MacKey
+  uint8_t MacKey[16];
+  btct.f5(HCI.DHKey, HCI.Na, HCI.Nb, remoteAddress, localAddress, MacKey, HCI.LTK);
 
+  // Compute Ea and Eb
+  uint8_t Ea[16];
+  uint8_t Eb[16];
+  uint8_t R[16];
+  uint8_t MasterIOCap[3];
+  uint8_t SlaveIOCap[3] = {HCI.localAuthreq().getOctet(), 0x0, LOCAL_IOCAP};
+  
+  ATT.getPeerIOCap(handle, MasterIOCap);
+  for(int i=0; i<16; i++) R[i] = 0;
+  
+  btct.f6(MacKey, HCI.Na,HCI.Nb,R, MasterIOCap, remoteAddress, localAddress, Ea);
+  btct.f6(MacKey, HCI.Nb,HCI.Na,R, SlaveIOCap, localAddress, remoteAddress, Eb);
 
 #ifdef _BLE_TRACE_
-      Serial.println("Calculate f5, f6:");
-      Serial.print("DH          : ");
-      btct.printBytes(HCI.DHKey,32);
-      Serial.print("Na        : ");
-      btct.printBytes(HCI.Na,16);
-      Serial.print("Nb        : ");
-      btct.printBytes(HCI.Nb,16);
-      Serial.print("MAC         : ");
-      btct.printBytes(MacKey,16);
-      // Serial.print("Expected MAC: ");
-      // printBytes(EXPECTED_MAC, 16);
-      Serial.print("LTK         : ");
-      btct.printBytes(HCI.LTK,16);
-      // Serial.print("Expected LTK: ");
-      // printBytes(EXPECTED_LTK, 16);
-      Serial.print("Expected Ex : ");
-      btct.printBytes(RemoteDHKeyCheck, 16);
-      Serial.print("Ea          : ");
-      btct.printBytes(Ea, 16);
-      Serial.print("Eb          : ");
-      btct.printBytes(Eb,16);
-      Serial.print("Local Addr  : ");
-      btct.printBytes(localAddress, 7);
-      Serial.print("LocalIOCap  : ");
-      btct.printBytes(SlaveIOCap, 3);
-      Serial.print("MasterAddr  : ");
-      btct.printBytes(BD_ADDR_REMOTE, 7);
-      Serial.print("MasterIOCAP : ");
-      btct.printBytes(MasterIOCap, 3);
-      Serial.println("Send Eb Back.");
+  Serial.println("Calculate and confirm LTK via f5, f6:");
+  Serial.print("DHKey      : ");  btct.printBytes(HCI.DHKey,32);
+  Serial.print("Na         : ");  btct.printBytes(HCI.Na,16);
+  Serial.print("Nb         : ");  btct.printBytes(HCI.Nb,16);
+  Serial.print("MacKey     : ");  btct.printBytes(MacKey,16);
+  Serial.print("LTK        : ");  btct.printBytes(HCI.LTK,16);
+  Serial.print("Expected Ea: ");  btct.printBytes(expectedEa, 16);
+  Serial.print("Ea         : ");  btct.printBytes(Ea, 16);
+  Serial.print("Eb         : ");  btct.printBytes(Eb,16);
+  Serial.print("Local Addr : ");  btct.printBytes(localAddress, 7);
+  Serial.print("LocalIOCap : ");  btct.printBytes(SlaveIOCap, 3);
+  Serial.print("MasterAddr : ");  btct.printBytes(remoteAddress, 7);
+  Serial.print("MasterIOCAP: ");  btct.printBytes(MasterIOCap, 3);
+#endif
+      
+  // Check if Ea = expectedEa
+  if (memcmp(Ea, expectedEa, 16) == 0){
+    // Check ok
+    // Send our confirmation value to complete authentication stage 2
+    uint8_t ret[17];
+    ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
+    for(int i=0; i<sizeof(Eb); i++){
+      ret[sizeof(Eb)-i] = Eb[i];
+    }
+    HCI.sendAclPkt(handle, SECURITY_CID, sizeof(ret), ret );
+    uint8_t encryption = ATT.getPeerEncryption(handle) | PEER_ENCRYPTION::SENT_DH_CHECK;
+    ATT.setPeerEncryption(handle, encryption);
+#ifdef _BLE_TRACE_
+    Serial.println("DHKey check ok - send Eb back");
 #endif
 
-      uint8_t ret[17];
-      ret[0] = 0x0d;
-      for(int i=0; i<sizeof(Eb); i++){
-        ret[sizeof(Eb)-i] = Eb[i];
-      }
-      HCI.sendAclPkt(connectionHandle, 0x06, sizeof(ret), ret );
-    }
+  } else {
+    // Check failed, abort pairing
+    uint8_t ret[2] = {CONNECTION_PAIRING_FAILED, 0x0B}; // 0x0B = DHKey Check Failed
+    HCI.sendAclPkt(handle, SECURITY_CID, sizeof(ret), ret);
+    ATT.setPeerEncryption(handle, NO_ENCRYPTION);
+#ifdef _BLE_TRACE_
+    Serial.println("Error: DHKey check failed - Aborting");
+#endif
   }
 }
 
@@ -374,6 +402,15 @@ void L2CAPSignalingClass::setConnectionInterval(uint16_t minInterval, uint16_t m
 void L2CAPSignalingClass::setSupervisionTimeout(uint16_t supervisionTimeout)
 {
   _supervisionTimeout = supervisionTimeout;
+}
+
+void L2CAPSignalingClass::setPairingEnabled(uint8_t enabled)
+{
+  _pairing_enabled = enabled;
+}
+bool L2CAPSignalingClass::isPairingEnabled()
+{
+  return _pairing_enabled > 0;
 }
 
 void L2CAPSignalingClass::connectionParameterUpdateRequest(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[])

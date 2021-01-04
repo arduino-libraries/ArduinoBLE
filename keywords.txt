@@ -77,9 +77,12 @@ setEventHandler	KEYWORD2
 setAdvertisingInterval	KEYWORD2
 setConnectionInterval	KEYWORD2
 setConnectable	KEYWORD2
+setPairable	KEYWORD2
 setTimeout	KEYWORD2
 debug	KEYWORD2
 noDebug	KEYWORD2
+pairable	KEYWORD2
+paired	KEYWORD2
 
 properties	KEYWORD2
 valueSize	KEYWORD2

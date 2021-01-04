@@ -214,6 +214,16 @@ bool BLELocalDevice::connected() const
   return ATT.connected();
 }
 
+/*
+ * Whether there is at least one paired device
+ */
+bool BLELocalDevice::paired()
+{
+  HCI.poll();
+
+  return ATT.paired();
+}
+
 bool BLELocalDevice::disconnect()
 {
   return ATT.disconnect();
@@ -395,6 +405,22 @@ void BLELocalDevice::setTimeout(unsigned long timeout)
   ATT.setTimeout(timeout);
 }
 
+/*
+ * Control whether pairing is allowed or rejected
+ * Use true/false or the Pairable enum
+ */
+void BLELocalDevice::setPairable(uint8_t pairable)
+{
+  L2CAPSignaling.setPairingEnabled(pairable);
+}
+
+/*
+ * Whether pairing is currently allowed
+ */
+bool BLELocalDevice::pairable()
+{
+  return L2CAPSignaling.isPairingEnabled();
+}
 
 void BLELocalDevice::setGetIRKs(int (*getIRKs)(uint8_t* nIRKs, uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs)){
   HCI._getIRKs = getIRKs;

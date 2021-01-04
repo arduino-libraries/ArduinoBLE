@@ -24,6 +24,12 @@
 #include "BLEService.h"
 #include "BLEAdvertisingData.h"
 
+enum Pairable {
+  NO = 0,
+  YES = 1,
+  ONCE = 2,
+};
+
 class BLELocalDevice {
 public:
   BLELocalDevice();
@@ -80,6 +86,10 @@ public:
 
   virtual void debug(Stream& stream);
   virtual void noDebug();
+  
+  virtual void setPairable(uint8_t pairable);
+  virtual bool pairable();
+  virtual bool paired();
 
   // address - The mac to store
   // IRK - The IRK to store with this mac
