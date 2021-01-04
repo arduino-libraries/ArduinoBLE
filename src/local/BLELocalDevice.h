@@ -81,11 +81,19 @@ public:
   virtual void debug(Stream& stream);
   virtual void noDebug();
 
-/// TODO: Put in actual variable names
-  virtual void setStoreIRK(int (*storeIRK)(uint8_t*, uint8_t*));
-  virtual void setGetIRKs(int (*getIRKs)(uint8_t* nIRKs, uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs));
-  virtual void setStoreLTK(int (*storeLTK)(uint8_t*, uint8_t*));
-  virtual void setGetLTK(int (*getLTK)(uint8_t*, uint8_t*));
+  // address - The mac to store
+  // IRK - The IRK to store with this mac
+  virtual void setStoreIRK(int (*storeIRK)(uint8_t* address, uint8_t* IRK));
+  // nIRKs      - the number of IRKs being provided.
+  // BDAddrType - an array containing the type of each address (0 public, 1 static random)
+  // BDAddrs    - an array containing the list of addresses
+  virtual void setGetIRKs(int (*getIRKs)(uint8_t* nIRKs, uint8_t** BDAddrType, uint8_t*** BDAddrs, uint8_t*** IRKs));
+  // address - the address to store [6 bytes]
+  // LTK - the LTK to store with this mac [16 bytes]
+  virtual void setStoreLTK(int (*storeLTK)(uint8_t* address, uint8_t* LTK));
+  // address - The mac address needing its LTK
+  // LTK - 16 octet LTK for the mac address
+  virtual void setGetLTK(int (*getLTK)(uint8_t* address, uint8_t* LTK));
   uint8_t BDaddress[6];
   
 protected:

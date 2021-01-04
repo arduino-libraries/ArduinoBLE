@@ -23,6 +23,8 @@
 #include "L2CAPSignaling.h"
 #include "btct.h"
 #include "HCI.h"
+#include "bitDescriptions.h"
+// #define _BLE_TRACE_
 
 #define HCI_COMMAND_PKT   0x01
 #define HCI_ACLDATA_PKT   0x02
@@ -1139,50 +1141,63 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
         // Load our LTK for this connection.
         uint8_t peerAddr[7];
         uint8_t resolvableAddr[6];
+        uint8_t foundLTK;
         ATT.getPeerAddrWithType(ltkRequest->connectionHandle, peerAddr);
         
-        if(ATT.getPeerResolvedAddress(ltkRequest->connectionHandle, resolvableAddr)
-          && !((ATT.getPeerEncryption(ltkRequest->connectionHandle) & PEER_ENCRYPTION::PAIRING_REQUEST)>0)){
-          _getLTK(resolvableAddr, HCI.LTK);
+        if((ATT.getPeerEncryption(ltkRequest->connectionHandle) & PEER_ENCRYPTION::PAIRING_REQUEST)>0){
+          // Pairing request - LTK is one in buffer already
+          foundLTK = 1;
         }else{
-          _getLTK(&peerAddr[1], HCI.LTK);
+          if(ATT.getPeerResolvedAddress(ltkRequest->connectionHandle, resolvableAddr)){
+            foundLTK = getLTK(resolvableAddr, HCI.LTK);
+          }else{
+            foundLTK = getLTK(&peerAddr[1], HCI.LTK);
+          }
         }
-        // }
+        // } //2d
         // Send our LTK back
-        struct __attribute__ ((packed)) LTKReply
-        {
-          uint16_t connectionHandle;
-          uint8_t LTK[16];
-        } ltkReply = {0,0};
-        ltkReply.connectionHandle = ltkRequest->connectionHandle;
-        for(int i=0; i<16; i++) ltkReply.LTK[15-i] = HCI.LTK[i];
-        int result = sendCommand(OGF_LE_CTL << 10 | LE_COMMAND::LONG_TERM_KEY_REPLY,sizeof(ltkReply), &ltkReply);
-
-#ifdef _BLE_TRACE_
-        Serial.println("Sending LTK as: ");
-        btct.printBytes(ltkReply.LTK,16);
-#endif
-
-        if(result == 0){
-          struct __attribute__ ((packed)) LTKReplyResult
+        if(foundLTK){
+          struct __attribute__ ((packed)) LTKReply
           {
-            uint8_t status;
             uint16_t connectionHandle;
-          } ltkReplyResult = {0,0};
-          memcpy(&ltkReplyResult, _cmdResponse, 3);
+            uint8_t LTK[16];
+          } ltkReply = {0,0};
+          ltkReply.connectionHandle = ltkRequest->connectionHandle;
+          for(int i=0; i<16; i++) ltkReply.LTK[15-i] = HCI.LTK[i];
+          int result = sendCommand(OGF_LE_CTL << 10 | LE_COMMAND::LONG_TERM_KEY_REPLY,sizeof(ltkReply), &ltkReply);
 
-#ifdef _BLE_TRACE_
-          Serial.println("LTK send success");
-          Serial.print("status     : ");
-          btct.printBytes(&ltkReplyResult.status,1);
-          Serial.print("Conn Handle: ");
-          btct.printBytes((uint8_t*)&ltkReplyResult.connectionHandle,2);
-#endif
+  #ifdef _BLE_TRACE_
+          Serial.println("Sending LTK as: ");
+          btct.printBytes(ltkReply.LTK,16);
+  #endif
+
+          if(result == 0){
+            struct __attribute__ ((packed)) LTKReplyResult
+            {
+              uint8_t status;
+              uint16_t connectionHandle;
+            } ltkReplyResult = {0,0};
+            memcpy(&ltkReplyResult, _cmdResponse, 3);
+
+  #ifdef _BLE_TRACE_
+            Serial.println("LTK send success");
+            Serial.print("status     : ");
+            btct.printBytes(&ltkReplyResult.status,1);
+            Serial.print("Conn Handle: ");
+            btct.printBytes((uint8_t*)&ltkReplyResult.connectionHandle,2);
+  #endif
+          }else{
+  #ifdef _BLE_TRACE_
+            Serial.print("Failed to send LTK...: ");
+            btct.printBytes((uint8_t*)&result,2);
+  #endif
+          }
         }else{
+          /// do LTK rejection
 #ifdef _BLE_TRACE_
-          Serial.print("Failed to send LTK...: ");
-          btct.printBytes((uint8_t*)&result,2);
+          Serial.println("LTK not found, rejecting");
 #endif
+          sendCommand(OGF_LE_CTL << 10 | LE_COMMAND::LONG_TERM_KEY_NEGATIVE_REPLY,2, &ltkRequest->connectionHandle);
         }
         break;
       }
@@ -1256,10 +1271,10 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
           
 
           uint8_t Z = 0;
-          for(int i=0; i<16; i++){
-            /// TODO: Implement secure random
-            Nb[i] = rand(); //// Should use ESP or ECCx08
-          }
+          
+          HCI.leRand(Nb);
+          HCI.leRand(&Nb[8]);
+          
 #ifdef _BLE_TRACE_
           Serial.print("nb: ");
           btct.printBytes(Nb, 16);
@@ -1404,6 +1419,47 @@ int HCIClass::leEncrypt(uint8_t* key, uint8_t* plaintext, uint8_t* status, uint8
   Serial.println(res, HEX);
 #endif
   return res;
+}
+int HCIClass::leRand(uint8_t rand[]){
+  int res = sendCommand(OGF_LE_CTL << 10 | LE_COMMAND::RANDOM);
+  if(res == 0){
+    memcpy(rand,_cmdResponse, 8); /// backwards but it's a random number
+  }
+  return res;
+}
+int HCIClass::getLTK(uint8_t* address, uint8_t* LTK){
+  if(_getLTK!=0){
+    return _getLTK(address, LTK);
+  }else{
+    return 0;
+  }
+}
+int HCIClass::storeIRK(uint8_t* address, uint8_t* IRK){
+  if(_storeIRK!=0){
+    return _storeIRK(address, IRK);
+  }else{
+    return 0;
+  }
+}
+int HCIClass::storeLTK(uint8_t* address, uint8_t* LTK){
+  if(_storeLTK!=0){
+    return _storeLTK(address, LTK);
+  }else{
+    return 0;
+  }
+}
+
+/// Stub function to generate parameters for local authreq
+AuthReq HCIClass::localAuthreq(){
+  // If get, set, IRK, LTK all set then we can bond.
+  AuthReq local = AuthReq();
+  if(_storeIRK!=0 && _storeLTK!=0 && _getLTK!=0 && _getIRKs!=0){
+    local.setBonding(true);
+  }
+  local.setSC(true);
+  local.setMITM(true);
+  local.setCT2(true);
+  return LOCAL_AUTHREQ;
 }
 
 void HCIClass::dumpPkt(const char* prefix, uint8_t plen, uint8_t pdata[])

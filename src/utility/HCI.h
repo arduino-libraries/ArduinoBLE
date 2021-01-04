@@ -21,6 +21,7 @@
 #define _HCI_H_
 
 #include <Arduino.h>
+#include "bitDescriptions.h"
 
 #define OGF_LINK_CTL           0x01
 #define OGF_HOST_CTL           0x03
@@ -29,11 +30,13 @@
 #define OGF_LE_CTL             0x08
 
 enum LE_COMMAND {
-  ENCRYPT             = 0x0017,
-  LONG_TERM_KEY_REPLY = 0x001A,
-  READ_LOCAL_P256     = 0x0025,
-  GENERATE_DH_KEY_V1  = 0x0026,
-  GENERATE_DH_KEY_V2  = 0x005E
+  ENCRYPT                      = 0x0017,
+  RANDOM                       = 0x0018,
+  LONG_TERM_KEY_REPLY          = 0x001A,
+  LONG_TERM_KEY_NEGATIVE_REPLY = 0x1B,
+  READ_LOCAL_P256              = 0x0025,
+  GENERATE_DH_KEY_V1           = 0x0026,
+  GENERATE_DH_KEY_V2           = 0x005E
 };
 enum LE_META_EVENT {
   CONN_COMPLETE             = 0x01,
@@ -89,6 +92,9 @@ public:
                   uint16_t latency, uint16_t supervisionTimeout);
   virtual int leCancelConn();
   virtual int leEncrypt(uint8_t* Key, uint8_t* plaintext, uint8_t* status, uint8_t* ciphertext);
+  // Generate a 64 bit random number
+  virtual int leRand(uint8_t rand[]);
+  virtual AuthReq localAuthreq();
 
   virtual int saveNewAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* remoteIrk);
   virtual int leAddResolvingAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* remoteIrk);
@@ -108,7 +114,7 @@ public:
   virtual void debug(Stream& stream);
   virtual void noDebug();
 
-  // TODO: Send command be private again & use ATT implementation within ATT.
+  // TODO: Send command be private again & use ATT implementation of send command within ATT.
   virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
   uint8_t remotePublicKeyBuffer[64];
   uint8_t Na[16];
@@ -116,11 +122,13 @@ public:
   uint8_t DHKey[32];
   uint8_t localAddr[6];
   uint8_t LTK[16];
-
-  int (*_storeIRK)(uint8_t* address, uint8_t* peerIrk);
-  int (*_getIRKs)(uint8_t* nIRKs,uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs);
-  int (*_storeLTK)(uint8_t*, uint8_t*);
-  int (*_getLTK)(uint8_t*, uint8_t*);
+  virtual int getLTK(uint8_t* address, uint8_t* LTK);
+  virtual int storeLTK(uint8_t* address, uint8_t* LTK);
+  virtual int storeIRK(uint8_t* address, uint8_t* IRK);
+  int (*_storeIRK)(uint8_t* address, uint8_t* peerIrk) = 0;
+  int (*_getIRKs)(uint8_t* nIRKs,uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs) = 0;
+  int (*_storeLTK)(uint8_t*, uint8_t*) = 0;
+  int (*_getLTK)(uint8_t*, uint8_t*) = 0;
 
 private:
 
