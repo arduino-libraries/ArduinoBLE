@@ -278,11 +278,8 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
   else if(code == CONNECTION_PAIRING_DHKEY_CHECK)
   {
     uint8_t RemoteDHKeyCheck[16];
-    uint8_t BD_ADDR_REMOTE[7];
-    ATT.getPeerAddrWithType(connectionHandle, BD_ADDR_REMOTE);
     for(int i=0; i<16; i++) RemoteDHKeyCheck[15-i] = l2capSignalingHdr->data[i];
-    uint8_t encryptionState = ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::RECEIVED_DH_CHECK;
-
+    
 
 #ifdef _BLE_TRACE_
     Serial.println("[Info] DH Key check");
@@ -290,7 +287,9 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     btct.printBytes(RemoteDHKeyCheck, 16);
 #endif
 
-    HCI.readBdAddr();
+    
+    
+    uint8_t encryptionState = ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::RECEIVED_DH_CHECK;
     ATT.setPeerEncryption(connectionHandle, encryptionState);
     if((encryptionState & PEER_ENCRYPTION::DH_KEY_CALULATED) == 0){
 #ifdef _BLE_TRACE_
@@ -301,89 +300,80 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
 
     } else {
       // We've already calculated the DHKey so we can calculate our check and send it.
+      smCalculateLTKandConfirm(connectionHandle, RemoteDHKeyCheck);
       
-      uint8_t MacKey[16];
-      uint8_t localAddress[7];
-      
-      memcpy(&localAddress[1],HCI.localAddr,6);
-      localAddress[0] = 0; // IOT 33 uses a static address
-
-      btct.f5(HCI.DHKey,HCI.Na,HCI.Nb,BD_ADDR_REMOTE,localAddress,MacKey,HCI.LTK);
-
-      uint8_t Ea[16];
-      uint8_t Eb[16];
-      uint8_t R[16];
-      uint8_t MasterIOCap[3];
-      uint8_t SlaveIOCap[3] = {LOCAL_AUTHREQ, 0x0, LOCAL_IOCAP};
-      
-      ATT.getPeerIOCap(connectionHandle, MasterIOCap);
-      for(int i=0; i<16; i++) R[i] = 0;
-      
-      btct.f6(MacKey, HCI.Na,HCI.Nb,R, MasterIOCap, BD_ADDR_REMOTE, localAddress, Ea);
-      btct.f6(MacKey, HCI.Nb,HCI.Na,R, SlaveIOCap, localAddress, BD_ADDR_REMOTE, Eb);
-      
-
-#ifdef _BLE_TRACE_
-      Serial.println("Calculate f5, f6:");
-      Serial.print("DH          : ");
-      btct.printBytes(HCI.DHKey,32);
-      Serial.print("Na        : ");
-      btct.printBytes(HCI.Na,16);
-      Serial.print("Nb        : ");
-      btct.printBytes(HCI.Nb,16);
-      Serial.print("MAC         : ");
-      btct.printBytes(MacKey,16);
-      // Serial.print("Expected MAC: ");
-      // printBytes(EXPECTED_MAC, 16);
-      Serial.print("LTK         : ");
-      btct.printBytes(HCI.LTK,16);
-      // Serial.print("Expected LTK: ");
-      // printBytes(EXPECTED_LTK, 16);
-      Serial.print("Expected Ex : ");
-      btct.printBytes(RemoteDHKeyCheck, 16);
-      Serial.print("Ea          : ");
-      btct.printBytes(Ea, 16);
-      Serial.print("Eb          : ");
-      btct.printBytes(Eb,16);
-      Serial.print("Local Addr  : ");
-      btct.printBytes(localAddress, 7);
-      Serial.print("LocalIOCap  : ");
-      btct.printBytes(SlaveIOCap, 3);
-      Serial.print("MasterAddr  : ");
-      btct.printBytes(BD_ADDR_REMOTE, 7);
-      Serial.print("MasterIOCAP : ");
-      btct.printBytes(MasterIOCap, 3);
-      Serial.println("Send Eb Back.");
-#endif
-      
-      // Check if RemoteDHKeyCheck = Ea
-      bool EaCheck = true;
-      for(int i = 0; i < 16; i++){
-        if (Ea[i] != RemoteDHKeyCheck[i]){	        
-	EaCheck = false;
-        }
-      }
-      
-      if (EaCheck){
-        // Send our confirmation value to complete authentication stage 2
-        uint8_t ret[17];
-        ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
-        for(int i=0; i<sizeof(Eb); i++){
-          ret[sizeof(Eb)-i] = Eb[i];
-        }
-        HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret );
-        ATT.setPeerEncryption(connectionHandle, encryptionState | PEER_ENCRYPTION::SENT_DH_CHECK);
-      
-      } else {
-        // If check fails, abort
-#ifdef _BLE_TRACE_
-        Serial.println("Error: DHKey check failed - Aborting");
-#endif
-        uint8_t ret[2] = {CONNECTION_PAIRING_FAILED, 0x0B}; // DHKey Check Faile
-        HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret);
-        ATT.setPeerEncryption(connectionHandle, NO_ENCRYPTION);
-      }
     }
+  }
+}
+
+void L2CAPSignalingClass::smCalculateLTKandConfirm(uint16_t handle, uint8_t expectedEa[])
+{ // Authentication stage 2: LTK Calculation
+  
+  uint8_t localAddress[7];
+  uint8_t remoteAddress[7];
+  ATT.getPeerAddrWithType(handle, remoteAddress);
+  
+  HCI.readBdAddr();
+  memcpy(&localAddress[1],HCI.localAddr,6);
+  localAddress[0] = 0; // IOT 33 uses a static address // TODO: confirm for Nano BLE
+
+  // Compute the LTK and MacKey
+  uint8_t MacKey[16];
+  btct.f5(HCI.DHKey, HCI.Na, HCI.Nb, remoteAddress, localAddress, MacKey, HCI.LTK);
+
+  // Compute Ea and Eb
+  uint8_t Ea[16];
+  uint8_t Eb[16];
+  uint8_t R[16];
+  uint8_t MasterIOCap[3];
+  uint8_t SlaveIOCap[3] = {LOCAL_AUTHREQ, 0x0, LOCAL_IOCAP};
+  
+  ATT.getPeerIOCap(handle, MasterIOCap);
+  for(int i=0; i<16; i++) R[i] = 0;
+  
+  btct.f6(MacKey, HCI.Na,HCI.Nb,R, MasterIOCap, remoteAddress, localAddress, Ea);
+  btct.f6(MacKey, HCI.Nb,HCI.Na,R, SlaveIOCap, localAddress, remoteAddress, Eb);
+
+#ifdef _BLE_TRACE_
+  Serial.println("Calculate and confirm LTK via f5, f6:");
+  Serial.print("DHKey      : ");  btct.printBytes(HCI.DHKey,32);
+  Serial.print("Na         : ");  btct.printBytes(HCI.Na,16);
+  Serial.print("Nb         : ");  btct.printBytes(HCI.Nb,16);
+  Serial.print("MacKey     : ");  btct.printBytes(MacKey,16);
+  Serial.print("LTK        : ");  btct.printBytes(HCI.LTK,16);
+  Serial.print("Expected Ea: ");  btct.printBytes(expectedEa, 16);
+  Serial.print("Ea         : ");  btct.printBytes(Ea, 16);
+  Serial.print("Eb         : ");  btct.printBytes(Eb,16);
+  Serial.print("Local Addr : ");  btct.printBytes(localAddress, 7);
+  Serial.print("LocalIOCap : ");  btct.printBytes(SlaveIOCap, 3);
+  Serial.print("MasterAddr : ");  btct.printBytes(remoteAddress, 7);
+  Serial.print("MasterIOCAP: ");  btct.printBytes(MasterIOCap, 3);
+#endif
+      
+  // Check if Ea = expectedEa
+  if (memcmp(Ea, expectedEa, 16) == 0){
+    // Check ok
+    // Send our confirmation value to complete authentication stage 2
+    uint8_t ret[17];
+    ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
+    for(int i=0; i<sizeof(Eb); i++){
+      ret[sizeof(Eb)-i] = Eb[i];
+    }
+    HCI.sendAclPkt(handle, SECURITY_CID, sizeof(ret), ret );
+    uint8_t encryption = ATT.getPeerEncryption(handle) | PEER_ENCRYPTION::SENT_DH_CHECK;
+    ATT.setPeerEncryption(handle, encryption);
+#ifdef _BLE_TRACE_
+    Serial.println("DHKey check ok - send Eb back");
+#endif
+
+  } else {
+    // Check failed, abort pairing
+    uint8_t ret[2] = {CONNECTION_PAIRING_FAILED, 0x0B}; // 0x0B = DHKey Check Failed
+    HCI.sendAclPkt(handle, SECURITY_CID, sizeof(ret), ret);
+    ATT.setPeerEncryption(handle, NO_ENCRYPTION);
+#ifdef _BLE_TRACE_
+    Serial.println("Error: DHKey check failed - Aborting");
+#endif
   }
 }
 

@@ -22,6 +22,8 @@
 
 #include <Arduino.h>
 
+#include "L2CAPSignaling.h"
+
 #define OGF_LINK_CTL           0x01
 #define OGF_HOST_CTL           0x03
 #define OGF_INFO_PARAM         0x04

@@ -1337,7 +1337,6 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
             break;
           }
           
-          uint8_t encryption = ATT.getPeerEncryption(connectionHandle);
           
           for(int i=0; i<32; i++) DHKey[31-i] = evtLeDHKeyComplete->DHKey[i];
 
@@ -1345,98 +1344,14 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
           Serial.println("Stored our DHKey:");
           btct.printBytes(DHKey,32);
 #endif
-          encryption |= PEER_ENCRYPTION::DH_KEY_CALULATED;
+          uint8_t encryption = ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::DH_KEY_CALULATED;
           ATT.setPeerEncryption(connectionHandle, encryption);
 
           if((encryption & PEER_ENCRYPTION::RECEIVED_DH_CHECK) > 0){
 #ifdef _BLE_TRACE_
             Serial.println("Recieved DHKey check already so calculate f5, f6 now.");
 #endif
-	  
-	  uint8_t BD_ADDR_REMOTE[7];
-            ATT.getPeerAddrWithType(connectionHandle, BD_ADDR_REMOTE);
-    
-	  
-	  uint8_t MacKey[16];
-            uint8_t localAddress[7];
-            
-            memcpy(&localAddress[1],HCI.localAddr,6);
-            localAddress[0] = 0; // IOT 33 uses a static address
-            
-            btct.f5(HCI.DHKey,HCI.Na,HCI.Nb,BD_ADDR_REMOTE,localAddress,MacKey,HCI.LTK);
-            
-            uint8_t Ea[16];
-            uint8_t Eb[16];
-            uint8_t R[16];
-            uint8_t MasterIOCap[3];
-            uint8_t SlaveIOCap[3] = {LOCAL_AUTHREQ, 0x0, LOCAL_IOCAP};
-            
-            ATT.getPeerIOCap(connectionHandle, MasterIOCap);
-            for(int i=0; i<16; i++) R[i] = 0;
-            
-            btct.f6(MacKey, HCI.Na,HCI.Nb,R, MasterIOCap, BD_ADDR_REMOTE, localAddress, Ea);
-            btct.f6(MacKey, HCI.Nb,HCI.Na,R, SlaveIOCap, localAddress, BD_ADDR_REMOTE, Eb);
-
-
-#ifdef _BLE_TRACE_
-            Serial.println("Calculate f5, f6:");
-            Serial.print("DH          : ");
-            btct.printBytes(HCI.DHKey,32);
-            Serial.print("Na        : ");
-            btct.printBytes(HCI.Na,16);
-            Serial.print("Nb        : ");
-            btct.printBytes(HCI.Nb,16);
-            Serial.print("MAC         : ");
-            btct.printBytes(MacKey,16);
-            // Serial.print("Expected MAC: ");
-            // printBytes(EXPECTED_MAC, 16);
-            Serial.print("LTK         : ");
-            btct.printBytes(HCI.LTK,16);
-            // Serial.print("Expected LTK: ");
-            // printBytes(EXPECTED_LTK, 16);
-            Serial.print("Expected Ex : ");
-            btct.printBytes(HCI.remoteDHKeyCheckBuffer, 16);
-            Serial.print("Ea          : ");
-            btct.printBytes(Ea, 16);
-            Serial.print("Eb          : ");
-            btct.printBytes(Eb,16);
-            Serial.print("Local Addr  : ");
-            btct.printBytes(localAddress, 7);
-            Serial.print("LocalIOCap  : ");
-            btct.printBytes(SlaveIOCap, 3);
-            Serial.print("MasterAddr  : ");
-            btct.printBytes(BD_ADDR_REMOTE, 7);
-            Serial.print("MasterIOCAP : ");
-            btct.printBytes(MasterIOCap, 3);
-            Serial.println("Send Eb Back.");
-#endif
-            // Check if RemoteDHKeyCheck = Ea
-            bool EaCheck = true;
-            for(int i = 0; i < 16; i++){
-              if (Ea[i] != HCI.remoteDHKeyCheckBuffer[i]){	        
-                EaCheck = false;
-              }
-            }
-            
-            if (EaCheck){
-              // Send our confirmation value to complete authentication stage 2
-              uint8_t ret[17];
-              ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
-              for(int i=0; i<sizeof(Eb); i++){
-                ret[sizeof(Eb)-i] = Eb[i];
-              }
-              HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret );
-              ATT.setPeerEncryption(connectionHandle, encryption | PEER_ENCRYPTION::SENT_DH_CHECK);
-	    
-	  } else {
-              // If check fails, abort
-#ifdef _BLE_TRACE_
-        Serial.println("Error: DHKey check failed - Aborting");
-#endif
-              uint8_t ret[2] = {CONNECTION_PAIRING_FAILED, 0x0B}; // DHKey Check Faile
-              HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret);
-              ATT.setPeerEncryption(connectionHandle, NO_ENCRYPTION);
-            }
+            L2CAPSignaling.smCalculateLTKandConfirm(connectionHandle, HCI.remoteDHKeyCheckBuffer);
 	  
           }else{
 #ifdef _BLE_TRACE_

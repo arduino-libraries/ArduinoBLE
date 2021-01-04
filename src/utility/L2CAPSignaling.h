@@ -64,9 +64,15 @@ public:
 
   virtual void setSupervisionTimeout(uint16_t supervisionTimeout);
 
+
+
+  virtual void smCalculateLTKandConfirm(uint16_t handle, uint8_t expectedEa[]);
+
+
 private:
   virtual void connectionParameterUpdateRequest(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[]);
   virtual void connectionParameterUpdateResponse(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[]);
+
 
 private:
   uint16_t _minInterval;
