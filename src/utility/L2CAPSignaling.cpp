@@ -32,6 +32,7 @@ L2CAPSignalingClass::L2CAPSignalingClass() :
   _minInterval(0),
   _maxInterval(0),
   _supervisionTimeout(0)
+  ,_pairing_enabled(1)
 {
 }
 
@@ -131,53 +132,64 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
   btct.printBytes(data,dlen);
 #endif
   if (code == CONNECTION_PAIRING_REQUEST) {
-    // 0x1
-    struct __attribute__ ((packed)) PairingRequest {
-      uint8_t ioCapability;
-      uint8_t oobDataFlag;
-      uint8_t authReq;
-      uint8_t maxEncSize;
-      uint8_t initiatorKeyDistribution;
-      uint8_t responderKeyDistribution;
-    } *pairingRequest = (PairingRequest*)l2capSignalingHdr->data;
-
-
-    ATT.remoteKeyDistribution = KeyDistribution(pairingRequest->initiatorKeyDistribution);
-    ATT.localKeyDistribution = KeyDistribution(pairingRequest->responderKeyDistribution);
-    KeyDistribution rkd(pairingRequest->responderKeyDistribution);
-    AuthReq req(pairingRequest->authReq);
-    KeyDistribution responseKD = KeyDistribution();
-    responseKD.setIdKey(true);
+	  
+    if (isPairingEnabled()){
+      if (_pairing_enabled >= 2) _pairing_enabled = 0;  // 2 = pair once only
+      
+      // 0x1
+      struct __attribute__ ((packed)) PairingRequest {
+        uint8_t ioCapability;
+        uint8_t oobDataFlag;
+        uint8_t authReq;
+        uint8_t maxEncSize;
+        uint8_t initiatorKeyDistribution;
+        uint8_t responderKeyDistribution;
+      } *pairingRequest = (PairingRequest*)l2capSignalingHdr->data;
+     
+     
+      ATT.remoteKeyDistribution = KeyDistribution(pairingRequest->initiatorKeyDistribution);
+      ATT.localKeyDistribution = KeyDistribution(pairingRequest->responderKeyDistribution);
+      KeyDistribution rkd(pairingRequest->responderKeyDistribution);
+      AuthReq req(pairingRequest->authReq);
+      KeyDistribution responseKD = KeyDistribution();
+      responseKD.setIdKey(true);
 #ifdef _BLE_TRACE_
-    Serial.print("Req has properties: ");
-    Serial.print(req.Bonding()?"bonding, ":"no bonding, ");
-    Serial.print(req.CT2()?"CT2, ":"no CT2, ");
-    Serial.print(req.KeyPress()?"KeyPress, ":"no KeyPress, ");
-    Serial.print(req.MITM()?"MITM, ":"no MITM, ");
-    Serial.print(req.SC()?"SC, ":"no SC, ");
+      Serial.print("Req has properties: ");
+      Serial.print(req.Bonding()?"bonding, ":"no bonding, ");
+      Serial.print(req.CT2()?"CT2, ":"no CT2, ");
+      Serial.print(req.KeyPress()?"KeyPress, ":"no KeyPress, ");
+      Serial.print(req.MITM()?"MITM, ":"no MITM, ");
+      Serial.print(req.SC()?"SC, ":"no SC, ");
 #endif
     
-    uint8_t peerIOCap[3];
-    peerIOCap[0] = pairingRequest->authReq;
-    peerIOCap[1] = pairingRequest->oobDataFlag;
-    peerIOCap[2] = pairingRequest->ioCapability;
-    ATT.setPeerIOCap(connectionHandle, peerIOCap);
-    ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::PAIRING_REQUEST);
+      uint8_t peerIOCap[3];
+      peerIOCap[0] = pairingRequest->authReq;
+      peerIOCap[1] = pairingRequest->oobDataFlag;
+      peerIOCap[2] = pairingRequest->ioCapability;
+      ATT.setPeerIOCap(connectionHandle, peerIOCap);
+      ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::PAIRING_REQUEST);
 #ifdef _BLE_TRACE_
-    Serial.print("Peer encryption : 0b");
-    Serial.println(ATT.getPeerEncryption(connectionHandle), BIN);
+      Serial.print("Peer encryption : 0b");
+      Serial.println(ATT.getPeerEncryption(connectionHandle), BIN);
 #endif
-    struct __attribute__ ((packed)) PairingResponse {
-      uint8_t code;
-      uint8_t ioCapability;
-      uint8_t oobDataFlag;
-      uint8_t authReq;
-      uint8_t maxEncSize;
-      uint8_t initiatorKeyDistribution;
-      uint8_t responderKeyDistribution;
-    } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, LOCAL_AUTHREQ, 0x10, responseKD.getOctet(), responseKD.getOctet()};
-
-    HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
+      struct __attribute__ ((packed)) PairingResponse {
+        uint8_t code;
+        uint8_t ioCapability;
+        uint8_t oobDataFlag;
+        uint8_t authReq;
+        uint8_t maxEncSize;
+        uint8_t initiatorKeyDistribution;
+        uint8_t responderKeyDistribution;
+      } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, LOCAL_AUTHREQ, 0x10, responseKD.getOctet(), responseKD.getOctet()};
+     
+      HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
+      
+    } else {
+      // Pairing not enabled
+      uint8_t ret[2] = {CONNECTION_PAIRING_FAILED, 0x05}; // reqect pairing
+      HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(ret), ret);
+      ATT.setPeerEncryption(connectionHandle, NO_ENCRYPTION);
+    }
   }
   else if (code == CONNECTION_PAIRING_RANDOM)
   {
@@ -390,6 +402,15 @@ void L2CAPSignalingClass::setConnectionInterval(uint16_t minInterval, uint16_t m
 void L2CAPSignalingClass::setSupervisionTimeout(uint16_t supervisionTimeout)
 {
   _supervisionTimeout = supervisionTimeout;
+}
+
+void L2CAPSignalingClass::setPairingEnabled(uint8_t enabled)
+{
+  _pairing_enabled = enabled;
+}
+bool L2CAPSignalingClass::isPairingEnabled()
+{
+  return _pairing_enabled > 0;
 }
 
 void L2CAPSignalingClass::connectionParameterUpdateRequest(uint16_t handle, uint8_t identifier, uint8_t dlen, uint8_t data[])

@@ -75,6 +75,8 @@ public:
   virtual bool connected() const;
   virtual bool connected(uint8_t addressType, const uint8_t address[6]) const;
   virtual bool connected(uint16_t handle) const;
+  virtual bool paired() const;
+  virtual bool paired(uint16_t handle) const;
   virtual uint16_t mtu(uint16_t handle) const;
 
   virtual bool disconnect();
