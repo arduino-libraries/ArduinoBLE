@@ -18,7 +18,7 @@
 #include <ArduinoBLE.h>
 
 
-#define PAIR_BUTTON D3        // button for pairing
+#define PAIR_BUTTON 3        // button for pairing
 #define PAIR_LED 24           // LED used to signal pairing
 #define PAIR_LED_ON LOW       // Blue LED on Nano BLE has inverted logic
 #define PAIR_INTERVAL 30000   // interval for pairing after button press in ms
@@ -42,6 +42,7 @@ int oldBatteryLevel = 0;  // last battery level reading from analog input
 unsigned long previousMillis = 0;  // last time the battery level was checked, in ms
 unsigned long pairingStarted = 0;  // pairing start time when button is pressed
 bool wasConnected = 0;
+bool acceptOrReject = true;
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
@@ -53,6 +54,30 @@ void setup() {
 
 
   Serial.println("Serial connected");
+  
+  // Callback function with confirmation code when new device is pairing.
+  BLE.setDisplayCode([](uint32_t confirmCode){
+    Serial.println("New device pairing request.");
+    Serial.print("Confirm code matches pairing device: ");
+    char code[6];
+    sprintf(code, "%06d", confirmCode);
+    Serial.println(code);
+  });
+  
+  // Callback to allow accepting or rejecting pairing
+  BLE.setBinaryConfirmPairing([&acceptOrReject](){
+    Serial.print("Should we confirm pairing? ");
+    delay(5000);
+    if(acceptOrReject){
+      acceptOrReject = false;
+      Serial.println("yes");
+      return true;
+    }else{
+      acceptOrReject = true;
+      Serial.println("no");
+      return false;
+    }
+  });
 
   // IRKs are keys that identify the true owner of a random mac address.
   // Add IRKs of devices you are bonded with.
