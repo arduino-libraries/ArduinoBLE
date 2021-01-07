@@ -434,6 +434,12 @@ void BLELocalDevice::setStoreLTK(int (*storeLTK)(uint8_t*, uint8_t*)){
 void BLELocalDevice::setStoreIRK(int (*storeIRK)(uint8_t*, uint8_t*)){
   HCI._storeIRK = storeIRK;
 }
+void BLELocalDevice::setDisplayCode(void (*displayCode)(uint32_t confirmationCode)){
+  HCI._displayCode = displayCode;
+}
+void BLELocalDevice::setBinaryConfirmPairing(bool (*binaryConfirmPairing)()){
+  HCI._binaryConfirmPairing = binaryConfirmPairing;
+}
 
 void BLELocalDevice::debug(Stream& stream)
 {

@@ -49,7 +49,7 @@
 
 
 #define LOCAL_AUTHREQ 0b00101101
-#define LOCAL_IOCAP   IOCAP_NO_INPUT_NO_OUTPUT // will use JustWorks pairing
+// #define LOCAL_IOCAP   IOCAP_DISPLAY_ONLY // will use JustWorks pairing
 
 class L2CAPSignalingClass {
 public:

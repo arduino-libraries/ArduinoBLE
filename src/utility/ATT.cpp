@@ -81,6 +81,8 @@
 #define ATT_ECODE_UNSUPP_GRP_TYPE      0x10
 #define ATT_ECODE_INSUFF_RESOURCES     0x11
 
+// #define _BLE_TRACE_
+
 ATTClass::ATTClass() :
   _maxMtu(23),
   _timeout(5000),
