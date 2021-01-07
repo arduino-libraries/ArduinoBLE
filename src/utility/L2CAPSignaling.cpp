@@ -180,7 +180,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
         uint8_t maxEncSize;
         uint8_t initiatorKeyDistribution;
         uint8_t responderKeyDistribution;
-      } response = { CONNECTION_PAIRING_RESPONSE, LOCAL_IOCAP, 0, HCI.localAuthreq().getOctet(), 0x10, responseKD.getOctet(), responseKD.getOctet()};
+      } response = { CONNECTION_PAIRING_RESPONSE, HCI.localIOCap(), 0, HCI.localAuthreq().getOctet(), 0x10, responseKD.getOctet(), responseKD.getOctet()};
      
       HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
       
@@ -209,6 +209,55 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     for(int i=0; i< 16; i++) response.Nb[15-i] = HCI.Nb[i];
 
     HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(response), &response);
+
+    // We now have all needed for compare value
+    uint8_t g2Result[4];
+    uint8_t U[32];
+    uint8_t V[32];
+    
+    for(int i=0; i<32; i++){
+      U[31-i] = HCI.remotePublicKeyBuffer[i];
+      V[31-i] = HCI.localPublicKeyBuffer[i];
+    }
+
+    btct.g2(U,V,HCI.Na,HCI.Nb, g2Result);
+    uint32_t result = 0;
+    for(int i=0; i<4; i++) result += g2Result[3-i] << 8*i;
+
+#ifdef _BLE_TRACE_
+    Serial.print("U      : ");
+    btct.printBytes(U,32);
+    Serial.print("V      : ");
+    btct.printBytes(V,32);
+    Serial.print("X      : ");
+    btct.printBytes(X,16);
+    Serial.print("Y      : ");
+    btct.printBytes(Y,16);
+    Serial.print("g2res  : ");
+    btct.printBytes(g2Result,4);
+    Serial.print("Result : ");
+    Serial.println(result);
+#endif
+
+    if(HCI._displayCode!=0){
+      HCI._displayCode(result%1000000);
+    }
+    if(HCI._binaryConfirmPairing!=0){
+      if(!HCI._binaryConfirmPairing()){
+#ifdef _BLE_TRACE_
+        Serial.println("User rejection");
+#endif
+        uint8_t rejection[2];
+        rejection[0] = CONNECTION_PAIRING_FAILED;
+        rejection[1] = 0x0C; // Numeric comparison failed
+        HCI.sendAclPkt(connectionHandle, SECURITY_CID, 2, rejection);
+        ATT.setPeerEncryption(connectionHandle, PEER_ENCRYPTION::NO_ENCRYPTION);
+      }else{
+#ifdef _BLE_TRACE_
+        Serial.println("User did confirm");
+#endif
+      }
+    }
   }
   else if (code == CONNECTION_PAIRING_RESPONSE)
   {
@@ -224,6 +273,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     Serial.print("Pairing failed with code: 0x");
     Serial.println(pairingFailed->reason,HEX);
 #endif
+    ATT.setPeerEncryption(connectionHandle, PEER_ENCRYPTION::NO_ENCRYPTION);
   }
   else if (code == CONNECTION_IDENTITY_INFORMATION){
     struct __attribute__ ((packed)) IdentityInformation {
@@ -338,7 +388,7 @@ void L2CAPSignalingClass::smCalculateLTKandConfirm(uint16_t handle, uint8_t expe
   uint8_t Eb[16];
   uint8_t R[16];
   uint8_t MasterIOCap[3];
-  uint8_t SlaveIOCap[3] = {HCI.localAuthreq().getOctet(), 0x0, LOCAL_IOCAP};
+  uint8_t SlaveIOCap[3] = {HCI.localAuthreq().getOctet(), 0x0, HCI.localIOCap()};
   
   ATT.getPeerIOCap(handle, MasterIOCap);
   for(int i=0; i<16; i++) R[i] = 0;

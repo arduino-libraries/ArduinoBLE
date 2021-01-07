@@ -104,6 +104,9 @@ public:
   // address - The mac address needing its LTK
   // LTK - 16 octet LTK for the mac address
   virtual void setGetLTK(int (*getLTK)(uint8_t* address, uint8_t* LTK));
+
+  virtual void setDisplayCode(void (*displayCode)(uint32_t confirmationCode));
+  virtual void setBinaryConfirmPairing(bool (*binaryConfirmPairing)());
   uint8_t BDaddress[6];
   
 protected:

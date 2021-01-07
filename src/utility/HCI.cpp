@@ -26,7 +26,6 @@
 #include "bitDescriptions.h"
 // #define _BLE_TRACE_
 
-//#define _BLE_TRACE_
 
 #define HCI_COMMAND_PKT   0x01
 #define HCI_ACLDATA_PKT   0x02
@@ -1258,6 +1257,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
             uint8_t publicKey[64];
           } pairingPublicKey = {CONNECTION_PAIRING_PUBLIC_KEY,0};
           memcpy(pairingPublicKey.publicKey,evtReadLocalP256Complete->localPublicKey,64);
+          memcpy(localPublicKeyBuffer,      evtReadLocalP256Complete->localPublicKey,64);
 
           // Send the local public key to the remote
           uint16_t connectionHandle = ATT.getPeerEncrptingConnectionHandle();
@@ -1454,6 +1454,19 @@ int HCIClass::storeLTK(uint8_t* address, uint8_t* LTK){
     return _storeLTK(address, LTK);
   }else{
     return 0;
+  }
+}
+uint8_t HCIClass::localIOCap(){
+  if(_displayCode!=0){
+    /// We have a display
+    if(_binaryConfirmPairing!=0){
+      return IOCAP_DISPLAY_YES_NO;
+    }else{
+      return IOCAP_DISPLAY_ONLY;
+    }
+  }else{
+    // We have no display
+    return IOCAP_NO_INPUT_NO_OUTPUT;
   }
 }
 

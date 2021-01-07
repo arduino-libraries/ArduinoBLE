@@ -97,6 +97,7 @@ public:
   // Generate a 64 bit random number
   virtual int leRand(uint8_t rand[]);
   virtual AuthReq localAuthreq();
+  virtual uint8_t localIOCap();
 
   virtual int saveNewAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* remoteIrk);
   virtual int leAddResolvingAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* remoteIrk);
@@ -119,6 +120,7 @@ public:
   // TODO: Send command be private again & use ATT implementation of send command within ATT.
   virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
   uint8_t remotePublicKeyBuffer[64];
+  uint8_t localPublicKeyBuffer[64];
   uint8_t remoteDHKeyCheckBuffer[16];
   uint8_t Na[16];
   uint8_t Nb[16];
@@ -132,6 +134,8 @@ public:
   int (*_getIRKs)(uint8_t* nIRKs,uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs) = 0;
   int (*_storeLTK)(uint8_t*, uint8_t*) = 0;
   int (*_getLTK)(uint8_t*, uint8_t*) = 0;
+  void (*_displayCode)(uint32_t confirmationCode) = 0;
+  bool (*_binaryConfirmPairing)() = 0;
 
 private:
 
