@@ -26,7 +26,7 @@ BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
 const int buttonPin = PG1; // set buttonPin to digital pin PG1
-#elif defined(ARDUINO_DISCO_L475VG_IOT) || defined(ARDUINO_B_L4S5I_IOT01A)
+#elif defined(ARDUINO_B_L475E_IOT01A) || defined(ARDUINO_B_L4S5I_IOT01A)
 /* B-L475E-IOT01A1 or B_L4S5I_IOT01A */
 SPIClass SpiHCI(PC12, PC11, PC10);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000, SPI_MODE0);
