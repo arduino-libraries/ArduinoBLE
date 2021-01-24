@@ -116,7 +116,7 @@ void setup() {
   // The LTK is the secret key which is used to encrypt bluetooth traffic
   BLE.setGetLTK([](uint8_t* address, uint8_t* LTK){
     // address is input
-    Serial.print("Recieved request for address: ");
+    Serial.print("Received request for address: ");
     btct.printBytes(address,6);
 
     // Set these to the MAC and LTK of your devices after bonding.

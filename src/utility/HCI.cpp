@@ -841,7 +841,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
       if((ATT.getPeerEncryption(encryptionChange->connectionHandle)&PEER_ENCRYPTION::PAIRING_REQUEST)>0){
         if(ATT.localKeyDistribution.EncKey()){
 #ifdef _BLE_TRACE_
-          Serial.println("Enc key set but sould be ignored");
+          Serial.println("Enc key set but should be ignored");
 #endif
         }else{
 #ifdef _BLE_TRACE_
@@ -1364,7 +1364,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
 
           if((encryption & PEER_ENCRYPTION::RECEIVED_DH_CHECK) > 0){
 #ifdef _BLE_TRACE_
-            Serial.println("Recieved DHKey check already so calculate f5, f6 now.");
+            Serial.println("Received DHKey check already so calculate f5, f6 now.");
 #endif
             L2CAPSignaling.smCalculateLTKandConfirm(connectionHandle, HCI.remoteDHKeyCheckBuffer);
 	  

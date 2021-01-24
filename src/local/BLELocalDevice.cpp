@@ -123,7 +123,7 @@ int BLELocalDevice::begin()
 
   /// The HCI should allow automatic address resolution.
 
-  // // If we have callbacks to rememember bonded devices:
+  // // If we have callbacks to remember bonded devices:
   // if(HCI._getIRKs!=0){
   //   uint8_t nIRKs = 0;
   //   uint8_t** BADDR_Type = new uint8_t*;

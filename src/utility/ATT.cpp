@@ -602,7 +602,7 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
     memcpy(&notification[notificationLength], value, length);
     notificationLength += length;
 
-    /// TODO: Set encyption requirement on notify.
+    /// TODO: Set encryption requirement on notify.
     HCI.sendAclPkt(_peers[i].connectionHandle, ATT_CID, notificationLength, notification);
 
     numNotifications++;
