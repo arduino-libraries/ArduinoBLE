@@ -18,6 +18,7 @@
 */
 
 #include <Arduino.h>
+#include "BLELocalDevice.h"
 
 #include "utility/ATT.h"
 #include "utility/GAP.h"
@@ -121,10 +122,10 @@ int BLELocalCharacteristic::writeValue(const uint8_t value[], int length)
   if (_broadcast) {
     uint16_t serviceUuid = GATT.serviceUuidForCharacteristic(this);
 
-    GAP.setAdvertisedServiceData(serviceUuid, value, length);
+    BLE.setAdvertisedServiceData(serviceUuid, value, length);
   
     if (!ATT.connected() && GAP.advertising()) {
-      GAP.advertise();
+      BLE.advertise();
     }
   }
 

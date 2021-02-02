@@ -672,4 +672,7 @@ void HCIClass::setTransport(HCITransportInterface *HCITransport)
   _HCITransport = HCITransport;
 }
 
-HCIClass HCI;
+#if !defined(FAKE_HCI)
+HCIClass HCIObj;
+HCIClass& HCI = HCIObj;
+#endif
