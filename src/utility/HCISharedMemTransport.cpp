@@ -20,6 +20,7 @@
 
 #include "HCISharedMemTransport.h"
 #include "STM32Cube_FW/hw.h"
+#include "otp.h"
 
 /* Private variables ---------------------------------------------------------*/
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t BleCmdBuffer;
@@ -338,8 +339,13 @@ static bool get_bd_address(uint8_t *bd_addr)
 
     bd_found = true;
   } else {
-    bd_addr = NULL;
-    bd_found = false;
+    OTP_BT_t *p_otp = (OTP_BT_t *)OTP_Read(0);
+    if (p_otp) {
+      memcpy(bd_addr, p_otp->bd_address, CONFIG_DATA_PUBADDR_LEN);
+      bd_found = true;
+    } else {
+      bd_found = false;
+    }
   }
 
   return bd_found;
