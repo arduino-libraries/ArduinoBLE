@@ -55,6 +55,12 @@ class HCISpiTransportClass : public HCITransportInterface {
     void wait_for_blue_initialize();
     void wait_for_enable_ll_only();
     void enable_ll_only();
+    void wait_for_aci_gatt_init();
+    void aci_gatt_init();
+    void wait_for_aci_gap_init();
+    void aci_gap_init();
+    void wait_for_aci_read_config_parameter();
+    void aci_read_config_parameter();
     SPIClass *_spi;
     SPISettings _spiSettings;
     BLEChip_t _ble_chip;
@@ -66,6 +72,7 @@ class HCISpiTransportClass : public HCITransportInterface {
     uint16_t _write_index;
     uint16_t _write_index_initial;
     uint8_t _initial_phase;
+    uint8_t _random_addr[6];
 };
 
 #endif /* _HCI_SPI_TRANSPORT_H_ */
