@@ -237,12 +237,12 @@ int HCISpiTransportClass::available()
         delay(300);
       }
 
-      /* Call ACI Gatt Init and ACI Gap Init to activate the random BLE address */
+      /* Call Gatt Init and Gap Init to activate the random BLE address */
       aci_gatt_init();
       wait_for_aci_gatt_init();
       aci_gap_init();
       wait_for_aci_gap_init();
-      /* Call ACI Read Config Parameter to retrieve the random BLE address */
+      /* Call Read Config Parameter to retrieve the random BLE address */
       aci_read_config_parameter();
       wait_for_aci_read_config_parameter();
 
