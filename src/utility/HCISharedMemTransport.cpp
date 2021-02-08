@@ -898,7 +898,7 @@ int HCISharedMemTransportClass::bt_ipm_gap_init(void)
    * Role byte, enable_privacy byte, device_name_char_len byte */
   uint8_t data[4 + 3];
 
-  phase_tx_power = false;
+  phase_gap_init = false;
 
   data[0] = BT_BUF_CMD; /* the type */
   data[1] = 0x8A; /* the OPCODE */
