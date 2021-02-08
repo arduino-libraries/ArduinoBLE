@@ -559,13 +559,23 @@ size_t HCISharedMemTransportClass::write(const uint8_t *data, size_t length)
 //private:
 void HCISharedMemTransportClass::start_ble_rf(void)
 {
-  if ((LL_RCC_IsActiveFlag_PINRST()) && (!LL_RCC_IsActiveFlag_SFTRST())) {
-    /* Simulate power off reset */
-    LL_PWR_EnableBkUpAccess();
-    LL_PWR_EnableBkUpAccess();
-    LL_RCC_ForceBackupDomainReset();
-    LL_RCC_ReleaseBackupDomainReset();
+  /* Set the DBP bit in the Power control register 1 (PWR_CR1) */
+  LL_PWR_EnableBkUpAccess();
+
+  /* LSE belongs to the back-up domain, enable access.*/
+  while (!LL_PWR_IsEnabledBkUpAccess()) {
+  /* Wait for Backup domain access */
   }
+  LL_RCC_ForceBackupDomainReset();
+  LL_RCC_ReleaseBackupDomainReset();
+
+  /* Enable LSE Oscillator (32.768 kHz) */
+  LL_RCC_LSE_Enable();
+  while (!LL_RCC_LSE_IsReady()) {
+    /* Wait for LSE ready */
+  }
+
+  LL_PWR_DisableBkUpAccess();
 
   /* Switch OFF LSI as LSE is the source clock */
   LL_RCC_LSI2_Disable();
