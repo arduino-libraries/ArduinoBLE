@@ -102,7 +102,7 @@ void setup() {
   while (!Serial);
 
   // configure the button pin as input
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
 
   // initialize the BLE hardware
   BLE.begin();
