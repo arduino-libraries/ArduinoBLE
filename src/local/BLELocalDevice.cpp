@@ -39,7 +39,7 @@
 #endif
 #endif
 
-BLELocalDevice::BLELocalDevice()
+BLELocalDevice::BLELocalDevice(uint8_t ownBdaddrType): _ownBdaddrType(ownBdaddrType)
 {
   _advertisingData.setFlags(BLEFlagsGeneralDiscoverable | BLEFlagsBREDRNotSupported);
 }
@@ -206,6 +206,10 @@ int BLELocalDevice::begin()
   // }
 
   GATT.begin();
+
+  GAP.setOwnBdaddrType(_ownBdaddrType);
+
+  ATT.setOwnBdaddrType(_ownBdaddrType);
 
   return 1;
 }

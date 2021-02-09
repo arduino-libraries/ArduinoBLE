@@ -109,6 +109,10 @@ public:
   uint8_t peerIRK[16];
   /// This is just a random number... Not sure it has use unless privacy mode is active.
   uint8_t localIRK[16] = {0x54,0x83,0x63,0x7c,0xc5,0x1e,0xf7,0xec,0x32,0xdd,0xad,0x51,0x89,0x4b,0x9e,0x07};
+
+  void setOwnBdaddrType(uint8_t ownBdaddrType);
+  uint8_t getOwnBdaddrType(); // Used in L2CAPSignaling to encryption
+
 private:
   virtual void error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
   virtual void mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
@@ -170,6 +174,8 @@ private:
   } _pendingResp;
 
   BLEDeviceEventHandler _eventHandlers[2];
+
+  uint8_t _ownBdaddrType;
 };
 
 extern ATTClass& ATT;

@@ -30,9 +30,16 @@ enum Pairable {
   ONCE = 2,
 };
 
+enum AddressType {
+  PUBLIC_ADDR = 0,
+  STATIC_RANDOM_ADDR = 1,
+  RESOLVABLE_PRIVATE_ADDR = 2,
+  NON_RESOLVABLE_PRIVATE_ADDR = 3,
+};
+
 class BLELocalDevice {
 public:
-  BLELocalDevice();
+  BLELocalDevice(uint8_t ownBdaddrType = STATIC_RANDOM_ADDR);
   virtual ~BLELocalDevice();
 
   virtual int begin();
@@ -107,6 +114,7 @@ public:
 
   virtual void setDisplayCode(void (*displayCode)(uint32_t confirmationCode));
   virtual void setBinaryConfirmPairing(bool (*binaryConfirmPairing)());
+
   uint8_t BDaddress[6];
   
 protected:
@@ -116,6 +124,7 @@ protected:
 private:
   BLEAdvertisingData _advertisingData;
   BLEAdvertisingData _scanResponseData;
+  uint8_t _ownBdaddrType;
 };
 
 extern BLELocalDevice& BLE;

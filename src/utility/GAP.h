@@ -45,6 +45,8 @@ public:
 
   virtual void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);
 
+  void setOwnBdaddrType(uint8_t ownBdaddrType);
+
 protected:
   friend class HCIClass;
 
@@ -67,6 +69,7 @@ private:
   String _scanNameFilter;
   String _scanUuidFilter;
   String _scanAddressFilter;
+  uint8_t _ownBdaddrType;
 };
 
 extern GAPClass& GAP;
