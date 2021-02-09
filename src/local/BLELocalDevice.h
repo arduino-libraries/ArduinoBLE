@@ -25,9 +25,14 @@
 #include "BLEService.h"
 #include "BLEAdvertisingData.h"
 
+#define PUBLIC_ADDR                 (0)
+#define STATIC_RANDOM_ADDR          (1)
+#define RESOLVABLE_PRIVATE_ADDR     (2)
+#define NON_RESOLVABLE_PRIVATE_ADDR (3)
+
 class BLELocalDevice {
 public:
-  BLELocalDevice(HCITransportInterface *HCITransport);
+  BLELocalDevice(HCITransportInterface *HCITransport, uint8_t ownBdaddrType = STATIC_RANDOM_ADDR);
   virtual ~BLELocalDevice();
 
   virtual int begin();
@@ -90,6 +95,7 @@ private:
   HCITransportInterface *_HCITransport;
   BLEAdvertisingData _advertisingData;
   BLEAdvertisingData _scanResponseData;
+  uint8_t _ownBdaddrType;
 };
 
 extern BLELocalDevice& BLE;

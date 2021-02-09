@@ -77,6 +77,8 @@ public:
   virtual int writeReq(uint16_t connectionHandle, uint16_t handle, const uint8_t* data, uint8_t dataLen, uint8_t responseBuffer[]);
   virtual void writeCmd(uint16_t connectionHandle, uint16_t handle, const uint8_t* data, uint8_t dataLen);
 
+  void setOwnBdaddrType(uint8_t ownBdaddrType);
+
 private:
   virtual void error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
   virtual void mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[]);
@@ -135,6 +137,8 @@ private:
   } _pendingResp;
 
   BLEDeviceEventHandler _eventHandlers[2];
+
+  uint8_t _ownBdaddrType;
 };
 
 extern ATTClass& ATT;
