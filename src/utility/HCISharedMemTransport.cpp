@@ -48,11 +48,17 @@ volatile uint16_t _write_index; /* fifo position when receiving */
 /* var of different device steps during init and receiving  */
 volatile bool phase_bd_addr;
 volatile bool phase_tx_power;
+volatile bool phase_gatt_init;
+volatile bool phase_gap_init;
+volatile bool phase_random_addr;
+volatile bool phase_get_random_addr;
 volatile bool phase_reset;
 volatile bool phase_running;
+volatile bool is_random_addr_msg; 
 
 /** Bluetooth Device Address */
 static uint8_t bd_addr_udn[CONFIG_DATA_PUBADDR_LEN];
+static uint8_t helper_random_addr[6];
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -175,12 +181,21 @@ void evt_received(TL_EvtPacket_t *hcievt)
          * the Reset packet is handled at HCI layer : the running_phase begins
          */
         if (phase_running == false) {
-          /* check the Rx event of complete the previous bd_addr opcode 0xFC0C */
+          /* check the Rx event of complete the previous bd_addr or random address opcode 0xFC0C */
           if ((hcievt->evtserial.evt.evtcode == TL_BLEEVT_CC_OPCODE) &&
               (hcievt->evtserial.evt.payload[0] == 0x01) &&
               (hcievt->evtserial.evt.payload[1] == 0x0C) &&
               (hcievt->evtserial.evt.payload[2] == 0xFC)) {
-            phase_bd_addr = true;
+            /* First setting must be global address and is_random_addr_msg should be false
+             * Second setting must be static random address and is_random_addr_msg should be true
+             */
+            if(!is_random_addr_msg) {
+              phase_bd_addr = true;
+              is_random_addr_msg = true;
+            } else {
+              phase_random_addr = true;
+              is_random_addr_msg = false;
+            }
             if (hcievt->evtserial.evt.payload[3] != 0) {
 #if defined(PRINT_IPCC_INFO)
               printf("Error: wrong BD Addr\r\n");
@@ -200,6 +215,50 @@ void evt_received(TL_EvtPacket_t *hcievt)
               printf("Error: wrong Tx power\r\n");
 #endif /*(PRINT_IPCC_INFO)*/
             }
+            /* rx data is no more useful : not stored in the _rxbuff */
+            break;
+          }
+          /* check the Rx event of complete the previous gatt init 0xFD01 */
+          if ((hcievt->evtserial.evt.evtcode == TL_BLEEVT_CC_OPCODE) &&
+              (hcievt->evtserial.evt.payload[0] == 0x01) &&
+              (hcievt->evtserial.evt.payload[1] == 0x01) &&
+              (hcievt->evtserial.evt.payload[2] == 0xFD)) {
+            phase_gatt_init = true;
+            if (hcievt->evtserial.evt.payload[3] != 0) {
+#if defined(PRINT_IPCC_INFO)
+              printf("Error: wrong Random Addr\r\n");
+#endif /*(PRINT_IPCC_INFO)*/
+            }
+            /* rx data is no more useful : not stored in the _rxbuff */
+            break;
+          }
+          /* check the Rx event of complete the previous gap init 0xFC8A */
+          if ((hcievt->evtserial.evt.evtcode == TL_BLEEVT_CC_OPCODE) &&
+              (hcievt->evtserial.evt.payload[0] == 0x01) &&
+              (hcievt->evtserial.evt.payload[1] == 0x8A) &&
+              (hcievt->evtserial.evt.payload[2] == 0xFC)) {
+            phase_gap_init = true;
+            if (hcievt->evtserial.evt.payload[3] != 0) {
+#if defined(PRINT_IPCC_INFO)
+              printf("Error: wrong Random Addr\r\n");
+#endif /*(PRINT_IPCC_INFO)*/
+            }
+            /* rx data is no more useful : not stored in the _rxbuff */
+            break;
+          }
+          /* check the Rx event of complete the previous get random addr opcode 0xFC0D */
+          if ((hcievt->evtserial.evt.evtcode == TL_BLEEVT_CC_OPCODE) &&
+              (hcievt->evtserial.evt.payload[0] == 0x01) &&
+              (hcievt->evtserial.evt.payload[1] == 0x0D) &&
+              (hcievt->evtserial.evt.payload[2] == 0xFC)) {
+            if (hcievt->evtserial.evt.payload[3] != 0) {
+#if defined(PRINT_IPCC_INFO)
+              printf("Error: wrong Random Addr\r\n");
+#endif /*(PRINT_IPCC_INFO)*/
+            }
+
+            memcpy(helper_random_addr, &hcievt->evtserial.evt.payload[5], 6);
+            phase_get_random_addr = true;
             /* rx data is no more useful : not stored in the _rxbuff */
             break;
           }
@@ -389,8 +448,13 @@ HCISharedMemTransportClass::HCISharedMemTransportClass()
 
   phase_bd_addr = false;
   phase_tx_power = false;
+  phase_gatt_init = false;
+  phase_gap_init = false;
+  phase_random_addr = false;
+  phase_get_random_addr = false;
   phase_reset = false;
   phase_running = false;
+  is_random_addr_msg = false;
 }
 
 HCISharedMemTransportClass::~HCISharedMemTransportClass()
@@ -453,8 +517,13 @@ void HCISharedMemTransportClass::end()
   /* the HCI RESET command ready to be processed again */
   phase_bd_addr = false;
   phase_tx_power = false;
+  phase_gatt_init = false;
+  phase_gap_init = false;
+  phase_random_addr = false;
+  phase_get_random_addr = false;
   phase_reset = false;
   phase_running = false;
+  is_random_addr_msg = false;
 }
 
 void HCISharedMemTransportClass::wait(unsigned long timeout)
@@ -543,10 +612,33 @@ size_t HCISharedMemTransportClass::write(const uint8_t *data, size_t length)
     while (!phase_bd_addr);
     /* this sequence is now complete */
 
+    /* set the random address */
+    bt_ipm_set_random_addr();
+    /* wait for the Rx complete */
+    while (!phase_random_addr);
+
     /* set the Tx power */
     bt_ipm_set_power();
     /* wait for the Rx complete */
     while (!phase_tx_power);
+
+    /* gatt init */
+    bt_ipm_gatt_init();
+    /* wait for the Rx complete */
+    while (!phase_gatt_init);
+
+    /* gap init */
+    bt_ipm_gap_init();
+    /* wait for the Rx complete */
+    while (!phase_gap_init);
+
+    /* get the random address */
+    bt_ipm_get_random_addr();
+    /* wait for the Rx complete */
+    while (!phase_get_random_addr);
+
+    /* Now we can copy the random address and save it in the transport class */
+    memcpy(_random_addr, helper_random_addr, 6);
 
     /* this sequence is now complete */
     phase_running = true;
@@ -725,6 +817,41 @@ int HCISharedMemTransportClass::bt_ipm_set_addr(void)
   return 0; /* Error */
 }
 
+int HCISharedMemTransportClass::bt_ipm_set_random_addr(void)
+{
+  /* the specific table for set addr is 8 bytes:
+   * one byte for config_offset
+   * one byte for length
+   * 6 bytes for payload */
+  uint8_t data[4 + 8];
+
+  /*
+   * Static random Address
+   * The two upper bits shall be set to 1
+   * The lowest 32bits is read from the UDN to differentiate between devices
+   * The RNG may be used to provide a random number on each power on
+   */
+  uint32_t srd_bd_addr[2];
+
+  phase_random_addr = false;
+
+  srd_bd_addr[1] =  0x0000ED6E;
+  srd_bd_addr[0] =  LL_FLASH_GetUDN( );
+
+  data[0] = BT_BUF_CMD;
+  data[1] = uint8_t(ACI_WRITE_CONFIG_DATA_OPCODE & 0x000000FF); /* OCF */
+  data[2] = uint8_t((ACI_WRITE_CONFIG_DATA_OPCODE & 0x0000FF00) >> 8); /* OGF */
+  data[3] = 8; /* length of parameters */
+  /* fill the ACI_HAL_WRITE_CONFIG_DATA with the addr*/
+  data[4] = 0x2E; /* the offset */
+  data[5] = 6; /* is the length of the random address */
+  memcpy(data + 6, srd_bd_addr, 6);
+  /* send the ACI_HAL_WRITE_CONFIG_DATA */
+  mbox_write(data[0], 11, &data[1]);
+  /* now wait for the corresponding Rx event */
+  return 1; /* success */
+}
+
 int HCISharedMemTransportClass::bt_ipm_set_power(void)
 {
   /* the specific table for power is 2 bytes:
@@ -737,12 +864,77 @@ int HCISharedMemTransportClass::bt_ipm_set_power(void)
   data[1] = (uint8_t)(ACI_HAL_SET_TX_POWER_LEVEL & 0x000000FF); /* the OPCODE */
   data[2] = (uint8_t)((ACI_HAL_SET_TX_POWER_LEVEL & 0x0000FF00) >> 8);
   data[3] = 2; /* the length */
-  /* fill the ACI_HAL_WRITE_CONFIG_DATA */
+  /* fill the SET_POWER */
   data[4] = 0x01; /* En_High_Power */
   data[5] = CFG_TX_POWER; /* PA_level */
 
-  /* send the ACI_HAL_WRITE_CONFIG_DATA */
+  /* send the SET_POWER */
   mbox_write(data[0], 5, &data[1]);
+  /* now wait for the corresponding Rx event */
+  return 1; /* success */
+}
+
+int HCISharedMemTransportClass::bt_ipm_gatt_init(void)
+{
+  /* the specific table for gatt init */
+  uint8_t data[4];
+
+  phase_gatt_init = false;
+
+  data[0] = BT_BUF_CMD; /* the type */
+  data[1] = 0x01; /* the OPCODE */
+  data[2] = 0xFD;
+  data[3] = 0; /* the length */
+
+  /* send the GATT_INIT */
+  mbox_write(data[0], 3, &data[1]);
+  /* now wait for the corresponding Rx event */
+  return 1; /* success */
+}
+
+int HCISharedMemTransportClass::bt_ipm_gap_init(void)
+{
+  /* the specific table for gap init is 3 bytes:
+   * Role byte, enable_privacy byte, device_name_char_len byte */
+  uint8_t data[4 + 3];
+
+  phase_gap_init = false;
+
+  data[0] = BT_BUF_CMD; /* the type */
+  data[1] = 0x8A; /* the OPCODE */
+  data[2] = 0xFC;
+  data[3] = 3; /* the length */
+  /* fill the GAP_INIT */
+  data[4] = 0x0F; /* role */
+  data[5] = 0x00; /* enable_privacy */
+  data[6] = 0x00; /* device_name_char_len */
+
+  /* send the GAP_INIT */
+  mbox_write(data[0], 6, &data[1]);
+  /* now wait for the corresponding Rx event */
+  return 1; /* success */
+}
+
+int HCISharedMemTransportClass::bt_ipm_get_random_addr(void)
+{
+  /* the specific table for set addr is 8 bytes:
+   * one byte for config_offset
+   * one byte for length
+   * 6 bytes for payload */
+  uint8_t data[4 + 1];
+
+  phase_get_random_addr = false;
+
+  /* create ACI_READ_CONFIG_DATA_OPCODE */
+  data[0] = BT_BUF_CMD;
+  data[1] = uint8_t(ACI_READ_CONFIG_DATA_OPCODE & 0x000000FF); /* OCF */
+  data[2] = uint8_t((ACI_READ_CONFIG_DATA_OPCODE & 0x0000FF00) >> 8); /* OGF */
+  data[3] = 1; /* length of parameters */
+  /* fill the ACI_READ_CONFIG_DATA_OPCODE with the offset*/
+  data[4] = 0x2E; /* the offset */
+
+  /* send the ACI_READ_CONFIG_DATA_OPCODE */
+  mbox_write(data[0], 4, &data[1]);
   /* now wait for the corresponding Rx event */
   return 1; /* success */
 }

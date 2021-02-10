@@ -108,7 +108,7 @@ void setup() {
   while (!Serial);
 
   pinMode(ledPin, OUTPUT); // use the LED as an output
-  pinMode(buttonPin, INPUT); // use button pin as an input
+  pinMode(buttonPin, INPUT_PULLUP); // use button pin as an input
 
   // begin initialization
   if (!BLE.begin()) {

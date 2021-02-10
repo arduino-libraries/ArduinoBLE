@@ -23,8 +23,8 @@
 #include "utility/L2CAPSignaling.h"
 #include "BLELocalDevice.h"
 
-BLELocalDevice::BLELocalDevice(HCITransportInterface *HCITransport) :
-  _HCITransport(HCITransport) 
+BLELocalDevice::BLELocalDevice(HCITransportInterface *HCITransport, uint8_t ownBdaddrType) :
+  _HCITransport(HCITransport), _ownBdaddrType(ownBdaddrType)
 {
   _advertisingData.setFlags(BLEFlagsGeneralDiscoverable | BLEFlagsBREDRNotSupported);
 }
@@ -75,6 +75,10 @@ int BLELocalDevice::begin()
   }
 
   GATT.begin();
+
+  GAP.setOwnBdaddrType(_ownBdaddrType);
+
+  ATT.setOwnBdaddrType(_ownBdaddrType);
 
   return 1;
 }

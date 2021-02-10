@@ -54,7 +54,7 @@ int GAPClass::advertise(uint8_t* advData, uint8_t advDataLen, uint8_t* scanData,
 
   stopAdvertise();
 
-  if (HCI.leSetAdvertisingParameters(_advertisingInterval, _advertisingInterval, type, 0x00, 0x00, directBdaddr, 0x07, 0) != 0) {
+  if (HCI.leSetAdvertisingParameters(_advertisingInterval, _advertisingInterval, type, _ownBdaddrType, 0x00, directBdaddr, 0x07, 0) != 0) {
     return 0;
   }
 
@@ -91,8 +91,8 @@ int GAPClass::scan(bool withDuplicates)
     }
   }
 
-  // active scan, 10 ms scan interval (N * 0.625), 10 ms scan window (N * 0.625), public own address type, no filter
-  if (HCI.leSetScanParameters(0x01, 0x0010, 0x0010, 0x00, 0x00) != 0) {
+  // active scan, 10 ms scan interval (N * 0.625), 10 ms scan window (N * 0.625), public or static random own address type, no filter
+  if (HCI.leSetScanParameters(0x01, 0x0010, 0x0010, _ownBdaddrType, 0x00) != 0) {
     return false;
   }
 
@@ -268,6 +268,11 @@ bool GAPClass::matchesScanFilter(const BLEDevice& device)
   }
 
   return true;
+}
+
+void GAPClass::setOwnBdaddrType(uint8_t ownBdaddrType)
+{
+  _ownBdaddrType = ownBdaddrType;
 }
 
 #if !defined(FAKE_GAP)

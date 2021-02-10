@@ -87,8 +87,13 @@ class HCISharedMemTransportClass : public HCITransportInterface {
     int stm32wb_start_ble(void);
     int bt_ipm_ble_init(void);
     int bt_ipm_set_addr(void);
+    int bt_ipm_set_random_addr(void);
     int bt_ipm_set_power(void);
+    int bt_ipm_gatt_init(void);
+    int bt_ipm_gap_init(void);
+    int bt_ipm_get_random_addr(void);
 
+    uint8_t _random_addr[6];
 };
 
 #endif /* _HCI_SHARED_MEM_TRANSPORT_H_ */
