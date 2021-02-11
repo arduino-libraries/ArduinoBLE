@@ -324,7 +324,7 @@ void evt_received(TL_EvtPacket_t *hcievt)
   }
 }
 
-/* to send BLE packet to the SharedMem */
+/* to send BLE packet to the SharedMem : return nb of bytes actually written */
 uint16_t mbox_write(uint8_t type, uint16_t len, const uint8_t *pData)
 {
   TL_CmdPacket_t *bleCmdBuf = &BleCmdBuffer;
@@ -598,8 +598,10 @@ size_t HCISharedMemTransportClass::write(const uint8_t *data, size_t length)
   if ((data[1] == 0x03) && (data[2] == 0x0C)) {
     phase_reset = false;
 
-    mbox_write(data[0], (length - 1), msg_data);
-
+    if (mbox_write(data[0], (length - 1), msg_data) != (length - 1)) {
+      /* Error: no data are written */
+      return 0;
+    }
     /* capture event after HCI_RESET */
     while (!phase_reset);
 
@@ -645,7 +647,7 @@ size_t HCISharedMemTransportClass::write(const uint8_t *data, size_t length)
 
     return (length - 1); /* mbox_size of the HCI reset command */
   }
-  return 0; /* mbox_size of the HCI reset command */
+  return 0; /* Error: no data written */
 }
 
 //private:
@@ -810,7 +812,10 @@ int HCISharedMemTransportClass::bt_ipm_set_addr(void)
     data[5] = 6; /* is the length of the bd_addr table */
     memcpy(data + 6, bd_addr_udn, 6);
     /* send the ACI_HAL_WRITE_CONFIG_DATA */
-    mbox_write(data[0], 11, &data[1]);
+    if (mbox_write(data[0], 11, &data[1]) != 11) {
+      /* Error: no data are written */
+      return 0;
+    }
     /* now wait for the corresponding Rx event */
     return 1; /* success */
   }
@@ -847,7 +852,10 @@ int HCISharedMemTransportClass::bt_ipm_set_random_addr(void)
   data[5] = 6; /* is the length of the random address */
   memcpy(data + 6, srd_bd_addr, 6);
   /* send the ACI_HAL_WRITE_CONFIG_DATA */
-  mbox_write(data[0], 11, &data[1]);
+  if (mbox_write(data[0], 11, &data[1]) != 11) {
+    /* Error: no data are written */
+    return 0;
+  }
   /* now wait for the corresponding Rx event */
   return 1; /* success */
 }
@@ -869,7 +877,10 @@ int HCISharedMemTransportClass::bt_ipm_set_power(void)
   data[5] = CFG_TX_POWER; /* PA_level */
 
   /* send the SET_POWER */
-  mbox_write(data[0], 5, &data[1]);
+  if (mbox_write(data[0], 5, &data[1]) != 5) {
+    /* Error: no data are written */
+    return 0;
+  }
   /* now wait for the corresponding Rx event */
   return 1; /* success */
 }
@@ -887,7 +898,10 @@ int HCISharedMemTransportClass::bt_ipm_gatt_init(void)
   data[3] = 0; /* the length */
 
   /* send the GATT_INIT */
-  mbox_write(data[0], 3, &data[1]);
+  if (mbox_write(data[0], 3, &data[1]) != 3) {
+    /* Error: no data are written */
+    return 0;
+  }
   /* now wait for the corresponding Rx event */
   return 1; /* success */
 }
@@ -910,7 +924,10 @@ int HCISharedMemTransportClass::bt_ipm_gap_init(void)
   data[6] = 0x00; /* device_name_char_len */
 
   /* send the GAP_INIT */
-  mbox_write(data[0], 6, &data[1]);
+  if (mbox_write(data[0], 6, &data[1]) != 6) {
+    /* Error: no data are written */
+    return 0;
+  }
   /* now wait for the corresponding Rx event */
   return 1; /* success */
 }
@@ -934,7 +951,10 @@ int HCISharedMemTransportClass::bt_ipm_get_random_addr(void)
   data[4] = 0x2E; /* the offset */
 
   /* send the ACI_READ_CONFIG_DATA_OPCODE */
-  mbox_write(data[0], 4, &data[1]);
+  if (mbox_write(data[0], 4, &data[1]) != 4) {
+    /* Error: no data are written */
+    return 0;
+  }
   /* now wait for the corresponding Rx event */
   return 1; /* success */
 }
