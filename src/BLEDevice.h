@@ -84,6 +84,7 @@ public:
   BLECharacteristic characteristic(int index) const;
   BLECharacteristic characteristic(const char * uuid) const;
   BLECharacteristic characteristic(const char * uuid, int index) const;
+  int getRawAdvertisement(uint8_t *value, int length);
 
 protected:
   friend class ATTClass;
