@@ -23,7 +23,7 @@
 
 #if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
 #define SerialHCI Serial2
-#elif defined(ARDUINO_SAMD_NANO_33_IOT)
+#elif defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
 // SerialHCI is already defined in the variant
 #elif defined(ARDUINO_PORTENTA_H7_M4)
 // SerialHCI is already defined in the variant
@@ -93,7 +93,7 @@ size_t HCIUartTransportClass::write(const uint8_t* data, size_t length)
   return result;
 }
 
-#ifdef ARDUINO_AVR_UNO_WIFI_REV2
+#if defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_NANO_RP2040_CONNECT)
 HCIUartTransportClass HCIUartTransport(SerialHCI, 119600);
 #else
 HCIUartTransportClass HCIUartTransport(SerialHCI, 912600);
