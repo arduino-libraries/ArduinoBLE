@@ -1,23 +1,23 @@
 name: Compile Examples
-on: [push, pull_request]
+on:
+  - push
+  - pull_request
+
 jobs:
- build:
-   runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-   strategy:
-     matrix:
-       fqbn: [
-         "arduino:samd:mkrwifi1010",
-         "arduino:samd:nano_33_iot",
-         "arduino:megaavr:uno2018:mode=on",
-         "arduino:mbed:nano33ble"
-       ]
+    strategy:
+      matrix:
+        fqbn:
+          - arduino:samd:mkrwifi1010
+          - arduino:samd:nano_33_iot
+          - arduino:megaavr:uno2018:mode=on
+          - arduino:mbed:nano33ble
 
-   steps:
-     - uses: actions/checkout@v1
-       with:
-         fetch-depth: 1
-     - uses: arduino/actions/libraries/compile-examples@master
-       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-         fqbn: ${{ matrix.fqbn }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{ matrix.fqbn }}
