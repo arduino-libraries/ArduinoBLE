@@ -34,7 +34,7 @@ static int notify_host_recv(uint8_t *data, uint16_t length)
   for (uint8_t i = 0; i < length; i++) {
     char b = data[i];
   }
-	xStreamBufferSend(rec_buffer,data,length,portMAX_DELAY);  // !!!potentially waiting forever
+  xStreamBufferSend(rec_buffer,data,length,portMAX_DELAY);  // !!!potentially waiting forever
   return 0;
 }
 
@@ -46,12 +46,12 @@ static esp_vhci_host_callback_t vhci_host_cb = {
 void bleTask(void *pvParameters)
 {
   esp_vhci_host_register_callback(&vhci_host_cb);
-	size_t length;
-	uint8_t mybuf[256];
+  size_t length;
+  uint8_t mybuf[256];
 
   while(true){
-		length = xStreamBufferReceive(send_buffer,mybuf,256,portMAX_DELAY);
-		while (!esp_vhci_host_check_send_available()) {}
+    length = xStreamBufferReceive(send_buffer,mybuf,256,portMAX_DELAY);
+    while (!esp_vhci_host_check_send_available()) {}
     for (uint8_t i = 0; i < length; i++) {
       char b = mybuf[i];
     }
@@ -70,28 +70,28 @@ HCIVirtualTransportClass::~HCIVirtualTransportClass()
 
 int HCIVirtualTransportClass::begin()
 {
-	btStarted(); // this somehow stops the arduino ide from initializing bluedroid
+  btStarted(); // this somehow stops the arduino ide from initializing bluedroid
 
-	rec_buffer = xStreamBufferCreate(258, 1);
+  rec_buffer = xStreamBufferCreate(258, 1);
   send_buffer = xStreamBufferCreate(258, 1);
 
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
   }
   ESP_ERROR_CHECK( ret );
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-	bt_cfg.mode = ESP_BT_MODE_BLE;
+  bt_cfg.mode = ESP_BT_MODE_BLE;
   ret = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
   if (ret) {
-      return 0;
+    return 0;
   }
   if ((ret = esp_bt_controller_init(&bt_cfg)) != ESP_OK) {
-      return 0;
+    return 0;
   }
   if ((ret = esp_bt_controller_enable(ESP_BT_MODE_BLE)) != ESP_OK) {
-      return 0;
+    return 0;
   }
   xTaskCreatePinnedToCore(&bleTask, "bleTask", 2048, NULL, 5, NULL, 0);
   return 1;
@@ -99,7 +99,7 @@ int HCIVirtualTransportClass::begin()
 
 void HCIVirtualTransportClass::end()
 {
-	vStreamBufferDelete(rec_buffer);
+  vStreamBufferDelete(rec_buffer);
   vStreamBufferDelete(send_buffer);
   esp_bt_controller_deinit();
 }
@@ -127,8 +127,8 @@ int HCIVirtualTransportClass::peek()
 
 int HCIVirtualTransportClass::read()
 {
-	uint8_t c;
-	if(xStreamBufferReceive(rec_buffer, &c, 1, portMAX_DELAY)) {
+  uint8_t c;
+  if(xStreamBufferReceive(rec_buffer, &c, 1, portMAX_DELAY)) {
     return c;
   }
   return -1;
@@ -136,7 +136,7 @@ int HCIVirtualTransportClass::read()
 
 size_t HCIVirtualTransportClass::write(const uint8_t* data, size_t length)
 {
-	size_t result = xStreamBufferSend(send_buffer,data,length,portMAX_DELAY);
+  size_t result = xStreamBufferSend(send_buffer,data,length,portMAX_DELAY);
   return result;
 }
 
