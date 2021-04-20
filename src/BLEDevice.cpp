@@ -205,6 +205,49 @@ int BLEDevice::advertisementData(uint8_t value[], int length) const
   return length;
 }
 
+bool BLEDevice::hasManufacturerData() const
+{
+  return (manufacturerDataLength() > 0);
+}
+
+int BLEDevice::manufacturerDataLength() const
+{
+  int length = 0;
+
+  for (int i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+
+    if (eirType == 0xFF) {
+      length = (eirLength - 1);
+      break;
+    }
+
+    i += (eirLength - 1);
+  }
+
+  return length;
+}
+
+int BLEDevice::manufacturerData(uint8_t value[], int length) const
+{
+  for (int i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+
+    if (eirType == 0xFF) {
+      if (length > (eirLength - 1)) length = (eirLength - 1);
+
+      memcpy(value, &_eirData[i], length);
+      break;
+    }
+
+    i += (eirLength - 1);
+  }
+
+  return length;
+}
+
 int BLEDevice::rssi()
 {
   uint16_t handle = ATT.connectionHandle(_addressType, _address);

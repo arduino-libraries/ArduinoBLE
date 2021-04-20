@@ -63,6 +63,10 @@ public:
   int advertisementDataLength() const;
   int advertisementData(uint8_t value[], int length) const;
 
+  bool hasManufacturerData() const;
+  int manufacturerDataLength() const;
+  int manufacturerData(uint8_t value[], int length) const;
+
   virtual int rssi();
 
   bool connect();
