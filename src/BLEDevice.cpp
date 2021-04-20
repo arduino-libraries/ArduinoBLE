@@ -184,6 +184,16 @@ String BLEDevice::advertisedServiceUuid(int index) const
   return serviceUuid;
 }
 
+bool BLEDevice::hasAdvertisementData() const
+{
+  return (_eirDataLength > 0);
+}
+
+int BLEDevice::advertisementDataLength() const
+{
+  return _eirDataLength;
+}
+
 int BLEDevice::advertisementData(uint8_t value[], int length) const
 {
   if (length > _eirDataLength) length = _eirDataLength;
