@@ -184,15 +184,15 @@ String BLEDevice::advertisedServiceUuid(int index) const
   return serviceUuid;
 }
 
-int BLEDevice::advertisementData(uint8_t value[], int length)
+int BLEDevice::advertisementData(uint8_t value[], int length) const
 {
-  if (_eirDataLength > length) return 0;  // Check that buffer size is sufficient
+  if (length > _eirDataLength) length = _eirDataLength;
 
-  if (_eirDataLength) {
-    memcpy(value, _eirData, _eirDataLength);
+  if (length) {
+    memcpy(value, _eirData, length);
   }
 
-  return _eirDataLength;
+  return length;
 }
 
 int BLEDevice::rssi()

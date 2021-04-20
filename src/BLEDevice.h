@@ -59,7 +59,7 @@ public:
   String advertisedServiceUuid() const;
   String advertisedServiceUuid(int index) const;
 
-  int advertisementData(uint8_t value[], int length);
+  int advertisementData(uint8_t value[], int length) const;
 
   virtual int rssi();
 
