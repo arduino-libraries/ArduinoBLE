@@ -25,6 +25,31 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
 
 const int ledPin = LED_BUILTIN; // pin to use for the LED
 
+void blePeripheralConnectHandler(BLEDevice central) {
+  // central connected event handler
+  Serial.print("Connected event, central: ");
+  Serial.println(central.address());
+}
+
+void blePeripheralDisconnectHandler(BLEDevice central) {
+  // central disconnected event handler
+  Serial.print("Disconnected event, central: ");
+  Serial.println(central.address());
+}
+
+void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
+  // central wrote new value to characteristic, update LED
+  Serial.print("Characteristic event, written: ");
+
+  if (switchCharacteristic.value()) {
+    Serial.println("LED on");
+    digitalWrite(ledPin, HIGH);
+  } else {
+    Serial.println("LED off");
+    digitalWrite(ledPin, LOW);
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   while (!Serial);
@@ -69,27 +94,3 @@ void loop() {
   BLE.poll();
 }
 
-void blePeripheralConnectHandler(BLEDevice central) {
-  // central connected event handler
-  Serial.print("Connected event, central: ");
-  Serial.println(central.address());
-}
-
-void blePeripheralDisconnectHandler(BLEDevice central) {
-  // central disconnected event handler
-  Serial.print("Disconnected event, central: ");
-  Serial.println(central.address());
-}
-
-void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
-  // central wrote new value to characteristic, update LED
-  Serial.print("Characteristic event, written: ");
-
-  if (switchCharacteristic.value()) {
-    Serial.println("LED on");
-    digitalWrite(ledPin, HIGH);
-  } else {
-    Serial.println("LED off");
-    digitalWrite(ledPin, LOW);
-  }
-}
