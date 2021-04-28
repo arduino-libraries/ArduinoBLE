@@ -14,6 +14,7 @@ jobs:
           - arduino:samd:nano_33_iot
           - arduino:megaavr:uno2018:mode=on
           - arduino:mbed:nano33ble
+          - arduino:mbed_nano:nanorp2040connect
 
     steps:
       - uses: actions/checkout@v2
