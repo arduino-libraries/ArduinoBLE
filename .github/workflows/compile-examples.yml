@@ -4,20 +4,20 @@ on:
   - pull_request
 
 jobs:
- build:
-   runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-   strategy:
-     matrix:
-       fqbn: [
-         '"STM32:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
-         '"STM32:stm32:Nucleo_64:pnum=NUCLEO_L476RG" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
-         '"STM32:stm32:Disco:pnum=B_L475E_IOT01A" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"'
-       ]
+    strategy:
+      matrix:
+        fqbn: [
+          '"STM32:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
+          '"STM32:stm32:Nucleo_64:pnum=NUCLEO_L476RG" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
+          '"STM32:stm32:Disco:pnum=B_L475E_IOT01A" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"'
+        ]
 
-   steps:
-     - uses: actions/checkout@v2
-     - uses: arduino/compile-sketches@v1
-       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-         fqbn: ${{ matrix.fqbn }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{ matrix.fqbn }}
