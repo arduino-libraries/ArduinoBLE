@@ -9,11 +9,11 @@ jobs:
 
     strategy:
       matrix:
-        fqbn: [
-          '"STM32:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
-          '"STM32:stm32:Nucleo_64:pnum=NUCLEO_L476RG" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"',
-          '"STM32:stm32:Disco:pnum=B_L475E_IOT01A" "https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"'
-        ]
+        fqbn:
+          - STMicroelectronics:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen
+          - STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_L476RG
+          - STMicroelectronics:stm32:Disco:pnum=B_L475E_IOT01A
+          - STMicroelectronics:stm32:Nucleo_64:pnum=P_NUCLEO_WB55RG
 
     steps:
       - uses: actions/checkout@v2
@@ -21,3 +21,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.fqbn }}
+          platforms: |
+            - source-url: https://github.com/stm32duino/BoardManagerFiles/raw/master/package_stmicroelectronics_index.json
+              name: STMicroelectronics:stm32
