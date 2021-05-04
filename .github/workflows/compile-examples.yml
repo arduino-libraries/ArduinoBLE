@@ -18,4 +18,5 @@ jobs:
          fetch-depth: 1
      - uses: arduino/actions/libraries/compile-examples@master
        with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
          fqbn: ${{ matrix.fqbn }}
