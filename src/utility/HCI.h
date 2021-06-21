@@ -64,7 +64,7 @@ public:
   virtual int leCancelConn();
 
 
-  virtual int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
+  virtual int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, const void* data);
 
   virtual int disconnect(uint16_t handle);
 
@@ -72,7 +72,7 @@ public:
   virtual void noDebug();
 
 private:
-  virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
+  virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, const void* parameters = nullptr);
 
   virtual void handleAclDataPkt(uint8_t plen, uint8_t pdata[]);
   virtual void handleNumCompPkts(uint16_t handle, uint16_t numPkts);
