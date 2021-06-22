@@ -33,13 +33,14 @@ class BLELocalDescriptor;
 
 class BLELocalCharacteristic : public BLELocalAttribute {
 public:
-  BLELocalCharacteristic(const char* uuid, uint8_t properties, int valueSize, bool fixedLength = false);
-  BLELocalCharacteristic(const char* uuid, uint8_t properties, const char* value);
+  BLELocalCharacteristic(const char* uuid, uint16_t permissions, int valueSize, bool fixedLength = false);
+  BLELocalCharacteristic(const char* uuid, uint16_t permissions, const char* value);
   virtual ~BLELocalCharacteristic();
 
   virtual enum BLEAttributeType type() const;
 
   uint8_t properties() const;
+  uint8_t permissions() const;
 
   int valueSize() const;
   const uint8_t* value() const;
@@ -75,6 +76,7 @@ protected:
 
 private:
   uint8_t  _properties;
+  uint8_t  _permissions;
   int      _valueSize;
   uint8_t* _value;
   uint16_t  _valueLength;

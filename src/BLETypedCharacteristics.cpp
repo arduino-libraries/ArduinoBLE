@@ -21,72 +21,72 @@
 
 #include "BLETypedCharacteristics.h"
 
-BLEBoolCharacteristic::BLEBoolCharacteristic(const char* uuid, unsigned char properties) :
+BLEBoolCharacteristic::BLEBoolCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<bool>(uuid, properties)
 {
 }
 
-BLEBooleanCharacteristic::BLEBooleanCharacteristic(const char* uuid, unsigned char properties) :
+BLEBooleanCharacteristic::BLEBooleanCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<bool>(uuid, properties)
 {
 }
 
-BLECharCharacteristic::BLECharCharacteristic(const char* uuid, unsigned char properties) :
+BLECharCharacteristic::BLECharCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<char>(uuid, properties)
 {
 }
 
-BLEUnsignedCharCharacteristic::BLEUnsignedCharCharacteristic(const char* uuid, unsigned char properties) :
+BLEUnsignedCharCharacteristic::BLEUnsignedCharCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<unsigned char>(uuid, properties)
 {
 }
 
-BLEByteCharacteristic::BLEByteCharacteristic(const char* uuid, unsigned char properties) :
+BLEByteCharacteristic::BLEByteCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<byte>(uuid, properties)
 {
 }
 
-BLEShortCharacteristic::BLEShortCharacteristic(const char* uuid, unsigned char properties) :
+BLEShortCharacteristic::BLEShortCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<short>(uuid, properties)
 {
 }
 
-BLEUnsignedShortCharacteristic::BLEUnsignedShortCharacteristic(const char* uuid, unsigned char properties) :
+BLEUnsignedShortCharacteristic::BLEUnsignedShortCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<unsigned short>(uuid, properties)
 {
 }
 
-BLEWordCharacteristic::BLEWordCharacteristic(const char* uuid, unsigned char properties) :
+BLEWordCharacteristic::BLEWordCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<word>(uuid, properties)
 {
 }
 
-BLEIntCharacteristic::BLEIntCharacteristic(const char* uuid, unsigned char properties) :
+BLEIntCharacteristic::BLEIntCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<int>(uuid, properties) 
 {
 }
 
-BLEUnsignedIntCharacteristic::BLEUnsignedIntCharacteristic(const char* uuid, unsigned char properties) :
+BLEUnsignedIntCharacteristic::BLEUnsignedIntCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<unsigned int>(uuid, properties)
 {
 }
 
-BLELongCharacteristic::BLELongCharacteristic(const char* uuid, unsigned char properties) :
+BLELongCharacteristic::BLELongCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<long>(uuid, properties)
 {
 }
 
-BLEUnsignedLongCharacteristic::BLEUnsignedLongCharacteristic(const char* uuid, unsigned char properties) :
+BLEUnsignedLongCharacteristic::BLEUnsignedLongCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<unsigned long>(uuid, properties)
 {
 }
 
-BLEFloatCharacteristic::BLEFloatCharacteristic(const char* uuid, unsigned char properties) :
+BLEFloatCharacteristic::BLEFloatCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<float>(uuid, properties)
 {
 }
 
-BLEDoubleCharacteristic::BLEDoubleCharacteristic(const char* uuid, unsigned char properties) :
+BLEDoubleCharacteristic::BLEDoubleCharacteristic(const char* uuid, unsigned int properties) :
   BLETypedCharacteristic<double>(uuid, properties)
 {
 }
