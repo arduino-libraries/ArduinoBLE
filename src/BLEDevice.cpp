@@ -184,6 +184,17 @@ String BLEDevice::advertisedServiceUuid(int index) const
   return serviceUuid;
 }
 
+int BLEDevice::advertisementData(uint8_t value[], int length)
+{
+  if (_eirDataLength > length) return 0;  // Check that buffer size is sufficient
+
+  if (_eirDataLength) {
+    memcpy(value, _eirData, _eirDataLength);
+  }
+
+  return _eirDataLength;
+}
+
 int BLEDevice::rssi()
 {
   uint16_t handle = ATT.connectionHandle(_addressType, _address);
