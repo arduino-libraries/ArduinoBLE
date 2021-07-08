@@ -23,7 +23,6 @@
 #include "HCITransport.h"
 
 /* STM32WB include files */
-#include "stm32wb55xx.h"
 #include "stm32wbxx_ll_rcc.h"
 #include "stm32wbxx_ll_ipcc.h"
 #include "stm32wbxx_ll_system.h"
