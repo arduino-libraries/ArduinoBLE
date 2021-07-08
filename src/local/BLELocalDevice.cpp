@@ -21,6 +21,7 @@
 #include "utility/GAP.h"
 #include "utility/GATT.h"
 #include "utility/L2CAPSignaling.h"
+
 #include "BLELocalDevice.h"
 
 BLELocalDevice::BLELocalDevice(HCITransportInterface *HCITransport, uint8_t ownBdaddrType) :
