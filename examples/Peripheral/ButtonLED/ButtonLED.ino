@@ -72,7 +72,7 @@ void loop() {
   char buttonValue = digitalRead(buttonPin);
 
   // has the value changed since the last read
-  boolean buttonChanged = (buttonCharacteristic.value() != buttonValue);
+  bool buttonChanged = (buttonCharacteristic.value() != buttonValue);
 
   if (buttonChanged) {
     // button state changed, update characteristics
