@@ -30,8 +30,7 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000,
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-#elif defined(ARDUINO_P_NUCLEO_WB55RG)
-/* PNUCLEO_WB55RG */
+#elif defined(ARDUINO_P_NUCLEO_WB55RG) || defined(ARDUINO_STM32WB5MM_DK)
 HCISharedMemTransportClass HCISharedMemTransport;
 #if !defined(FAKE_BLELOCALDEVICE)
 BLELocalDevice BLEObj(&HCISharedMemTransport);
