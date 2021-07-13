@@ -109,8 +109,9 @@ ATTClass::~ATTClass()
 
 bool ATTClass::connect(uint8_t peerBdaddrType, uint8_t peerBdaddr[6])
 {
+  // original supervision timeout "0x00c8" seems to be too short for Nano 33 BLE (2 seconds)
   if (HCI.leCreateConn(0x0060, 0x0030, 0x00, peerBdaddrType, peerBdaddr, 0x00,
-                        0x0006, 0x000c, 0x0000, 0x00c8, 0x0004, 0x0006) != 0) {
+                        0x001c, 0x0020, 0x0000, 1000, 0x0004, 0x0006) != 0) { 
     return false;
   }
 
@@ -497,17 +498,76 @@ bool ATTClass::disconnect()
   return (numDisconnects > 0);
 }
 
-BLEDevice ATTClass::central()
+BLEDevice ATTClass::central() 
 {
+  return central(0);
+}
+
+BLEDevice ATTClass::central(int index) 
+{
+  int currentIndex = 0;
   for (int i = 0; i < ATT_MAX_PEERS; i++) {
     if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x01) {
       continue;
     }
 
-    return BLEDevice(_peers[i].addressType, _peers[i].address);
+    if (currentIndex == index) {
+      return BLEDevice(_peers[i].addressType, _peers[i].address);
+    }
+    currentIndex++;
   }
 
   return BLEDevice();
+}
+
+int ATTClass::centralCount()
+{
+  int count = 0;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x01) {
+      continue;
+    }
+
+    count++;
+  }
+
+  return count;
+}
+
+BLEDevice ATTClass::peripheral()
+{
+  return peripheral(0);
+}
+
+BLEDevice ATTClass::peripheral(int index)
+{
+  int currentIndex = 0;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x00) {
+      continue;
+    }
+
+    if (currentIndex == index) {
+      return BLEDevice(_peers[i].addressType, _peers[i].address);
+    }
+    currentIndex++;
+  }
+
+  return BLEDevice();
+}
+
+int ATTClass::peripheralCount()
+{
+  int count = 0;
+  for (int i = 0; i < ATT_MAX_PEERS; i++) {
+    if (_peers[i].connectionHandle == 0xffff || _peers[i].role != 0x00) {
+      continue;
+    }
+
+    count++;
+  }
+
+  return count;
 }
 
 bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)

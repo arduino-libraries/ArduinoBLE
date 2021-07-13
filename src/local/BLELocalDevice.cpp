@@ -297,6 +297,41 @@ BLEDevice BLELocalDevice::central()
   return ATT.central();
 }
 
+BLEDevice BLELocalDevice::central(int index)
+{
+  HCI.poll();
+
+  return ATT.central(index);
+}
+
+int BLELocalDevice::centralCount()
+{
+  HCI.poll();
+
+  return ATT.centralCount();
+}
+
+BLEDevice BLELocalDevice::peripheral() 
+{
+  HCI.poll();
+
+  return ATT.peripheral();
+}
+
+BLEDevice BLELocalDevice::peripheral(int index) 
+{
+  HCI.poll();
+
+  return ATT.peripheral(index);
+}
+
+int BLELocalDevice::peripheralCount()
+{
+  HCI.poll();
+
+  return ATT.peripheralCount();
+}
+
 BLEDevice BLELocalDevice::available()
 {
   HCI.poll();

@@ -84,7 +84,8 @@ void GAPClass::stopAdvertise()
 
 int GAPClass::scan(bool withDuplicates)
 {
-  HCI.leSetScanEnable(false, true);
+  //HCI.leSetScanEnable(false, true);
+  stopScan();
 
   // active scan, 10 ms scan interval (N * 0.625), 10 ms scan window (N * 0.625), public own address type, no filter
   if (HCI.leSetScanParameters(0x01, 0x0010, 0x0010, 0x00, 0x00) != 0) {
@@ -129,7 +130,8 @@ int GAPClass::scanForAddress(String address, bool withDuplicates)
 
 void GAPClass::stopScan()
 {
-  HCI.leSetScanEnable(false, false);
+  //HCI.leSetScanEnable(false, false);
+  HCI.leSetScanEnable(false, true);
 
   _scanning = false;
 
