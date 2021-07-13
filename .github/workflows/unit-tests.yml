@@ -1,0 +1,45 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/unit-tests.yml"
+      - 'extras/test/**'
+      - 'src/**'
+
+  push:
+    paths:
+      - ".github/workflows/unit-tests.yml"
+      - 'extras/test/**'
+      - 'src/**'
+
+jobs:
+  test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+
+    env:
+      COVERAGE_DATA_PATH: extras/coverage-data/coverage.info
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: arduino/cpp-test-action@main
+        with:
+          runtime-paths: |
+            - extras/test/build/bin/TEST_TARGET_UUID
+            - extras/test/build/bin/TEST_TARGET_DISC_DEVICE
+            - extras/test/build/bin/TEST_TARGET_ADVERTISING_DATA
+          coverage-exclude-paths: |
+            - '*/extras/test/*'
+            - '/usr/*'
+          coverage-data-path: ${{ env.COVERAGE_DATA_PATH }}
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: "${{ env.COVERAGE_DATA_PATH }}"
+          fail_ci_if_error: true
+
+          

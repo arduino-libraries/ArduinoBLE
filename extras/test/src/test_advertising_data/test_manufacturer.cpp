@@ -29,7 +29,7 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
 {
   BLEAdvertisingData advData;
   int oldRemainingLength = advData.remainingLength();
-  uint16_t companyId = 0x1100;
+  const uint16_t companyId = 0x1100;
   bool retVal;
 
   WHEN("Set correct manufacturer data without id")
@@ -38,8 +38,11 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
     const uint8_t goldenData[] = {(sizeof(data) + 1), BLEFieldManufacturerData, 
                                   0x00, 0x11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     retVal = advData.setManufacturerData(data, sizeof(data));
-    REQUIRE(retVal);
-    REQUIRE( (sizeof(data) + 2) == (oldRemainingLength - advData.remainingLength()) );
+    THEN("Check that the manufacturer data has been correctly set")
+    {
+      REQUIRE(retVal);
+      REQUIRE( (sizeof(data) + 2) == (oldRemainingLength - advData.remainingLength()) );
+    }
     oldRemainingLength = advData.remainingLength();
 
     advData.updateData();
@@ -53,8 +56,11 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
     const uint8_t goldenData[] = {(sizeof(data) + sizeof(companyId) + 1), BLEFieldManufacturerData, 
                                   0x00, 0x11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     retVal = advData.setManufacturerData(companyId, data, sizeof(data));
-    REQUIRE(retVal);
-    REQUIRE( (sizeof(data) + sizeof(companyId) + 2) == (oldRemainingLength - advData.remainingLength()) );
+    THEN("Check that the manufacturer data has been correctly set")
+    {
+      REQUIRE(retVal);
+      REQUIRE( (sizeof(data) + sizeof(companyId) + 2) == (oldRemainingLength - advData.remainingLength()) );
+    }
     oldRemainingLength = advData.remainingLength();
 
     advData.updateData();
@@ -68,8 +74,11 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
     const uint8_t data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27};
     retVal = advData.setManufacturerData(companyId, data, sizeof(data));
-    REQUIRE(!retVal);
-    REQUIRE( oldRemainingLength == advData.remainingLength() );
+    THEN("Manufacturer data was too long, check that it has not been set")
+    {
+      REQUIRE(!retVal);
+      REQUIRE( oldRemainingLength == advData.remainingLength() );
+    }
     advData.updateData();
     REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH - oldRemainingLength) );
   }
@@ -80,8 +89,11 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
     const uint8_t data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29};
     retVal = advData.setManufacturerData(data, sizeof(data));
-    REQUIRE(!retVal);
-    REQUIRE( oldRemainingLength == advData.remainingLength() );
+    THEN("Manufacturer data was too long, check that it has not been set")
+    {
+      REQUIRE(!retVal);
+      REQUIRE( oldRemainingLength == advData.remainingLength() );
+    }
     advData.updateData();
     REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH - oldRemainingLength) );
   }
@@ -93,13 +105,19 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
                                   16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
     const uint8_t data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28};
-    retVal = advData.setManufacturerData(companyId, dataGivenId, sizeof(dataGivenId));
-    REQUIRE(retVal);
-    retVal = advData.setManufacturerData(data, sizeof(data));
-    REQUIRE(retVal);
-    REQUIRE( 0 == advData.remainingLength() );
-    advData.updateData();
-    REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH) );
+    THEN("Check that first insertion of manufacturer data given id is correctly done")
+    {
+      retVal = advData.setManufacturerData(companyId, dataGivenId, sizeof(dataGivenId));
+      REQUIRE(retVal);
+    }
+    THEN("Check that the insertion of manufacturer data without after one with id is correctly done")
+    {
+      retVal = advData.setManufacturerData(data, sizeof(data));
+      REQUIRE(retVal);
+      REQUIRE( 0 == advData.remainingLength() );
+      advData.updateData();
+      REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH) );
+    }
   }
 
   WHEN("Set manufacturer data given id after setting manufacturer data without id")
@@ -110,10 +128,16 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
                                   16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27};
     const uint8_t data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28};
-    retVal = advData.setManufacturerData(data, sizeof(data));
-    REQUIRE(retVal);
-    retVal = advData.setManufacturerData(companyId, dataGivenId, sizeof(dataGivenId));
-    REQUIRE(!retVal);
+    THEN("Check that first insertion of manufacturer data WITHOUT id is correctly done")
+    {
+      retVal = advData.setManufacturerData(data, sizeof(data));
+      REQUIRE(retVal);
+    }
+    THEN("Check that the insertion of manufacturer data given id after one without id is correctly done")
+    {
+      retVal = advData.setManufacturerData(companyId, dataGivenId, sizeof(dataGivenId));
+      REQUIRE(!retVal);
+    }
   }
 
   WHEN("Overwrite manufacturer data with one as long as max data length")
@@ -124,17 +148,20 @@ TEST_CASE("Test manufacturer data setting", "[ArduinoBLE::BLEAdvertisingData]")
                                   0x00, 0x11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                                   12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
     retVal = advData.setManufacturerData(companyId, data, sizeof(data));
-    REQUIRE(retVal);
+    THEN("Manufacturer data should be set correctly")
+    {
+      REQUIRE(retVal);
 
-    advData.updateData();
-    REQUIRE( 0 == advData.remainingLength() );
-    REQUIRE( 0 == advData.availableForWrite() );
-    REQUIRE( 0 == memcmp(goldenData, advData.data(), sizeof(goldenData)) );
+      advData.updateData();
+      REQUIRE( 0 == advData.remainingLength() );
+      REQUIRE( 0 == advData.availableForWrite() );
+      REQUIRE( 0 == memcmp(goldenData, advData.data(), sizeof(goldenData)) );
+    }
   }
 
   WHEN("Check consistency when setting the external advertising data")
   {
-    auto goldenData = advData.data();
+    const auto goldenData = advData.data();
     BLE.setAdvertisingData(advData);
     BLE.advertise();
     REQUIRE( 0 == memcmp(goldenData, BLE.getAdvertisingData().data(), advData.dataLength()) );
