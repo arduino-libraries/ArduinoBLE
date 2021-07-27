@@ -19,6 +19,7 @@
 
 #include "utility/ATT.h"
 #include "utility/BLEUuid.h"
+#include "utility/BLEManufacturerData.h"
 #include "utility/HCI.h"
 
 #include "remote/BLERemoteDevice.h"
@@ -90,6 +91,11 @@ bool BLEDevice::hasAdvertisedServiceUuid() const
   return hasAdvertisedServiceUuid(0);
 }
 
+bool BLEDevice::hasManufacturerData() const
+{
+  return (manufacturerData().length() > 0);
+}
+
 bool BLEDevice::hasAdvertisedServiceUuid(int index) const
 {
   return (advertisedServiceUuid(index).length() > 0);
@@ -144,6 +150,25 @@ String BLEDevice::localName() const
   }
 
   return localName;
+}
+
+String BLEDevice::manufacturerData() const
+{
+   String manufacturerData = "";
+
+   for (int i = 0; i < _eirDataLength;) {
+     int eirLength = _eirData[i++];
+     int eirType = _eirData[i++];
+
+     if (eirType == 0xFF) {
+       manufacturerData = BLEManufacturerData::manufacturerDataToString(&_eirData[i], eirLength);
+       break;
+     }
+
+     i += (eirLength - 1);
+   }
+
+   return manufacturerData;
 }
 
 String BLEDevice::advertisedServiceUuid() const
@@ -509,4 +534,3 @@ bool BLEDevice::discovered()
   // expect, 0x03 or 0x04 flag to be set
   return (_advertisementTypeMask & 0x18) != 0;
 }
-

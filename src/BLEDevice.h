@@ -50,12 +50,14 @@ public:
   virtual String address() const;
 
   bool hasLocalName() const;
-    
+  bool hasManufacturerData() const;
+
   bool hasAdvertisedServiceUuid() const;
   bool hasAdvertisedServiceUuid(int index) const;
   int advertisedServiceUuidCount() const;
 
   String localName() const;
+  String manufacturerData() const;
   String advertisedServiceUuid() const;
   String advertisedServiceUuid(int index) const;
 
@@ -72,7 +74,7 @@ public:
   String deviceName();
   int appearance();
 
-  int serviceCount() const; 
+  int serviceCount() const;
   bool hasService(const char* uuid) const;
   bool hasService(const char* uuid, int index) const;
   BLEService service(int index) const;
