@@ -57,6 +57,7 @@ public:
   int advertisedServiceUuidCount() const;
 
   String localName() const;
+  String manufacturerData() const;
   String advertisedServiceUuid() const;
   String advertisedServiceUuid(int index) const;
 
