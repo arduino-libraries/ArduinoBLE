@@ -70,7 +70,12 @@ void GATTClass::begin()
 
 void GATTClass::end()
 {
-  _attributes.clear();
+  delete( _genericAccessService );
+  delete( _deviceNameCharacteristic );
+  delete( _appearanceCharacteristic );
+  delete( _genericAttributeService );
+  delete( _servicesChangedCharacteristic );
+ _attributes.clear();
 }
 
 void GATTClass::setDeviceName(const char* deviceName)
@@ -143,7 +148,7 @@ void GATTClass::addService(BLELocalService* service)
     characteristic->retain();
     _attributes.add(characteristic);
     characteristic->setHandle(attributeCount());
-    
+
     // add the characteristic again to make space of the characteristic value handle
     _attributes.add(characteristic);
 
