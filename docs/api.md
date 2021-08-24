@@ -19,20 +19,20 @@ BLE.begin()
 
 None
 
-Returns
+#### Returns
 1 on success, 0 on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
 
     while (1);
   }
-…
+
 
 ```
 
@@ -51,13 +51,13 @@ BLE.end()
 
 None
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -68,7 +68,7 @@ Nothing
   // ....
 
   BLE.end();
-…
+
 
 ```
 
@@ -87,21 +87,21 @@ BLE.poll() BLE.poll(timeout)
 
 **timeout**: optional timeout in ms, to wait for event. If not specified defaults to 0 ms.
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // assign event handlers for connected, disconnected to peripheral
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
   BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
 
-  // …
+  
 
   BLE.poll();
-…
+
 
 ```
 
@@ -120,13 +120,13 @@ BLE.setEventHandler(eventType, callback)
 
 **eventType**: event type (BLEConnected, BLEDisconnected)
 **callback**: function to call when event occurs
-Returns
+#### Returns
 Nothing.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -140,7 +140,7 @@ Nothing.
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
   BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
 
-  // …
+  
 
 
 void blePeripheralConnectHandler(BLEDevice central) {
@@ -154,7 +154,7 @@ void blePeripheralDisconnectHandler(BLEDevice central) {
   Serial.print("Disconnected event, central: ");
   Serial.println(central.address());
 }
-…
+
 
 ```
 
@@ -173,19 +173,19 @@ BLE.connected()
 
 None
 
-Returns
+#### Returns
 **true** if another BLE device is connected, otherwise **false**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
     // while the central is still connected to peripheral:
     while (BLE.connected()) {
 
        // ...
     }
-…
+
 
 ```
 
@@ -204,19 +204,19 @@ BLE.disconnect()
 
 None
 
-Returns
+#### Returns
 **true** if any BLE device that was previously connected was disconnected, otherwise **false**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (BLE.connected()) {
-    // …
+    
 
     BLE.disconnect();
   }
-…
+
 
 ```
 
@@ -235,18 +235,18 @@ BLE.address()
 
 None
 
-Returns
+#### Returns
 The **Bluetooth address** of the BLE device (as a String).
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   **String** address = BLE.address();
 
   Serial.print(“Local address is: “);
   Serial.println(address);
-…
+
 
 ```
 
@@ -265,20 +265,20 @@ BLE.rssi()
 
 None
 
-Returns
+#### Returns
 The **RSSI** of the connected BLE device, 127 if no BLE device is connected.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (BLE.connected()) {
-    // …
+    
 
    Serial.print(“RSSI = “);
     Serial.println(BLE.rssi());
   }
-…
+
 
 ```
 
@@ -297,13 +297,13 @@ BLE.setAdvertisedServiceUuid(uuid)
 
 **uuid:** 16-bit or 128-bit BLE UUID in **String** format
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -317,7 +317,7 @@ Nothing
 
   // start advertising
   BLE.advertise();
-…
+
 
 ```
 
@@ -336,13 +336,13 @@ BLE.setAdvertisedService(bleService)
 
 **bleService:** BLEService to use UUID from
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
 
 // ...
@@ -360,7 +360,7 @@ BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Servic
 
   // start advertising
   BLE.advertise();
-…
+
 
 ```
 
@@ -380,13 +380,13 @@ BLE.setManufacturerData(data, length)
 **data:** byte array containing manufacturer data
 **length:** length of manufacturer data array
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
  // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -403,7 +403,7 @@ Nothing
   // start advertising
   BLE.advertise();
 
-…
+
 
 ```
 
@@ -422,13 +422,13 @@ BLE.setLocalName(name)
 
 **name:** local name value to use when advertising
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
  // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -443,7 +443,7 @@ Nothing
   // start advertising
   BLE.advertise();
 
-…
+
 
 ```
 
@@ -462,13 +462,13 @@ BLE.setDeviceName(name)
 
 **name:** device name value
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
  // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -483,7 +483,7 @@ Nothing
   // start advertising
   BLE.advertise();
 
-…
+
 
 ```
 
@@ -502,13 +502,13 @@ BLE.setAppearance(appearance)
 
 **appearance:** appearance value
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
  // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -523,7 +523,7 @@ Nothing
   // start advertising
   BLE.advertise();
 
-…
+
 
 ```
 
@@ -542,16 +542,16 @@ BLE.addService(service)
 
 **service:** BLEService to add
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
 
-// …
+
 
  // begin initialization
   if (!BLE.begin()) {
@@ -565,7 +565,7 @@ BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Servic
   BLE.addService(ledService);
 
   // ...  
-…
+
 
 ```
 
@@ -584,13 +584,13 @@ BLE.advertise()
 
 None
 
-Returns
+#### Returns
 1 on success, 0 on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -603,7 +603,7 @@ Returns
   BLE.advertise();
 
   // ...  
-…
+
 
 ```
 
@@ -622,13 +622,13 @@ BLE.stopAdvertise()
 
 None
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -643,7 +643,7 @@ Nothing
   // ...  
 
   BLE.stopAdvertise();
-…
+
 
 ```
 
@@ -662,13 +662,13 @@ BLE.central()
 
 None
 
-Returns
+#### Returns
 **BLEDevice** representing the central.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // listen for BLE peripherals to connect:
   BLEDevice central = BLE.central();
 
@@ -678,9 +678,9 @@ Returns
     // print the central's MAC address:
     Serial.println(central.address());
 
-    // …
+    
   }
-…
+
 
 ```
 
@@ -699,13 +699,13 @@ BLE.setAdvertisingInterval(advertisingInterval)
 
 **advertisingInterval:** advertising interval in units of 0.625 ms
 
-Returns
+#### Returns
 Nothing.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -718,7 +718,7 @@ Nothing.
   BLE.setAdvertisingInterval(320); // 200 * 0.625 ms
 
   BLE.advertise();
-…
+
 
 ```
 
@@ -738,13 +738,13 @@ BLE.setConnectionInterval(minimum, maximum)
 **minimum:** minimum desired connection interval in units of 1.25 ms
 **maximum:** maximum desired connection interval in units of 1.25 ms
 
-Returns
+#### Returns
 Nothing.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -756,7 +756,7 @@ Nothing.
 
   BLE.setConnectionInterval(0x0006, 0x0c80); // 7.5 ms minimum, 4 s maximum
 
-…
+
 
 ```
 
@@ -776,13 +776,13 @@ BLE.setConnectable(connectable)
 **true**: the device will be connectable when advertising
 **false**: the device will NOT be connectable when advertising
 
-Returns
+#### Returns
 Nothing.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -794,7 +794,7 @@ Nothing.
 
   BLE.setConnectable(false); // make the device unconnectable when advertising
 
-…
+
 
 ```
 
@@ -814,13 +814,13 @@ BLE.scan(withDuplicates)
 
 **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered
 
-Returns
+#### Returns
 1 on success, 0 on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -833,14 +833,14 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
   if (peripheral) {
      // ...
   }
-…
+
 
 ```
 
@@ -861,13 +861,13 @@ BLE.scanForName(name, withDuplicates)
 **name:** (local) name of device (as a **String**) to filter for
 **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered.
 
-Returns
+#### Returns
 1 on success, 0 on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -880,14 +880,14 @@ Returns
   // start scanning for peripheral
   BLE.scanForName("LED");
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
   if (peripheral) {
      // ...
   }
-…
+
 
 ```
 
@@ -908,13 +908,13 @@ BLE.scanForAddress(address, withDuplicates)
 **address:** (Bluetooth) address (as a String) to filter for
 **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered
 
-Returns
+#### Returns
 1 on success, 0 on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -927,14 +927,14 @@ Returns
   // start scanning for peripheral
   BLE.scanForAddress("aa:bb:cc:ee:dd:ff");
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
   if (peripheral) {
      // ...
   }
-…
+
 
 ```
 
@@ -955,13 +955,13 @@ BLE.scanForUuid(uuid, withDuplicates)
 **uuid:** (service) UUID (as a **String**) to filter for
 **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered.
 
-Returns
+#### Returns
 1 on success, 0 on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -974,14 +974,14 @@ Returns
   // start scanning for peripheral
   BLE.scanForUuid("aa10");
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
   if (peripheral) {
      // ...
   }
-…
+
 
 ```
 
@@ -1000,13 +1000,13 @@ BLE.stopScan()
 
 None
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1019,9 +1019,9 @@ Nothing
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
   BLE.stopScan();
-…
+
 
 ```
 
@@ -1040,13 +1040,13 @@ BLE.available()
 
 Nothing
 
-Returns
+#### Returns
 **BLEDevice** representing the discovered device.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1059,14 +1059,14 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
   if (peripheral) {
      // ...
   }
-…
+
 
 ```
 
@@ -1090,25 +1090,25 @@ bleDevice.poll(timeout)
 
 **timeout**: optional timeout in ms, to wait for event. If not specified defaults to 0 ms.
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // listen for BLE centrals to connect:
   BLEDevice central = BLE.central();
 
   // if a central is connected to peripheral:
   if (central) {
-    // …
+    
 
    central.poll();
 
     // ...
   }
-…
+
 
 ```
 
@@ -1127,13 +1127,13 @@ bleDevice.connected()
 
 None
 
-Returns
+#### Returns
 **true** if the BLE device is connected, otherwise **false**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // listen for BLE centrals to connect:
   BLEDevice central = BLE.central();
 
@@ -1142,7 +1142,7 @@ Returns
 
        // ...
     }
-…
+
 
 ```
 
@@ -1161,20 +1161,20 @@ bleDevice.disconnect()
 
 None
 
-Returns
+#### Returns
 **true** if the BLE device was disconnected, otherwise **false**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
  // listen for BLE centrals to connect:
   BLEDevice central = BLE.central();
 
-  // …
+  
 
   central.disconnect();
-…
+
 
 ```
 
@@ -1193,13 +1193,13 @@ bleDevice.address()
 
 None
 
-Returns
+#### Returns
 The **Bluetooth address** of the BLE device (as a String).
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // listen for BLE peripherals to connect:
   BLEDevice central = BLE.central();
 
@@ -1209,9 +1209,9 @@ The **Bluetooth address** of the BLE device (as a String).
     // print the central's MAC address:
     Serial.println(central.address());
 
-    // ….
+    .
   }
-…
+
 
 ```
 
@@ -1230,20 +1230,20 @@ bleDevice.rssi()
 
 None
 
-Returns
+#### Returns
 The **RSSI** of the connected BLE device, 127 if the BLE device is not connected.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (bleDevice.connected()) {
-    // …
+    
 
     Serial.print(“RSSI = “);
     Serial.println(bleDevice.rssi());
   }
-…
+
 
 ```
 
@@ -1265,13 +1265,13 @@ bleDevice.characteristic(uuid, index)
 **index**: index of characteristic
 **uuid**: uuid (as a **String**)
 
-Returns
+#### Returns
 **BLECharacteristic** for provided parameters
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1284,7 +1284,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1320,7 +1320,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1339,13 +1339,13 @@ bleDevice.discoverAttributes()
 
 None
 
-Returns
+#### Returns
 **true**, if successful, **false** on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1358,7 +1358,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1386,7 +1386,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1405,13 +1405,13 @@ bleDevice.discoverService(serviceUuid)
 
 **serviceUuid:** service UUID to discover (as a **String**)
 
-Returns
+#### Returns
 **true**, if successful, **false** on failure.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1424,7 +1424,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1452,7 +1452,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1471,13 +1471,13 @@ bleDevice.deviceName()
 
 None
 
-Returns
+#### Returns
 **Device name** (as a String).
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1490,7 +1490,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1526,7 +1526,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1545,13 +1545,13 @@ bleDevice.appearance()
 
 None
 
-Returns
+#### Returns
 **Appearance value** (as a number).
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1564,7 +1564,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1600,7 +1600,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1619,13 +1619,13 @@ bleDevice.serviceCount()
 
 None
 
-Returns
+#### Returns
 The number of **services discovered** for the BLE device.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1638,7 +1638,7 @@ The number of **services discovered** for the BLE device.
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1671,7 +1671,7 @@ The number of **services discovered** for the BLE device.
 
     // ...
   }
-…
+
 
 ```
 
@@ -1692,13 +1692,13 @@ bleDevice.hasService(uuid, index)
 **uuid**: uuid to check (as a **String**)
 **index**: optional, index of service to check if the device provides more than on. Defaults to 0, if not provided.
 
-Returns
+#### Returns
 **true**, if the device provides the service, **false** otherwise.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1711,7 +1711,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1743,7 +1743,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1765,13 +1765,13 @@ bleDevice.service(uuid, index)
 **index**: index of service
 **uuid**: uuid (as a **String**)
 
-Returns
+#### Returns
 **BLEService** for provided parameters
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1784,7 +1784,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1820,7 +1820,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1839,13 +1839,13 @@ bleDevice.characteristicCount()
 
 None
 
-Returns
+#### Returns
 The **number of characteristics** discovered for the BLE device.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1858,7 +1858,7 @@ The **number of characteristics** discovered for the BLE device.
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1891,7 +1891,7 @@ The **number of characteristics** discovered for the BLE device.
 
     // ...
   }
-…
+
 
 ```
 
@@ -1912,13 +1912,13 @@ bleDevice.hasCharacteristic(uuid, index)
 **uuid**: uuid to check (as a **String**)
 **index**: optional, index of characteristic to check if the device provides more than on. Defaults to 0, if not provided.
 
-Returns
+#### Returns
 **true**, if the device provides the characteristic, **false** otherwise.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -1931,7 +1931,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1963,7 +1963,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -1982,13 +1982,13 @@ bleDevice.hasLocalName()
 
 Nothing
 
-Returns
+#### Returns
 **true**, if the device is advertising a local name, **false** otherwise.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2001,7 +2001,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2016,7 +2016,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -2036,13 +2036,13 @@ bleDevice.hasAdvertisedServiceUuid(index)
 
 **index**: optional, defaults to 0, the index of the service UUID, if the device is advertising more than one.
 
-Returns
+#### Returns
 **true**, if the device is advertising a service UUID, **false** otherwise.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2055,7 +2055,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2074,7 +2074,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -2093,13 +2093,13 @@ bleDevice.advertisedServiceUuidCount()
 
 None
 
-Returns
+#### Returns
 The **number of advertised services** a discovered BLE device is advertising.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2112,7 +2112,7 @@ The **number of advertised services** a discovered BLE device is advertising.
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2131,7 +2131,7 @@ The **number of advertised services** a discovered BLE device is advertising.
 
     // ...
   }
-…
+
 
 ```
 
@@ -2150,13 +2150,13 @@ bleDevice.localName()
 
 Nothing
 
-Returns
+#### Returns
 **Advertised local name** (as a String).
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2169,7 +2169,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2184,7 +2184,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -2204,13 +2204,13 @@ bleDevice.advertisedServiceUuid(index)
 
 **index**: optional, defaults to 0, the index of the **service UUID**, if the device is advertising more than one.
 
-Returns
+#### Returns
 Advertised service **UUID** (as a String).
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2223,7 +2223,7 @@ Advertised service **UUID** (as a String).
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2242,7 +2242,7 @@ Advertised service **UUID** (as a String).
 
     // ...
   }
-…
+
 
 ```
 
@@ -2261,13 +2261,13 @@ bleDevice.connect()
 
 None
 
-Returns
+#### Returns
 **true**, if the connection was successful, **false** otherwise.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2280,7 +2280,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2298,7 +2298,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -2321,15 +2321,15 @@ BLEService(uuid)
 
 **uuid**: 16-bit or 128-bit UUID in **String** format
 
-Returns
+#### Returns
 New **BLEService** with the specified **UUID**
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
-…
+
 
 ```
 
@@ -2348,20 +2348,20 @@ bleService.uuid()
 
 None
 
-Returns
+#### Returns
 UUID of the BLE service as a **String**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
 
-// …
+
 Serial.print(“LED service UUID = “);
 Serial.println(ledService.uuid());
 
-…
+
 
 ```
 
@@ -2380,25 +2380,25 @@ bleService.addCharacteristic(bleCharacteristic)
 
 None
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
 
 // BLE LED Switch Characteristic - custom 128-bit UUID, readable and writable by central
 BLECharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite, 1);
 
 
-// …
+
 
 // add the characteristic to the service
 ledService.addCharacteristic(switchCharacteristic);
 
-…
+
 
 ```
 
@@ -2417,13 +2417,13 @@ bleService.characteristicCount()
 
 None
 
-Returns
+#### Returns
 The **number of characteristics** discovered for the BLE service.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2436,7 +2436,7 @@ The **number of characteristics** discovered for the BLE service.
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2476,7 +2476,7 @@ The **number of characteristics** discovered for the BLE service.
 
     // ...
   }
-…
+
 
 ```
 
@@ -2497,13 +2497,13 @@ bleService.hasCharacteristic(uuid, index)
 **uuid**: uuid to check (as a **String**)
 **index**: optional, index of characteristic to check if the device provides more than on. Defaults to 0, if not provided.
 
-Returns
+#### Returns
 **true**, if the service provides the characteristic, **false** otherwise.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2516,7 +2516,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
   BLEDevice peripheral = BLE.available();
 
   if (peripheral) {
@@ -2554,7 +2554,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -2576,13 +2576,13 @@ bleService.characteristic(uuid, index)
 **index**: index of characteristic
 **uuid**: uuid (as a **String**)
 
-Returns
+#### Returns
 **BLECharacteristic** for provided parameters
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -2595,7 +2595,7 @@ Returns
   // start scanning for peripheral
   BLE.scan();
 
-  // …
+  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2638,7 +2638,7 @@ Returns
 
     // ...
   }
-…
+
 
 ```
 
@@ -2679,18 +2679,18 @@ BLEDoubleCharacteristic(uuid, properties)
 **valueSize**: (maximum) size of characteristic value
 **stringValue**: value as a string
 
-Returns
+#### Returns
 New **BLECharacteristic** with the specified **UUID** and value
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE Battery Level Characteristic
 BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
-…
+
 
 ```
 
@@ -2709,21 +2709,21 @@ bleCharacteristic.uuid()
 
 None
 
-Returns
+#### Returns
 **UUID** of the BLE service as a **String**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
-// …
+
 Serial.print(“Switch characteristic UUID = “);
 Serial.println(switchCharacteristic.uuid());
 
-…
+
 
 ```
 
@@ -2742,17 +2742,17 @@ bleCharacteristic.properties()
 
 None
 
-Returns
+#### Returns
 **Properties of the characteristic masked** (BLEBroadcast, BLERead, BLEWriteWithoutResponse, BLEWrite, BLENotify, BLEIndicate)
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
-// …
+
 byte properties = switchCharacteristic.properties();
 
 if (properties & BLERead) {
@@ -2762,7 +2762,7 @@ if (properties & BLERead) {
 if (properties & (BLEWrite | BLEWriteWithoutResponse)) {
   // characteristic is writable ...
 }
-…
+
 
 ```
 
@@ -2781,21 +2781,21 @@ bleCharacteristic.valueSize()
 
 None
 
-Returns
+#### Returns
 The **maximum value** size of the characteristic (in bytes)
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
-// …
+
 
 Serial.print(“value size = “);
 Serial.println(switchCharacteristic.valueSize());
-…
+
 
 ```
 
@@ -2814,17 +2814,17 @@ bleCharacteristic.value()
 
 None
 
-Returns
+#### Returns
 The **current value** of the characteristic, value type depends on the constructor used
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
-// …
+
 
       if (switchCharacteristic.value()) {   // any value other than 0
           Serial.println("LED on");
@@ -2834,7 +2834,7 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
           digitalWrite(ledPin, LOW);          // will turn the LED off
         }
 
-…
+
 
 ```
 
@@ -2853,21 +2853,21 @@ bleCharacteristic.valueLength()
 
 None
 
-Returns
+#### Returns
 The **current value** size of the characteristic (in bytes)
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
-// …
+
 
 Serial.print(“value length = “);
 Serial.println(switchCharacteristic.valueLength());
-…
+
 
 ```
 
@@ -2888,13 +2888,13 @@ bleCharacteristic.readValue(value)
 **buffer:** byte array to read value into length: size of buffer argument in bytes 
 **value**: variable to read value into (by reference)
 
-Returns
+#### Returns
 Number of bytes read
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   while (peripheral.connected()) {
     // while the peripheral is connected
 
@@ -2916,7 +2916,7 @@ Number of bytes read
       }
     }
   }
-…
+
 
 ```
 
@@ -2938,13 +2938,13 @@ bleCharacteristic.writeValue(value)
 **length**: number of bytes of the buffer argument to write
 **value**: value to write
 
-Returns
+#### Returns
 1 on success, 0 on failure
 
 #### Example
 
-```Arduino
-…
+```arduino
+
     // read the button pin
     int buttonState = digitalRead(buttonPin);
 
@@ -2964,7 +2964,7 @@ Returns
         ledCharacteristic.writeValue((byte)0x00);
       }
     }
-…
+
 
 ```
 
@@ -2984,23 +2984,23 @@ bleCharacteristic.setEventHandler(eventType, callback)
 **eventType**: event type (BLESubscribed, BLEUnsubscribed, BLERead, BLEWritten) 
 **callback**: function to call when the event occurs
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // create switch characteristic and allow remote device to read and write
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
-// …
+
 
   // assign event handlers for characteristic
   switchCharacteristic.setEventHandler(BLEWritten, switchCharacteristicWritten);
 
-// …
+
 
 void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
   // central wrote new value to characteristic, update LED
@@ -3015,7 +3015,7 @@ void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteri
   }
 }
 
-  …
+  
 
 ```
 
@@ -3034,21 +3034,21 @@ bleCharacteristic.broadcast()
 
 None
 
-Returns
+#### Returns
 1 on success, 0 on failure
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // create button characteristic and allow remote device to get notifications
 BLEByteCharacteristic buttonCharacteristic("19B10012-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify | BLEBroadcast);
 
-// …
+
 
 buttonCharacteristic.broadcast();
 
-…
+
 
 ```
 
@@ -3067,18 +3067,18 @@ bleCharacteristic.written()
 
 None
 
-Returns
+#### Returns
 **true** if the characteristic value has been written by another BLE device, **false** otherwise
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
-// …
+
 
  // listen for BLE peripherals to connect:
   BLEDevice central = BLE.central();
@@ -3110,7 +3110,7 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
   }
 
 
-…
+
 
 ```
 
@@ -3129,26 +3129,26 @@ bleCharacteristic.subscribed()
 
 None
 
-Returns
+#### Returns
 **true** if the characteristic value has been subscribed to by another BLE device, **false** otherwise
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE Battery Level Characteristic
 BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
 
 
-// …
+
 
   if (batteryLevelChar.subscribed()) {
      // set a new value , that well be pushed to subscribed BLE devices
     batteryLevelChar.writeValue(0xab);
   }
-…
+
 
 ```
 
@@ -3167,13 +3167,13 @@ bleCharacteristic.addDescriptor(bleDescriptor)
 
 **bleDescriptor**: descriptor to add to the characteristic
 
-Returns
+#### Returns
 Nothing
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 // BLE Battery Level Characteristic
 BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
@@ -3182,10 +3182,10 @@ BLEDescriptor batteryLevelDescriptor("2901", "millis");
 
 
 
-// …
+
 
   batteryLevelChar.addDescriptor(batteryLevelDescriptor);
-…
+
 
 ```
 
@@ -3204,20 +3204,20 @@ bleCharacteristic.descriptorCount()
 
 None
 
-Returns
+#### Returns
 The **number of BLE descriptors** discovered for the characteristic
 
 #### Example
 
-```Arduino
-…
+```arduino
+
  // loop the descriptors of the characteristic and explore each
   for (int i = 0; i < characteristic.descriptorCount(); i++) {
     BLEDescriptor descriptor = characteristic.descriptor(i);
 
     // ...
   }
-…
+
 
 ```
 
@@ -3238,17 +3238,17 @@ bleCharacteristic.hasDescriptor(uuid, index)
 **index**: index of descriptor
 **uuid**: uuid (as a **String**)
 
-Returns
+#### Returns
 **true**, if the characteristic has a matching descriptor, otherwise **false**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (characteristic.hasDescriptor("2901")) {
     Serial.println("characteristic has description descriptor");
   }
-…
+
 
 ```
 
@@ -3270,17 +3270,17 @@ bleCharacteristic.descriptor(uuid, index)
 **index**: index of descriptor
 **uuid**: uuid (as a **String**)
 
-Returns
+#### Returns
 BLEDescriptor that represents a characteristics BLE descriptor
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (characteristic.hasDescriptor("2901")) {
     Serial.println("characteristic has description descriptor");
   }
-…
+
 
 ```
 
@@ -3299,17 +3299,17 @@ bleCharacteristic.canRead()
 
 None
 
-Returns
+#### Returns
 **true**, if characteristic is readable, **false** otherwise
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (characteristic.canRead("2901")) {
     Serial.println("characteristic is readable");
   }
-…
+
 
 ```
 
@@ -3328,13 +3328,13 @@ bleCharacteristic.read()
 
 None
 
-Returns
+#### Returns
 **true**, if successful, **false** on failure
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (characteristic.read()) {
     Serial.println("characteristic value read");
 
@@ -3342,7 +3342,7 @@ Returns
   } else {
     Serial.println("error reading characteristic value");
   }
-…
+
 
 ```
 
@@ -3361,17 +3361,17 @@ bleCharacteristic.canWrite()
 
 None
 
-Returns
+#### Returns
 **true**, if characteristic is writable, **false** otherwise
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (characteristic.canWrite()) {
     Serial.println("characteristic is writable");
   }
-…
+
 
 ```
 
@@ -3390,17 +3390,17 @@ bleCharacteristic.canSubscribe()
 
 None
 
-Returns
+#### Returns
 **true**, if characteristic is subscribable, **false** otherwise
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (characteristic.canSubscribe()) {
     Serial.println("characteristic is subscribable");
   }
-…
+
 
 ```
 
@@ -3419,13 +3419,13 @@ bleCharacteristic.subscribe()
 
 None
 
-Returns
+#### Returns
 **true**, on success, **false** on failure
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // ...
 
   // retrieve the simple key characteristic
@@ -3448,7 +3448,7 @@ Returns
   }
 
   // ...
-…
+
 
 ```
 
@@ -3467,17 +3467,17 @@ bleCharacteristic.canUnsubscribe()
 
 None
 
-Returns
+#### Returns
 **true**, if characteristic is unsubscribable, **false** otherwise
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (characteristic.canUnsubscribe()) {
     Serial.println("characteristic is unsubscribable");
   }
-…
+
 
 ```
 
@@ -3496,13 +3496,13 @@ bleCharacteristic.unsubscribe()
 
 None
 
-Returns
+#### Returns
 **true**, on success, **false** on failure
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // ...
 
   // retrieve the simple key characteristic
@@ -3527,7 +3527,7 @@ Returns
   // ...
 
   simpleKeyCharacteristic.unsubscribe();
-…
+
 
 ```
 
@@ -3546,13 +3546,13 @@ bleCharacteristic.valueUpdated()
 
 None
 
-Returns
+#### Returns
 **true**, if the characteristics value been updated via a notification or indication
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   while (peripheral.connected()) {
     // while the peripheral is connected
 
@@ -3574,7 +3574,7 @@ Returns
       }
     }
   }
-…
+
 
 ```
 
@@ -3601,15 +3601,15 @@ BLEDescriptor(uuid, stringValue)
 **valueSize**: size of byte array value
 **stringValue**: value as a string
 
-Returns
+#### Returns
 New **BLEDescriptor** with the specified **UUID** and value
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEDescriptor millisLabelDescriptor("2901", "millis");
-…
+
 
 ```
 
@@ -3628,20 +3628,20 @@ bleDescriptor.uuid()
 
 None
 
-Returns
+#### Returns
 **UUID** of the BLE descriptor (as a String).
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEDescriptor millisLabelDescriptor("2901", "millis");
 
-// …
+
 Serial.print(“millis label descriptor UUID = “);
 Serial.println(millisLabelDescriptor.uuid());
 
-…
+
 
 ```
 
@@ -3660,20 +3660,20 @@ bleDescriptor.valueSize()
 
 None
 
-Returns
+#### Returns
 **Value size** (in bytes) of the BLE descriptor.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEDescriptor millisLabelDescriptor("2901", "millis");
 
-// …
+
 Serial.print(“millis label descriptor value size = “);
 Serial.println(millisLabelDescriptor.valueSize());
 
-…
+
 
 ```
 
@@ -3692,13 +3692,13 @@ bleDescriptor.valueLength()
 
 None
 
-Returns
+#### Returns
 **Length of descriptor** value in bytes.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   // read the descriptor value
   descriptor.read();
 
@@ -3719,7 +3719,7 @@ Returns
       Serial.print(b, HEX);
     }
   }
-…
+
 
 ```
 
@@ -3738,16 +3738,16 @@ bleDescriptor.value()
 
 None
 
-Returns
+#### Returns
 Value byte array of the **BLE descriptor**.
 
 #### Example
 
-```Arduino
-…
+```arduino
+
 BLEDescriptor millisLabelDescriptor("2901", "millis");
 
-// …
+
 
   int descriptorValueSize = millisLabelDescriptor.valueSize();
   byte descriptorValue[descriptorValueSize];
@@ -3756,7 +3756,7 @@ BLEDescriptor millisLabelDescriptor("2901", "millis");
     descriptorValue[i] = millisLabelDescriptor.value()[i];
   }
 
-…
+
 
 ```
 
@@ -3778,19 +3778,19 @@ bleDescriptor.readValue(value)
 **length**: size of buffer argument in bytes
 **value**: variable to read value into (by reference)
 
-Returns
+#### Returns
 **Number of bytes** read
 
 #### Example
 
 
-```Arduino
-…
+```arduino
+
   byte value = 0;
 
   /get the value, descriptor is 1 byte so use byte value    
   descriptor.readValue(value);
-…
+
 
 ```
 
@@ -3809,13 +3809,13 @@ bleDescriptor.read()
 
 None
 
-Returns
+#### Returns
 **true**, if successful, **false** on failure
 
 #### Example
 
-```Arduino
-…
+```arduino
+
   if (descriptor.read()) {
     Serial.println("descriptor value read");
 
@@ -3823,5 +3823,5 @@ Returns
   } else {
     Serial.println("error reading descriptor value");
   }
-…
+
 ```
