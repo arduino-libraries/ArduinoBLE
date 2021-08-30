@@ -1,6 +1,6 @@
 # ArduinoBLE library
 
-This library supports all the Arduino boards that have the hardware enabled for BLE and Bluetooth 4.0 and above; these include Nano 33 BLE, Arduino NANO 33 IoT, Uno WiFi Rev 2, MKR WiFi 1010.
+This library supports all the Arduino boards that have the hardware enabled for BLE and Bluetooth 4.0 and above; these include Nano 33 BLE, Arduino NANO 33 IoT, Uno WiFi Rev 2, MKR WiFi 1010, Nicla Sense ME.
 
 To use this library
 ``#include <ArduinoBLE.h>``
