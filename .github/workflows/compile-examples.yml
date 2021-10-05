@@ -22,5 +22,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.fqbn }}
           platforms: |
-            - source-url: https://github.com/stm32duino/BoardManagerFiles/raw/master/package_stmicroelectronics_index.json
+            - source-url: https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
               name: STMicroelectronics:stm32
