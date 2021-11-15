@@ -16,6 +16,11 @@ https://github.com/stm32duino/wiki/wiki/STM32duinoBLE#stm32duinoble-with-x-nucle
 For more information about ArduinoBLE library please visit the official web page at:
 https://github.com/arduino-libraries/ArduinoBLE
 
+# Configuration
+STM32Cube_WPAN has several configuration options, which are set in the `app_conf.h`.
+This package has a default configuration named `app_conf_default.h`.
+The user can include the file `app_conf_custom.h` to customize the ble application. Options wrapped in `#ifndef, #endif` in `app_conf_default.h` can be overwritten. Additional options can be added.
+
 ## License
 
 ```
