@@ -22,6 +22,8 @@
 #define _STM_LIST_H_
 
 /* Includes ------------------------------------------------------------------*/
+#include "stdint.h"
+#include "stdbool.h"
 
 typedef  struct _tListNode {
     struct _tListNode * next;
@@ -30,7 +32,7 @@ typedef  struct _tListNode {
 
 void LST_init_head (tListNode * listHead);
 
-uint8_t LST_is_empty (tListNode * listHead);
+bool LST_is_empty (tListNode * listHead);
 
 void LST_insert_head (tListNode * listHead, tListNode * node);
 

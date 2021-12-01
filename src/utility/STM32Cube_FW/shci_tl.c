@@ -17,12 +17,13 @@
   ******************************************************************************
  */
 
-
+#if defined(STM32WBxx)
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
 #include "stm_list.h"
 #include "shci_tl.h"
+#include "stm32_def.h"
 
 /**
  * These traces are not yet supported in an usual way in the delivery package
@@ -203,6 +204,20 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
   return;
 }
 
+void shci_notify_asynch_evt(void *pdata)
+{
+  UNUSED(pdata);
+  /* Need to parse data in future version */
+  shci_user_evt_proc();
+}
+
+void shci_register_io_bus(tSHciIO *fops)
+{
+  /* Register IO bus services */
+  fops->Init    = TL_SYS_Init;
+  fops->Send    = TL_SYS_SendCmd;
+}
+
 /* Private functions ---------------------------------------------------------*/
 static void TlInit( TL_CmdPacket_t * p_cmdbuffer )
 {
@@ -348,4 +363,4 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
   return;
 }
 
-
+#endif /* STM32WBxx */

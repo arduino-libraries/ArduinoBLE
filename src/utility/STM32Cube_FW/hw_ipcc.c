@@ -16,9 +16,9 @@
   *
   ******************************************************************************
   */
-
+#if defined(STM32WBxx)
 /* Includes ------------------------------------------------------------------*/
-#include "app_common.h"
+#include "hw.h"
 #include "mbox_def.h"
 
 /* Global variables ---------------------------------------------------------*/
@@ -45,35 +45,17 @@ static void HW_IPCC_THREAD_NotEvtHandler( void );
 static void HW_IPCC_THREAD_CliNotEvtHandler( void );
 #endif
 
-#ifdef MAC_802_15_4_WB
-static void HW_IPCC_MAC_802_15_4_CmdEvtHandler( void );
-static void HW_IPCC_MAC_802_15_4_NotEvtHandler( void );
-#endif
-
-#ifdef ZIGBEE_WB
-static void HW_IPCC_ZIGBEE_CmdEvtHandler( void );
-static void HW_IPCC_ZIGBEE_StackNotifEvtHandler( void );
-static void HW_IPCC_ZIGBEE_StackM0RequestHandler( void );
-
-#endif
-
 /* Public function definition -----------------------------------------------*/
 
 /******************************************************************************
  * INTERRUPT HANDLER
  ******************************************************************************/
-void HW_IPCC_Rx_Handler( void )
+void IPCC_C1_RX_IRQHandler(void)
 {
   if (HW_IPCC_RX_PENDING( HW_IPCC_SYSTEM_EVENT_CHANNEL ))
   {
       HW_IPCC_SYS_EvtHandler();
   }
-#ifdef MAC_802_15_4_WB
-  else if (HW_IPCC_RX_PENDING( HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL ))
-  {
-    HW_IPCC_MAC_802_15_4_NotEvtHandler();
-  }
-#endif /* MAC_802_15_4_WB */
 #ifdef THREAD_WB
   else if (HW_IPCC_RX_PENDING( HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL ))
   {
@@ -84,16 +66,6 @@ void HW_IPCC_Rx_Handler( void )
     HW_IPCC_THREAD_CliNotEvtHandler();
   }
 #endif /* THREAD_WB */
-#ifdef ZIGBEE_WB
-  else if (HW_IPCC_RX_PENDING( HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL ))
-  {
-    HW_IPCC_ZIGBEE_StackNotifEvtHandler();
-  }
-  else if (HW_IPCC_RX_PENDING( HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL ))
-  {
-    HW_IPCC_ZIGBEE_StackM0RequestHandler();
-  }
-#endif /* ZIGBEE_WB */
   else if (HW_IPCC_RX_PENDING( HW_IPCC_BLE_EVENT_CHANNEL ))
   {
     HW_IPCC_BLE_EvtHandler();
@@ -102,34 +74,20 @@ void HW_IPCC_Rx_Handler( void )
   {
     HW_IPCC_TRACES_EvtHandler();
   }
-
-  return;
 }
 
-void HW_IPCC_Tx_Handler( void )
+void IPCC_C1_TX_IRQHandler(void)
 {
   if (HW_IPCC_TX_PENDING( HW_IPCC_SYSTEM_CMD_RSP_CHANNEL ))
   {
     HW_IPCC_SYS_CmdEvtHandler();
   }
-#ifdef MAC_802_15_4_WB
-  else if (HW_IPCC_TX_PENDING( HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL ))
-  {
-    HW_IPCC_MAC_802_15_4_CmdEvtHandler();
-  }
-#endif /* MAC_802_15_4_WB */
 #ifdef THREAD_WB
   else if (HW_IPCC_TX_PENDING( HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL ))
   {
     HW_IPCC_OT_CmdEvtHandler();
   }
 #endif /* THREAD_WB */
-#ifdef ZIGBEE_WB
-  if (HW_IPCC_TX_PENDING( HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL ))
-  {
-      HW_IPCC_ZIGBEE_CmdEvtHandler();
-  }
-#endif /* ZIGBEE_WB */
   else if (HW_IPCC_TX_PENDING( HW_IPCC_SYSTEM_CMD_RSP_CHANNEL ))
   {
     HW_IPCC_SYS_CmdEvtHandler();
@@ -142,9 +100,8 @@ void HW_IPCC_Tx_Handler( void )
   {
     HW_IPCC_BLE_AclDataEvtHandler();
   }
-
-  return;
 }
+
 /******************************************************************************
  * GENERAL
  ******************************************************************************/
@@ -228,8 +185,8 @@ static void HW_IPCC_BLE_AclDataEvtHandler( void )
   return;
 }
 
-__weak void HW_IPCC_BLE_AclDataAckNot( void ){};
-__weak void HW_IPCC_BLE_RxEvtNot( void ){};
+__WEAK void HW_IPCC_BLE_AclDataAckNot( void ){};
+__WEAK void HW_IPCC_BLE_RxEvtNot( void ){};
 
 /******************************************************************************
  * SYSTEM
@@ -267,56 +224,8 @@ static void HW_IPCC_SYS_EvtHandler( void )
   return;
 }
 
-__weak void HW_IPCC_SYS_CmdEvtNot( void ){};
-__weak void HW_IPCC_SYS_EvtNot( void ){};
-
-/******************************************************************************
- * MAC 802.15.4
- ******************************************************************************/
-#ifdef MAC_802_15_4_WB
-void HW_IPCC_MAC_802_15_4_Init( void )
-{
-  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL );
-
-  return;
-}
-
-void HW_IPCC_MAC_802_15_4_SendCmd( void )
-{
-  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL );
-  LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL );
-
-  return;
-}
-
-void HW_IPCC_MAC_802_15_4_SendAck( void )
-{
-  LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL );
-  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL );
-
-  return;
-}
-
-static void HW_IPCC_MAC_802_15_4_CmdEvtHandler( void )
-{
-  LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_MAC_802_15_4_CMD_RSP_CHANNEL );
-
-  HW_IPCC_MAC_802_15_4_CmdEvtNot();
-
-  return;
-}
-
-static void HW_IPCC_MAC_802_15_4_NotEvtHandler( void )
-{
-  LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_MAC_802_15_4_NOTIFICATION_ACK_CHANNEL );
-
-  HW_IPCC_MAC_802_15_4_EvtNot();
-
-  return;
-}
-__weak void HW_IPCC_MAC_802_15_4_CmdEvtNot( void ){};
-__weak void HW_IPCC_MAC_802_15_4_EvtNot( void ){};
-#endif
+__WEAK void HW_IPCC_SYS_CmdEvtNot( void ){};
+__WEAK void HW_IPCC_SYS_EvtNot( void ){};
 
 /******************************************************************************
  * THREAD
@@ -388,79 +297,11 @@ static void HW_IPCC_THREAD_CliNotEvtHandler( void )
   return;
 }
 
-__weak void HW_IPCC_OT_CmdEvtNot( void ){};
-__weak void HW_IPCC_CLI_CmdEvtNot( void ){};
-__weak void HW_IPCC_THREAD_EvtNot( void ){};
+__WEAK void HW_IPCC_OT_CmdEvtNot( void ){};
+__WEAK void HW_IPCC_CLI_CmdEvtNot( void ){};
+__WEAK void HW_IPCC_THREAD_EvtNot( void ){};
 
 #endif /* THREAD_WB */
-
-/******************************************************************************
- * ZIGBEE
- ******************************************************************************/
-#ifdef ZIGBEE_WB
-void HW_IPCC_ZIGBEE_Init( void )
-{
-  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL );
-  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL );
-
-  return;
-}
-
-void HW_IPCC_ZIGBEE_SendM4RequestToM0( void )
-{
-  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL );
-  LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL );
-
-  return;
-}
-
-void HW_IPCC_ZIGBEE_SendM4AckToM0Notify( void )
-{
-  LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL );
-  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL );
-
-  return;
-}
-
-static void HW_IPCC_ZIGBEE_CmdEvtHandler( void )
-{
-    LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_ZIGBEE_CMD_APPLI_CHANNEL );
-
-    HW_IPCC_ZIGBEE_RecvAppliAckFromM0();
-
-    return;
-}
-
-static void HW_IPCC_ZIGBEE_StackNotifEvtHandler( void )
-{
-    LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_ZIGBEE_APPLI_NOTIF_ACK_CHANNEL );
-
-    HW_IPCC_ZIGBEE_RecvM0NotifyToM4();
-
-    return;
-}
-
-static void HW_IPCC_ZIGBEE_StackM0RequestHandler( void )
-{
-    LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL );
-
-    HW_IPCC_ZIGBEE_RecvM0RequestToM4();
-
-    return;
-}
-
-void HW_IPCC_ZIGBEE_SendM4AckToM0Request( void )
-{
-    LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL );
-    LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_ZIGBEE_M0_REQUEST_CHANNEL );
-
-    return;
-}
-
-__weak void HW_IPCC_ZIGBEE_RecvAppliAckFromM0( void ){};
-__weak void HW_IPCC_ZIGBEE_RecvM0NotifyToM4( void ){};
-__weak void HW_IPCC_ZIGBEE_RecvM0RequestToM4( void ){};
-#endif /* ZIGBEE_WB */
 
 /******************************************************************************
  * MEMORY MANAGER
@@ -512,6 +353,6 @@ static void HW_IPCC_TRACES_EvtHandler( void )
   return;
 }
 
-__weak void HW_IPCC_TRACES_EvtNot( void ){};
-
+__WEAK void HW_IPCC_TRACES_EvtNot( void ){};
+#endif /* STM32WBxx */
 /******************* (C) COPYRIGHT 2019 STMicroelectronics *****END OF FILE****/

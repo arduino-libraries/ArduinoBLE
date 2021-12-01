@@ -90,15 +90,15 @@
 
 /*
  * BLE_FIXED_BUFFER_SIZE_BYTES:
- * A part of the RAM, is dinamically allocated by initilizing all the pointers 
+ * A part of the RAM, is dynamically allocated by initializing all the pointers 
  * defined in a global context variable "mem_alloc_ctx_p".
  * This initialization is made in the Dynamic_allocator functions, which 
- * assing a portion of RAM given by the external application to the above
+ * assign a portion of RAM given by the external application to the above
  * mentioned "global pointers".
  *
  * The size of this Dynamic RAM is made of 2 main components: 
  * - a part that is parameters-dependent (num of links, GATT buffers, ...),
- *   and which value is explicited by the following macro;
+ *   and which value is defined by the following macro;
  * - a part, that may be considered "fixed", i.e. independent from the above
  *   mentioned parameters.
 */

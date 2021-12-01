@@ -50,7 +50,6 @@ extern "C" {
      ERR_BLE_INIT = 0,
      ERR_THREAD_LLD_FATAL_ERROR = 125, /* The LLD driver used on 802_15_4 detected a fatal error            */
      ERR_THREAD_UNKNOWN_CMD = 126,     /* The command send by the M4 to control the Thread stack is unknown */
-     ERR_ZIGBEE_UNKNOWN_CMD = 200,     /* The command send by the M4 to control the Zigbee stack is unknown */
    } SCHI_SystemErrCode_t;
 
 #define SHCI_EVTCODE                    ( 0xFF )
@@ -102,7 +101,7 @@ extern "C" {
 
   /**
    * SHCI_SUB_EVT_OT_NVM_RAM_UPDATE
-   * This notifies the CPU1 which part of the OT NVM RAM has been updated so that only the modified
+   * This notifies the CPU1 which part of the 'OT NVM RAM' has been updated so that only the modified
    * section could be written in Flash/NVM
    * StartAddress : Start address of the section that has been modified
    * Size : Size (in bytes) of the section that has been modified
@@ -208,9 +207,7 @@ extern "C" {
     SHCI_OCF_C2_FLASH_STORE_DATA,
     SHCI_OCF_C2_FLASH_ERASE_DATA,
     SHCI_OCF_C2_RADIO_ALLOW_LOW_POWER,
-    SHCI_OCF_C2_MAC_802_15_4_INIT,
     SHCI_OCF_C2_REINIT,
-    SHCI_OCF_C2_ZIGBEE_INIT,
     SHCI_OCF_C2_LLD_TESTS_INIT,
     SHCI_OCF_C2_EXTPA_CONFIG,
     SHCI_OCF_C2_SET_FLASH_ACTIVITY_CONTROL,
@@ -378,8 +375,6 @@ extern "C" {
     {
       uint8_t thread_config;
       uint8_t ble_config;
-      uint8_t mac_802_15_4_config;
-      uint8_t zigbee_config;
     } SHCI_C2_DEBUG_TracesConfig_t;
 
     typedef PACKED_STRUCT
@@ -419,7 +414,6 @@ extern "C" {
     {
       BLE_ENABLE,
       THREAD_ENABLE,
-      ZIGBEE_ENABLE,
     } SHCI_C2_CONCURRENT_Mode_Param_t;
       /** No response parameters*/
 
@@ -430,17 +424,12 @@ extern "C" {
     {
       BLE_IP,
       THREAD_IP,
-      ZIGBEE_IP,
     } SHCI_C2_FLASH_Ip_t;
       /** No response parameters*/
 
 #define SHCI_OPCODE_C2_RADIO_ALLOW_LOW_POWER    (( SHCI_OGF << 10) + SHCI_OCF_C2_RADIO_ALLOW_LOW_POWER)
 
-#define SHCI_OPCODE_C2_MAC_802_15_4_INIT        (( SHCI_OGF << 10) + SHCI_OCF_C2_MAC_802_15_4_INIT)
-
 #define SHCI_OPCODE_C2_REINIT                   (( SHCI_OGF << 10) + SHCI_OCF_C2_REINIT)
-
-#define SHCI_OPCODE_C2_ZIGBEE_INIT              (( SHCI_OGF << 10) + SHCI_OCF_C2_ZIGBEE_INIT)
 
 #define SHCI_OPCODE_C2_LLD_TESTS_INIT           (( SHCI_OGF << 10) + SHCI_OCF_C2_LLD_TESTS_INIT)
 
@@ -540,14 +529,14 @@ extern "C" {
 typedef  MB_WirelessFwInfoTable_t SHCI_WirelessFwInfoTable_t;
 
 /*
-  *   At startup, the informations relative to the wireless binary are stored in RAM trough a structure defined by
+  *   At startup, the information relative to the wireless binary are stored in RAM through a structure defined by
   *   SHCI_WirelessFwInfoTable_t.This structure contains 4 fields (Version,MemorySize, Stack_info and a reserved part)
   *   each of those coded on 32 bits as shown on the table below:
   *
   *
   *               |7 |6 |5 |4 |3 |2 |1 |0 |7 |6 |5 |4 |3 |2 |1 |0 |7 |6 |5 |4 |3 |2 |1 |0 |7 |6 |5 |4 |3 |2 |1 |0 |
   *               -------------------------------------------------------------------------------------------------
-  * Version       |   Major version       |    Minor version      |    Sub version        | Branch    |Releas Type|
+  * Version       |   Major version       |    Minor version      |    Sub version        | Branch   |Release Type|
   *               -------------------------------------------------------------------------------------------------
   * MemorySize    |   SRAM2B (kB)         |    SRAM2A (kB)        |    SRAM1 (kB)         | FLASH (4kb)           |
   *               -------------------------------------------------------------------------------------------------
@@ -592,19 +581,11 @@ typedef  MB_WirelessFwInfoTable_t SHCI_WirelessFwInfoTable_t;
 #define INFO_STACK_TYPE_BLE_LIGHT                   0x03
 #define INFO_STACK_TYPE_THREAD_FTD                  0x10
 #define INFO_STACK_TYPE_THREAD_MTD                  0x11
-#define INFO_STACK_TYPE_ZIGBEE_FFD                  0x30
-#define INFO_STACK_TYPE_ZIGBEE_RFD                  0x31
-#define INFO_STACK_TYPE_MAC                         0x40
 #define INFO_STACK_TYPE_BLE_THREAD_FTD_STATIC       0x50
 #define INFO_STACK_TYPE_BLE_THREAD_FTD_DYAMIC		0x51
-#define INFO_STACK_TYPE_802154_LLD_TESTS            0x60
-#define INFO_STACK_TYPE_802154_PHY_VALID            0x61
 #define INFO_STACK_TYPE_BLE_PHY_VALID               0x62
 #define INFO_STACK_TYPE_BLE_LLD_TESTS               0x63
 #define INFO_STACK_TYPE_BLE_RLV                     0x64
-#define INFO_STACK_TYPE_802154_RLV                  0x65
-#define INFO_STACK_TYPE_BLE_ZIGBEE_FFD_STATIC       0x70
-#define INFO_STACK_TYPE_BLE_ZIGBEE_FFD_DYNAMIC      0x78
 #define INFO_STACK_TYPE_RLV                         0x80
 
 typedef struct {
@@ -750,7 +731,7 @@ typedef struct {
   * @brief Starts the LLD tests CLI
   *
   * @param  param_size : Nb of bytes
-  * @param  p_param : pointeur with data to give from M4 to M0
+  * @param  p_param : pointer with data to give from M4 to M0
   * @retval Status
   */
   SHCI_CmdStatus_t SHCI_C2_LLDTESTS_Init( uint8_t param_size, uint8_t * p_param );
@@ -760,19 +741,10 @@ typedef struct {
   * @brief Starts the LLD tests CLI
   *
   * @param  param_size : Nb of bytes
-  * @param  p_param : pointeur with data to give from M4 to M0
+  * @param  p_param : pointer with data to give from M4 to M0
   * @retval Status
   */
   SHCI_CmdStatus_t SHCI_C2_LLD_BLE_Init( uint8_t param_size, uint8_t * p_param );
-  
-    /**
-  * SHCI_C2_ZIGBEE_Init
-  * @brief Starts the Zigbee Stack
-  *
-  * @param  None
-  * @retval Status
-  */
-  SHCI_CmdStatus_t SHCI_C2_ZIGBEE_Init( void );
   
   /**
   * SHCI_C2_DEBUG_Init
@@ -829,19 +801,9 @@ typedef struct {
   */
   SHCI_CmdStatus_t SHCI_C2_RADIO_AllowLowPower( SHCI_C2_FLASH_Ip_t Ip,uint8_t  FlagRadioLowPowerOn);
 
-
-  /**
-  * SHCI_C2_MAC_802_15_4_Init
-  * @brief Starts the MAC 802.15.4 on M0
-  *
-  * @param  None
-  * @retval Status
-  */
-  SHCI_CmdStatus_t SHCI_C2_MAC_802_15_4_Init( void );
-
   /**
    * SHCI_GetWirelessFwInfo
-   * @brief This function read back the informations relative to the wireless binary loaded.
+   * @brief This function read back the information relative to the wireless binary loaded.
    *         Refer yourself to SHCI_WirelessFwInfoTable_t structure to get the significance
    *         of the different parameters returned.
    * @param  pWirelessInfo : Pointer to WirelessFwInfo_t.
