@@ -20,12 +20,13 @@
 
 #ifndef _STM_LIST_H_
 #define _STM_LIST_H_
+#include "stm32_wpan_common.h"
 
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
 #include "stdbool.h"
 
-typedef  struct _tListNode {
+typedef  PACKED_STRUCT _tListNode {
     struct _tListNode * next;
     struct _tListNode * prev;
 } tListNode;
