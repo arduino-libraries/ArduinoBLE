@@ -21,8 +21,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
-#include <Arduino.h>
-
 #include "stm_list.h"
 #include "shci_tl.h"
 #include "stm32_def.h"
@@ -325,12 +323,11 @@ static void OutputEvtTrace(TL_EvtPacket_t *phcievtbuffer)
 /* Weak implementation ----------------------------------------------------------------*/
 __WEAK void shci_cmd_resp_wait(uint32_t timeout)
 {
+  (void)timeout;
+
   CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
-  for (unsigned long start = millis(); (millis() - start) < timeout;) {
-    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
-      break;
-    }
-  }
+  while (CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
+
   return;
 }
 
