@@ -28,109 +28,121 @@ extern "C" {
 
 #include "stm32_wpan_common.h"
 
-/**
- * This file shall be identical between the CPU1 and the CPU2
- */
+  /**
+   * This file shall be identical between the CPU1 and the CPU2
+   */
 
-/**
- *********************************************************************************
- * TABLES
- *********************************************************************************
- */
+  /**
+   *********************************************************************************
+   * TABLES
+   *********************************************************************************
+   */
 
-/**
- * Version
- * [0:3]   = Build - 0: Untracked - 15:Released - x: Tracked version
- * [4:7]   = branch - 0: Mass Market - x: ...
- * [8:15]  = Subversion
- * [16:23] = Version minor
- * [24:31] = Version major
- *
- * Memory Size
- * [0:7]   = Flash ( Number of 4k sector)
- * [8:15]  = Reserved ( Shall be set to 0 - may be used as flash extension )
- * [16:23] = SRAM2b ( Number of 1k sector)
- * [24:31] = SRAM2a ( Number of 1k sector)
- */
-typedef PACKED_STRUCT {
-  uint32_t    Version;
-} MB_SafeBootInfoTable_t;
+  /**
+   * Version
+   * [0:3]   = Build - 0: Untracked - 15:Released - x: Tracked version
+   * [4:7]   = branch - 0: Mass Market - x: ...
+   * [8:15]  = Subversion
+   * [16:23] = Version minor
+   * [24:31] = Version major
+   *
+   * Memory Size
+   * [0:7]   = Flash ( Number of 4k sector)
+   * [8:15]  = Reserved ( Shall be set to 0 - may be used as flash extension )
+   * [16:23] = SRAM2b ( Number of 1k sector)
+   * [24:31] = SRAM2a ( Number of 1k sector)
+   */
+  typedef PACKED_STRUCT
+  {
+    uint32_t    Version;
+  } MB_SafeBootInfoTable_t;
 
-typedef PACKED_STRUCT {
-  uint32_t    Version;
-  uint32_t    MemorySize;
-  uint32_t    FusInfo;
-} MB_FusInfoTable_t;
+  typedef PACKED_STRUCT
+  {
+    uint32_t    Version;
+    uint32_t    MemorySize;
+    uint32_t    FusInfo;
+  } MB_FusInfoTable_t;
 
-typedef PACKED_STRUCT {
-  uint32_t    Version;
-  uint32_t    MemorySize;
-  uint32_t    InfoStack;
-  uint32_t    Reserved;
-} MB_WirelessFwInfoTable_t;
+  typedef PACKED_STRUCT
+  {
+    uint32_t    Version;
+    uint32_t    MemorySize;
+    uint32_t    InfoStack;
+    uint32_t    Reserved;
+  } MB_WirelessFwInfoTable_t;
 
-typedef struct {
-  MB_SafeBootInfoTable_t      SafeBootInfoTable;
-  MB_FusInfoTable_t           FusInfoTable;
-  MB_WirelessFwInfoTable_t    WirelessFwInfoTable;
-} MB_DeviceInfoTable_t;
+  typedef struct
+  {
+    MB_SafeBootInfoTable_t      SafeBootInfoTable;
+    MB_FusInfoTable_t           FusInfoTable;
+    MB_WirelessFwInfoTable_t    WirelessFwInfoTable;
+  } MB_DeviceInfoTable_t;
 
-typedef struct {
-  uint8_t     *pcmd_buffer;
-  uint8_t     *pcs_buffer;
-  uint8_t     *pevt_queue;
-  uint8_t     *phci_acl_data_buffer;
-} MB_BleTable_t;
+  typedef struct
+  {
+    uint8_t     *pcmd_buffer;
+    uint8_t     *pcs_buffer;
+    uint8_t     *pevt_queue;
+    uint8_t     *phci_acl_data_buffer;
+  } MB_BleTable_t;
 
-typedef struct {
-  uint8_t   *notack_buffer;
-  uint8_t   *clicmdrsp_buffer;
-  uint8_t   *otcmdrsp_buffer;
-} MB_ThreadTable_t;
+  typedef struct
+  {
+    uint8_t   *notack_buffer;
+    uint8_t   *clicmdrsp_buffer;
+    uint8_t   *otcmdrsp_buffer;
+  } MB_ThreadTable_t;
 
-typedef struct {
-  uint8_t   *clicmdrsp_buffer;
-  uint8_t   *m0cmd_buffer;
-} MB_LldTestsTable_t;
+  typedef struct
+  {
+    uint8_t   *clicmdrsp_buffer;
+    uint8_t   *m0cmd_buffer;
+  } MB_LldTestsTable_t;
 
-typedef struct {
-  uint8_t   *cmdrsp_buffer;
-  uint8_t   *m0cmd_buffer;
-} MB_LldBleTable_t;
+  typedef struct
+  {
+    uint8_t   *cmdrsp_buffer;
+    uint8_t   *m0cmd_buffer;
+  } MB_LldBleTable_t;
 
-/**
- * msg
- * [0:7]   = cmd/evt
- * [8:31] = Reserved
- */
-typedef struct {
-  uint8_t   *pcmd_buffer;
-  uint8_t   *sys_queue;
-} MB_SysTable_t;
+  /**
+   * msg
+   * [0:7]   = cmd/evt
+   * [8:31] = Reserved
+   */
+  typedef struct
+  {
+    uint8_t   *pcmd_buffer;
+    uint8_t   *sys_queue;
+  } MB_SysTable_t;
 
-typedef struct {
-  uint8_t     *spare_ble_buffer;
-  uint8_t     *spare_sys_buffer;
-  uint8_t     *blepool;
-  uint32_t    blepoolsize;
-  uint8_t     *pevt_free_buffer_queue;
-  uint8_t     *traces_evt_pool;
-  uint32_t    tracespoolsize;
-} MB_MemManagerTable_t;
+  typedef struct
+  {
+    uint8_t     *spare_ble_buffer;
+    uint8_t     *spare_sys_buffer;
+    uint8_t     *blepool;
+    uint32_t    blepoolsize;
+    uint8_t     *pevt_free_buffer_queue;
+    uint8_t     *traces_evt_pool;
+    uint32_t    tracespoolsize;
+  } MB_MemManagerTable_t;
 
-typedef struct {
-  uint8_t   *traces_queue;
-} MB_TracesTable_t;
+  typedef struct
+  {
+    uint8_t   *traces_queue;
+  } MB_TracesTable_t;
 
-typedef struct {
-  MB_DeviceInfoTable_t    *p_device_info_table;
-  MB_BleTable_t           *p_ble_table;
-  MB_ThreadTable_t        *p_thread_table;
-  MB_SysTable_t           *p_sys_table;
-  MB_MemManagerTable_t    *p_mem_manager_table;
-  MB_TracesTable_t        *p_traces_table;
-  MB_LldTestsTable_t      *p_lld_tests_table;
-  MB_LldBleTable_t        *p_lld_ble_table;
+  typedef struct
+  {
+    MB_DeviceInfoTable_t    *p_device_info_table;
+    MB_BleTable_t           *p_ble_table;
+    MB_ThreadTable_t        *p_thread_table;
+    MB_SysTable_t           *p_sys_table;
+    MB_MemManagerTable_t    *p_mem_manager_table;
+    MB_TracesTable_t        *p_traces_table;
+    MB_LldTestsTable_t      *p_lld_tests_table;
+    MB_LldBleTable_t        *p_lld_ble_table;
 } MB_RefTable_t;
 
 #ifdef __cplusplus

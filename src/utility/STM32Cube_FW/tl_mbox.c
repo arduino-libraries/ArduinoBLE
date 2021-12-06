@@ -31,14 +31,14 @@
  * They can enabled by adding the definition of TL_MM_DBG_EN in the preprocessor option in the IDE
  */
 #if(TL_MM_DBG_EN != 0)
-  #include "app_conf.h"
-  #include "dbg_trace.h"
+#include "app_conf.h"
+#include "dbg_trace.h"
 #endif
 
 #if (TL_MM_DBG_EN != 0)
-  #define TL_MM_DBG__MSG             PRINT_MESG_DBG
+#define TL_MM_DBG__MSG             PRINT_MESG_DBG
 #else
-  #define TL_MM_DBG__MSG(...)
+#define TL_MM_DBG__MSG(...)
 #endif
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,23 +66,23 @@ PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static tListNode  SystemEvtQueue;
 
 
 static tListNode  LocalFreeBufQueue;
-static void (* BLE_IoBusEvtCallBackFunction)(TL_EvtPacket_t *phcievt);
-static void (* BLE_IoBusAclDataTxAck)(void);
-static void (* SYS_CMD_IoBusCallBackFunction)(TL_EvtPacket_t *phcievt);
-static void (* SYS_EVT_IoBusCallBackFunction)(TL_EvtPacket_t *phcievt);
+static void (* BLE_IoBusEvtCallBackFunction) (TL_EvtPacket_t *phcievt);
+static void (* BLE_IoBusAclDataTxAck) ( void );
+static void (* SYS_CMD_IoBusCallBackFunction) (TL_EvtPacket_t *phcievt);
+static void (* SYS_EVT_IoBusCallBackFunction) (TL_EvtPacket_t *phcievt);
 
 
 /* Global variables ----------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-static void SendFreeBuf(void);
-static void OutputMemReleaseTrace(TL_EvtPacket_t *phcievt);
+static void SendFreeBuf( void );
+static void OutputMemReleaseTrace(TL_EvtPacket_t * phcievt);
 
 /* Public Functions Definition ------------------------------------------------------*/
 
 /******************************************************************************
  * GENERAL
  ******************************************************************************/
-void TL_Enable(void)
+void TL_Enable( void )
 {
   HW_IPCC_Enable();
 
@@ -90,7 +90,7 @@ void TL_Enable(void)
 }
 
 
-void TL_Init(void)
+void TL_Init( void )
 {
   TL_RefTable.p_device_info_table = &TL_DeviceInfoTable;
   TL_RefTable.p_ble_table = &TL_BleTable;
@@ -100,7 +100,6 @@ void TL_Init(void)
   TL_RefTable.p_sys_table = &TL_SysTable;
   TL_RefTable.p_mem_manager_table = &TL_MemManagerTable;
   TL_RefTable.p_traces_table = &TL_TracesTable;
-
   HW_IPCC_Init();
 
   return;
@@ -109,20 +108,20 @@ void TL_Init(void)
 /******************************************************************************
  * BLE
  ******************************************************************************/
-int32_t TL_BLE_Init(void *pConf)
+int32_t TL_BLE_Init( void* pConf )
 {
-  MB_BleTable_t   *p_bletable;
+  MB_BleTable_t  * p_bletable;
 
   TL_BLE_InitConf_t *pInitHciConf = (TL_BLE_InitConf_t *) pConf;
 
-  LST_init_head(&EvtQueue);
+  LST_init_head (&EvtQueue);
 
   p_bletable = TL_RefTable.p_ble_table;
 
   p_bletable->pcmd_buffer = pInitHciConf->p_cmdbuffer;
   p_bletable->phci_acl_data_buffer = pInitHciConf->p_AclDataBuffer;
-  p_bletable->pcs_buffer  = (uint8_t *)CsBuffer;
-  p_bletable->pevt_queue  = (uint8_t *)&EvtQueue;
+  p_bletable->pcs_buffer  = (uint8_t*)CsBuffer;
+  p_bletable->pevt_queue  = (uint8_t*)&EvtQueue;
 
   HW_IPCC_BLE_Init();
 
@@ -132,12 +131,12 @@ int32_t TL_BLE_Init(void *pConf)
   return 0;
 }
 
-int32_t TL_BLE_SendCmd(uint8_t *buffer, uint16_t size)
+int32_t TL_BLE_SendCmd( uint8_t* buffer, uint16_t size )
 {
   (void)(buffer);
   (void)(size);
 
-  ((TL_CmdPacket_t *)(TL_RefTable.p_ble_table->pcmd_buffer))->cmdserial.type = TL_BLECMD_PKT_TYPE;
+  ((TL_CmdPacket_t*)(TL_RefTable.p_ble_table->pcmd_buffer))->cmdserial.type = TL_BLECMD_PKT_TYPE;
 
   HW_IPCC_BLE_SendCmd();
 
@@ -148,8 +147,9 @@ void HW_IPCC_BLE_RxEvtNot(void)
 {
   TL_EvtPacket_t *phcievt;
 
-  while (LST_is_empty(&EvtQueue) == FALSE) {
-    LST_remove_head(&EvtQueue, (tListNode **)&phcievt);
+  while(LST_is_empty(&EvtQueue) == FALSE)
+  {
+    LST_remove_head (&EvtQueue, (tListNode **)&phcievt);
 
     BLE_IoBusEvtCallBackFunction(phcievt);
   }
@@ -157,7 +157,7 @@ void HW_IPCC_BLE_RxEvtNot(void)
   return;
 }
 
-int32_t TL_BLE_SendAclData(uint8_t *buffer, uint16_t size)
+int32_t TL_BLE_SendAclData( uint8_t* buffer, uint16_t size )
 {
   (void)(buffer);
   (void)(size);
@@ -171,7 +171,7 @@ int32_t TL_BLE_SendAclData(uint8_t *buffer, uint16_t size)
 
 void HW_IPCC_BLE_AclDataAckNot(void)
 {
-  BLE_IoBusAclDataTxAck();
+  BLE_IoBusAclDataTxAck( );
 
   return;
 }
@@ -179,16 +179,16 @@ void HW_IPCC_BLE_AclDataAckNot(void)
 /******************************************************************************
  * SYSTEM
  ******************************************************************************/
-int32_t TL_SYS_Init(void *pConf)
+int32_t TL_SYS_Init( void* pConf  )
 {
-  MB_SysTable_t   *p_systable;
+  MB_SysTable_t  * p_systable;
 
   TL_SYS_InitConf_t *pInitHciConf = (TL_SYS_InitConf_t *) pConf;
 
-  LST_init_head(&SystemEvtQueue);
+  LST_init_head (&SystemEvtQueue);
   p_systable = TL_RefTable.p_sys_table;
   p_systable->pcmd_buffer = pInitHciConf->p_cmdbuffer;
-  p_systable->sys_queue = (uint8_t *)&SystemEvtQueue;
+  p_systable->sys_queue = (uint8_t*)&SystemEvtQueue;
 
   HW_IPCC_SYS_Init();
 
@@ -198,7 +198,7 @@ int32_t TL_SYS_Init(void *pConf)
   return 0;
 }
 
-int32_t TL_SYS_SendCmd(uint8_t *buffer, uint16_t size)
+int32_t TL_SYS_SendCmd( uint8_t* buffer, uint16_t size )
 {
   (void)(buffer);
   (void)(size);
@@ -212,18 +212,19 @@ int32_t TL_SYS_SendCmd(uint8_t *buffer, uint16_t size)
 
 void HW_IPCC_SYS_CmdEvtNot(void)
 {
-  SYS_CMD_IoBusCallBackFunction((TL_EvtPacket_t *)(TL_RefTable.p_sys_table->pcmd_buffer));
+  SYS_CMD_IoBusCallBackFunction( (TL_EvtPacket_t*)(TL_RefTable.p_sys_table->pcmd_buffer) );
 
   return;
 }
 
-void HW_IPCC_SYS_EvtNot(void)
+void HW_IPCC_SYS_EvtNot( void )
 {
   TL_EvtPacket_t *p_evt;
 
-  while (LST_is_empty(&SystemEvtQueue) == FALSE) {
-    LST_remove_head(&SystemEvtQueue, (tListNode **)&p_evt);
-    SYS_EVT_IoBusCallBackFunction(p_evt);
+  while(LST_is_empty(&SystemEvtQueue) == FALSE)
+  {
+    LST_remove_head (&SystemEvtQueue, (tListNode **)&p_evt);
+    SYS_EVT_IoBusCallBackFunction( p_evt );
   }
 
   return;
@@ -233,9 +234,9 @@ void HW_IPCC_SYS_EvtNot(void)
  * THREAD
  ******************************************************************************/
 #ifdef THREAD_WB
-void TL_THREAD_Init(TL_TH_Config_t *p_Config)
+void TL_THREAD_Init( TL_TH_Config_t *p_Config )
 {
-  MB_ThreadTable_t   *p_thread_table;
+  MB_ThreadTable_t  * p_thread_table;
 
   p_thread_table = TL_RefTable.p_thread_table;
 
@@ -248,7 +249,7 @@ void TL_THREAD_Init(TL_TH_Config_t *p_Config)
   return;
 }
 
-void TL_OT_SendCmd(void)
+void TL_OT_SendCmd( void )
 {
   ((TL_CmdPacket_t *)(TL_RefTable.p_thread_table->otcmdrsp_buffer))->cmdserial.type = TL_OTCMD_PKT_TYPE;
 
@@ -257,7 +258,7 @@ void TL_OT_SendCmd(void)
   return;
 }
 
-void TL_CLI_SendCmd(void)
+void TL_CLI_SendCmd( void )
 {
   ((TL_CmdPacket_t *)(TL_RefTable.p_thread_table->clicmdrsp_buffer))->cmdserial.type = TL_CLICMD_PKT_TYPE;
 
@@ -266,7 +267,7 @@ void TL_CLI_SendCmd(void)
   return;
 }
 
-void TL_THREAD_SendAck(void)
+void TL_THREAD_SendAck ( void )
 {
   ((TL_CmdPacket_t *)(TL_RefTable.p_thread_table->notack_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
 
@@ -275,7 +276,7 @@ void TL_THREAD_SendAck(void)
   return;
 }
 
-void TL_THREAD_CliSendAck(void)
+void TL_THREAD_CliSendAck ( void )
 {
   ((TL_CmdPacket_t *)(TL_RefTable.p_thread_table->notack_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
 
@@ -286,28 +287,28 @@ void TL_THREAD_CliSendAck(void)
 
 void HW_IPCC_OT_CmdEvtNot(void)
 {
-  TL_OT_CmdEvtReceived((TL_EvtPacket_t *)(TL_RefTable.p_thread_table->otcmdrsp_buffer));
+  TL_OT_CmdEvtReceived( (TL_EvtPacket_t*)(TL_RefTable.p_thread_table->otcmdrsp_buffer) );
 
   return;
 }
 
-void HW_IPCC_THREAD_EvtNot(void)
+void HW_IPCC_THREAD_EvtNot( void )
 {
-  TL_THREAD_NotReceived((TL_EvtPacket_t *)(TL_RefTable.p_thread_table->notack_buffer));
+  TL_THREAD_NotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_thread_table->notack_buffer) );
 
   return;
 }
 
-void HW_IPCC_THREAD_CliEvtNot(void)
+void HW_IPCC_THREAD_CliEvtNot( void )
 {
-  TL_THREAD_CliNotReceived((TL_EvtPacket_t *)(TL_RefTable.p_thread_table->clicmdrsp_buffer));
+  TL_THREAD_CliNotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_thread_table->clicmdrsp_buffer) );
 
   return;
 }
 
-__WEAK void TL_OT_CmdEvtReceived(TL_EvtPacket_t *Otbuffer) {};
-__WEAK void TL_THREAD_NotReceived(TL_EvtPacket_t *Notbuffer) {};
-__WEAK void TL_THREAD_CliNotReceived(TL_EvtPacket_t *Notbuffer) {};
+__WEAK void TL_OT_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
+__WEAK void TL_THREAD_NotReceived( TL_EvtPacket_t * Notbuffer ){};
+__WEAK void TL_THREAD_CliNotReceived( TL_EvtPacket_t * Notbuffer ){};
 
 #endif /* THREAD_WB */
 
@@ -315,9 +316,9 @@ __WEAK void TL_THREAD_CliNotReceived(TL_EvtPacket_t *Notbuffer) {};
  * LLD TESTS
  ******************************************************************************/
 #ifdef LLD_TESTS_WB
-void TL_LLDTESTS_Init(TL_LLD_tests_Config_t *p_Config)
+void TL_LLDTESTS_Init( TL_LLD_tests_Config_t *p_Config )
 {
-  MB_LldTestsTable_t   *p_lld_tests_table;
+  MB_LldTestsTable_t  * p_lld_tests_table;
 
   p_lld_tests_table = TL_RefTable.p_lld_tests_table;
   p_lld_tests_table->clicmdrsp_buffer = p_Config->p_LldTestsCliCmdRspBuffer;
@@ -326,49 +327,49 @@ void TL_LLDTESTS_Init(TL_LLD_tests_Config_t *p_Config)
   return;
 }
 
-void TL_LLDTESTS_SendCliCmd(void)
+void TL_LLDTESTS_SendCliCmd( void )
 {
   ((TL_CmdPacket_t *)(TL_RefTable.p_lld_tests_table->clicmdrsp_buffer))->cmdserial.type = TL_CLICMD_PKT_TYPE;
   HW_IPCC_LLDTESTS_SendCliCmd();
   return;
 }
 
-void HW_IPCC_LLDTESTS_ReceiveCliRsp(void)
+void HW_IPCC_LLDTESTS_ReceiveCliRsp( void )
 {
-  TL_LLDTESTS_ReceiveCliRsp((TL_CmdPacket_t *)(TL_RefTable.p_lld_tests_table->clicmdrsp_buffer));
+  TL_LLDTESTS_ReceiveCliRsp( (TL_CmdPacket_t*)(TL_RefTable.p_lld_tests_table->clicmdrsp_buffer) );
   return;
 }
 
-void TL_LLDTESTS_SendCliRspAck(void)
+void TL_LLDTESTS_SendCliRspAck( void )
 {
   HW_IPCC_LLDTESTS_SendCliRspAck();
   return;
 }
 
-void HW_IPCC_LLDTESTS_ReceiveM0Cmd(void)
+void HW_IPCC_LLDTESTS_ReceiveM0Cmd( void )
 {
-  TL_LLDTESTS_ReceiveM0Cmd((TL_CmdPacket_t *)(TL_RefTable.p_lld_tests_table->m0cmd_buffer));
+  TL_LLDTESTS_ReceiveM0Cmd( (TL_CmdPacket_t*)(TL_RefTable.p_lld_tests_table->m0cmd_buffer) );
   return;
 }
 
 
-void TL_LLDTESTS_SendM0CmdAck(void)
+void TL_LLDTESTS_SendM0CmdAck( void )
 {
   HW_IPCC_LLDTESTS_SendM0CmdAck();
   return;
 }
 
-__WEAK void TL_LLDTESTS_ReceiveCliRsp(TL_CmdPacket_t *Notbuffer) {};
-__WEAK void TL_LLDTESTS_ReceiveM0Cmd(TL_CmdPacket_t *Notbuffer) {};
+__WEAK void TL_LLDTESTS_ReceiveCliRsp( TL_CmdPacket_t * Notbuffer ){};
+__WEAK void TL_LLDTESTS_ReceiveM0Cmd( TL_CmdPacket_t * Notbuffer ){};
 #endif /* LLD_TESTS_WB */
 
 /******************************************************************************
  * LLD BLE
  ******************************************************************************/
-#ifdef LLD_BLE_WB
-void TL_LLD_BLE_Init(TL_LLD_BLE_Config_t *p_Config)
+#ifdef LLD_BLE_WB 
+void TL_LLD_BLE_Init( TL_LLD_BLE_Config_t *p_Config )
 {
-  MB_LldBleTable_t   *p_lld_ble_table;
+  MB_LldBleTable_t  * p_lld_ble_table;
 
   p_lld_ble_table = TL_RefTable.p_lld_ble_table;
   p_lld_ble_table->cmdrsp_buffer = p_Config->p_LldBleCmdRspBuffer;
@@ -377,56 +378,56 @@ void TL_LLD_BLE_Init(TL_LLD_BLE_Config_t *p_Config)
   return;
 }
 
-void TL_LLD_BLE_SendCliCmd(void)
+void TL_LLD_BLE_SendCliCmd( void )
 {
   ((TL_CmdPacket_t *)(TL_RefTable.p_lld_ble_table->cmdrsp_buffer))->cmdserial.type = TL_CLICMD_PKT_TYPE;
   HW_IPCC_LLD_BLE_SendCliCmd();
   return;
 }
 
-void HW_IPCC_LLD_BLE_ReceiveCliRsp(void)
+void HW_IPCC_LLD_BLE_ReceiveCliRsp( void )
 {
-  TL_LLD_BLE_ReceiveCliRsp((TL_CmdPacket_t *)(TL_RefTable.p_lld_ble_table->cmdrsp_buffer));
+  TL_LLD_BLE_ReceiveCliRsp( (TL_CmdPacket_t*)(TL_RefTable.p_lld_ble_table->cmdrsp_buffer) );
   return;
 }
 
-void TL_LLD_BLE_SendCliRspAck(void)
+void TL_LLD_BLE_SendCliRspAck( void )
 {
   HW_IPCC_LLD_BLE_SendCliRspAck();
   return;
 }
 
-void HW_IPCC_LLD_BLE_ReceiveM0Cmd(void)
+void HW_IPCC_LLD_BLE_ReceiveM0Cmd( void )
 {
-  TL_LLD_BLE_ReceiveM0Cmd((TL_CmdPacket_t *)(TL_RefTable.p_lld_ble_table->m0cmd_buffer));
+  TL_LLD_BLE_ReceiveM0Cmd( (TL_CmdPacket_t*)(TL_RefTable.p_lld_ble_table->m0cmd_buffer) );
   return;
 }
 
 
-void TL_LLD_BLE_SendM0CmdAck(void)
+void TL_LLD_BLE_SendM0CmdAck( void )
 {
   HW_IPCC_LLD_BLE_SendM0CmdAck();
   return;
 }
 
-__WEAK void TL_LLD_BLE_ReceiveCliRsp(TL_CmdPacket_t *Notbuffer) {};
-__WEAK void TL_LLD_BLE_ReceiveM0Cmd(TL_CmdPacket_t *Notbuffer) {};
+__WEAK void TL_LLD_BLE_ReceiveCliRsp( TL_CmdPacket_t * Notbuffer ){};
+__WEAK void TL_LLD_BLE_ReceiveM0Cmd( TL_CmdPacket_t * Notbuffer ){};
 
 /* Transparent Mode */
-void TL_LLD_BLE_SendCmd(void)
+void TL_LLD_BLE_SendCmd( void )
 {
   ((TL_CmdPacket_t *)(TL_RefTable.p_lld_ble_table->cmdrsp_buffer))->cmdserial.type = TL_CLICMD_PKT_TYPE;
   HW_IPCC_LLD_BLE_SendCmd();
   return;
 }
 
-void HW_IPCC_LLD_BLE_ReceiveRsp(void)
+void HW_IPCC_LLD_BLE_ReceiveRsp( void )
 {
-  TL_LLD_BLE_ReceiveRsp((TL_CmdPacket_t *)(TL_RefTable.p_lld_ble_table->cmdrsp_buffer));
+  TL_LLD_BLE_ReceiveRsp( (TL_CmdPacket_t*)(TL_RefTable.p_lld_ble_table->cmdrsp_buffer) );
   return;
 }
 
-void TL_LLD_BLE_SendRspAck(void)
+void TL_LLD_BLE_SendRspAck( void )
 {
   HW_IPCC_LLD_BLE_SendRspAck();
   return;
@@ -436,18 +437,18 @@ void TL_LLD_BLE_SendRspAck(void)
 /******************************************************************************
  * MEMORY MANAGER
  ******************************************************************************/
-void TL_MM_Init(TL_MM_Config_t *p_Config)
+void TL_MM_Init( TL_MM_Config_t *p_Config )
 {
-  static MB_MemManagerTable_t   *p_mem_manager_table;
+  static MB_MemManagerTable_t  * p_mem_manager_table;
 
-  LST_init_head(&FreeBufQueue);
-  LST_init_head(&LocalFreeBufQueue);
+  LST_init_head (&FreeBufQueue);
+  LST_init_head (&LocalFreeBufQueue);
 
   p_mem_manager_table = TL_RefTable.p_mem_manager_table;
 
   p_mem_manager_table->blepool = p_Config->p_AsynchEvtPool;
   p_mem_manager_table->blepoolsize = p_Config->AsynchEvtPoolSize;
-  p_mem_manager_table->pevt_free_buffer_queue = (uint8_t *)&FreeBufQueue;
+  p_mem_manager_table->pevt_free_buffer_queue = (uint8_t*)&FreeBufQueue;
   p_mem_manager_table->spare_ble_buffer = p_Config->p_BleSpareEvtBuffer;
   p_mem_manager_table->spare_sys_buffer = p_Config->p_SystemSpareEvtBuffer;
   p_mem_manager_table->traces_evt_pool = p_Config->p_TracesEvtPool;
@@ -456,47 +457,49 @@ void TL_MM_Init(TL_MM_Config_t *p_Config)
   return;
 }
 
-void TL_MM_EvtDone(TL_EvtPacket_t *phcievt)
+void TL_MM_EvtDone(TL_EvtPacket_t * phcievt)
 {
   LST_insert_tail(&LocalFreeBufQueue, (tListNode *)phcievt);
 
   OutputMemReleaseTrace(phcievt);
 
-  HW_IPCC_MM_SendFreeBuf(SendFreeBuf);
+  HW_IPCC_MM_SendFreeBuf( SendFreeBuf );
 
   return;
 }
 
-static void SendFreeBuf(void)
+static void SendFreeBuf( void )
 {
   tListNode *p_node;
 
-  while (FALSE == LST_is_empty(&LocalFreeBufQueue)) {
-    LST_remove_head(&LocalFreeBufQueue, (tListNode **)&p_node);
-    LST_insert_tail((tListNode *)(TL_RefTable.p_mem_manager_table->pevt_free_buffer_queue), p_node);
+  while ( FALSE == LST_is_empty (&LocalFreeBufQueue) )
+  {
+    LST_remove_head( &LocalFreeBufQueue, (tListNode **)&p_node );
+    LST_insert_tail( (tListNode*)(TL_RefTable.p_mem_manager_table->pevt_free_buffer_queue), p_node );
   }
 
   return;
 }
 
-static void OutputMemReleaseTrace(TL_EvtPacket_t *phcievt)
+static void OutputMemReleaseTrace(TL_EvtPacket_t * phcievt)
 {
-  switch (phcievt->evtserial.evt.evtcode) {
+  switch(phcievt->evtserial.evt.evtcode)
+  {
     case TL_BLEEVT_CS_OPCODE:
       TL_MM_DBG__MSG("mm evt released: 0x%02X", phcievt->evtserial.evt.evtcode);
-      TL_MM_DBG__MSG(" cmd opcode: 0x%04X", ((TL_CsEvt_t *)(phcievt->evtserial.evt.payload))->cmdcode);
+      TL_MM_DBG__MSG(" cmd opcode: 0x%04X", ((TL_CsEvt_t*)(phcievt->evtserial.evt.payload))->cmdcode);
       TL_MM_DBG__MSG(" buffer addr: 0x%08X", phcievt);
       break;
 
     case TL_BLEEVT_CC_OPCODE:
       TL_MM_DBG__MSG("mm evt released: 0x%02X", phcievt->evtserial.evt.evtcode);
-      TL_MM_DBG__MSG(" cmd opcode: 0x%04X", ((TL_CcEvt_t *)(phcievt->evtserial.evt.payload))->cmdcode);
+      TL_MM_DBG__MSG(" cmd opcode: 0x%04X", ((TL_CcEvt_t*)(phcievt->evtserial.evt.payload))->cmdcode);
       TL_MM_DBG__MSG(" buffer addr: 0x%08X", phcievt);
       break;
 
     case TL_BLEEVT_VS_OPCODE:
       TL_MM_DBG__MSG("mm evt released: 0x%02X", phcievt->evtserial.evt.evtcode);
-      TL_MM_DBG__MSG(" subevtcode: 0x%04X", ((TL_AsynchEvt_t *)(phcievt->evtserial.evt.payload))->subevtcode);
+      TL_MM_DBG__MSG(" subevtcode: 0x%04X", ((TL_AsynchEvt_t*)(phcievt->evtserial.evt.payload))->subevtcode);
       TL_MM_DBG__MSG(" buffer addr: 0x%08X", phcievt);
       break;
 
@@ -514,11 +517,11 @@ static void OutputMemReleaseTrace(TL_EvtPacket_t *phcievt)
 /******************************************************************************
  * TRACES
  ******************************************************************************/
-void TL_TRACES_Init(void)
+void TL_TRACES_Init( void )
 {
-  LST_init_head(&TracesEvtQueue);
+  LST_init_head (&TracesEvtQueue);
 
-  TL_RefTable.p_traces_table->traces_queue = (uint8_t *)&TracesEvtQueue;
+  TL_RefTable.p_traces_table->traces_queue = (uint8_t*)&TracesEvtQueue;
 
   HW_IPCC_TRACES_Init();
 
@@ -529,17 +532,19 @@ void HW_IPCC_TRACES_EvtNot(void)
 {
   TL_EvtPacket_t *phcievt;
 
-  while (LST_is_empty(&TracesEvtQueue) == FALSE) {
-    LST_remove_head(&TracesEvtQueue, (tListNode **)&phcievt);
-    TL_TRACES_EvtReceived(phcievt);
+  while(LST_is_empty(&TracesEvtQueue) == FALSE)
+  {
+    LST_remove_head (&TracesEvtQueue, (tListNode **)&phcievt);
+    TL_TRACES_EvtReceived( phcievt );
   }
 
   return;
 }
 
-__WEAK void TL_TRACES_EvtReceived(TL_EvtPacket_t *hcievt)
+__WEAK void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt )
 {
   (void)(hcievt);
 }
+
 #endif /* STM32WBxx */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

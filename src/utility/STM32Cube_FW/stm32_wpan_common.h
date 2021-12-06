@@ -37,9 +37,9 @@ extern "C" {
 #include <stdarg.h>
 #include "cmsis_compiler.h"
 
-/* -------------------------------- *
- *  Basic definitions               *
- * -------------------------------- */
+  /* -------------------------------- *
+   *  Basic definitions               *
+   * -------------------------------- */
 
 #undef NULL
 #define NULL                    0U
@@ -50,9 +50,9 @@ extern "C" {
 #undef TRUE
 #define TRUE                    (!0U)
 
-/* -------------------------------- *
- *  Critical Section definition     *
- * -------------------------------- */
+  /* -------------------------------- *
+   *  Critical Section definition     *
+   * -------------------------------- */
 #undef BACKUP_PRIMASK
 #define BACKUP_PRIMASK()    uint32_t primask_bit= __get_PRIMASK()
 
@@ -62,18 +62,18 @@ extern "C" {
 #undef RESTORE_PRIMASK
 #define RESTORE_PRIMASK()   __set_PRIMASK(primask_bit)
 
-/* -------------------------------- *
- *  Macro delimiters                *
- * -------------------------------- */
+  /* -------------------------------- *
+   *  Macro delimiters                *
+   * -------------------------------- */
 #undef M_BEGIN
 #define M_BEGIN     do {
 
 #undef  M_END
 #define M_END       } while(0)
 
-/* -------------------------------- *
- *  Some useful macro definitions   *
- * -------------------------------- */
+  /* -------------------------------- *
+   *  Some useful macro definitions   *
+   * -------------------------------- */
 #undef MAX
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 

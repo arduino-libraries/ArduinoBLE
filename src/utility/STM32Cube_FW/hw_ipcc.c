@@ -29,20 +29,20 @@
 /* Private macros ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static void (*FreeBufCb)(void);
+static void (*FreeBufCb)( void );
 
 /* Private function prototypes -----------------------------------------------*/
-static void HW_IPCC_BLE_EvtHandler(void);
-static void HW_IPCC_BLE_AclDataEvtHandler(void);
-static void HW_IPCC_MM_FreeBufHandler(void);
-static void HW_IPCC_SYS_CmdEvtHandler(void);
-static void HW_IPCC_SYS_EvtHandler(void);
-static void HW_IPCC_TRACES_EvtHandler(void);
+static void HW_IPCC_BLE_EvtHandler( void );
+static void HW_IPCC_BLE_AclDataEvtHandler( void );
+static void HW_IPCC_MM_FreeBufHandler( void );
+static void HW_IPCC_SYS_CmdEvtHandler( void );
+static void HW_IPCC_SYS_EvtHandler( void );
+static void HW_IPCC_TRACES_EvtHandler( void );
 
 #ifdef THREAD_WB
-  static void HW_IPCC_OT_CmdEvtHandler(void);
-  static void HW_IPCC_THREAD_NotEvtHandler(void);
-  static void HW_IPCC_THREAD_CliNotEvtHandler(void);
+static void HW_IPCC_OT_CmdEvtHandler( void );
+static void HW_IPCC_THREAD_NotEvtHandler( void );
+static void HW_IPCC_THREAD_CliNotEvtHandler( void );
 #endif
 
 /* Public function definition -----------------------------------------------*/
@@ -50,41 +50,54 @@ static void HW_IPCC_TRACES_EvtHandler(void);
 /******************************************************************************
  * INTERRUPT HANDLER
  ******************************************************************************/
-
 void IPCC_C1_RX_IRQHandler(void)
 {
-  if (HW_IPCC_RX_PENDING(HW_IPCC_SYSTEM_EVENT_CHANNEL)) {
-    HW_IPCC_SYS_EvtHandler();
+  if (HW_IPCC_RX_PENDING( HW_IPCC_SYSTEM_EVENT_CHANNEL ))
+  {
+      HW_IPCC_SYS_EvtHandler();
   }
 #ifdef THREAD_WB
-  else if (HW_IPCC_RX_PENDING(HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL)) {
+  else if (HW_IPCC_RX_PENDING( HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL ))
+  {
     HW_IPCC_THREAD_NotEvtHandler();
-  } else if (HW_IPCC_RX_PENDING(HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL)) {
+  }
+  else if (HW_IPCC_RX_PENDING( HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL ))
+  {
     HW_IPCC_THREAD_CliNotEvtHandler();
   }
 #endif /* THREAD_WB */
-  else if (HW_IPCC_RX_PENDING(HW_IPCC_BLE_EVENT_CHANNEL)) {
+  else if (HW_IPCC_RX_PENDING( HW_IPCC_BLE_EVENT_CHANNEL ))
+  {
     HW_IPCC_BLE_EvtHandler();
-  } else if (HW_IPCC_RX_PENDING(HW_IPCC_TRACES_CHANNEL)) {
+  }
+  else if (HW_IPCC_RX_PENDING( HW_IPCC_TRACES_CHANNEL ))
+  {
     HW_IPCC_TRACES_EvtHandler();
   }
 }
 
 void IPCC_C1_TX_IRQHandler(void)
 {
-  if (HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
+  if (HW_IPCC_TX_PENDING( HW_IPCC_SYSTEM_CMD_RSP_CHANNEL ))
+  {
     HW_IPCC_SYS_CmdEvtHandler();
   }
 #ifdef THREAD_WB
-  else if (HW_IPCC_TX_PENDING(HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL)) {
+  else if (HW_IPCC_TX_PENDING( HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL ))
+  {
     HW_IPCC_OT_CmdEvtHandler();
   }
 #endif /* THREAD_WB */
-  else if (HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
+  else if (HW_IPCC_TX_PENDING( HW_IPCC_SYSTEM_CMD_RSP_CHANNEL ))
+  {
     HW_IPCC_SYS_CmdEvtHandler();
-  } else if (HW_IPCC_TX_PENDING(HW_IPCC_MM_RELEASE_BUFFER_CHANNEL)) {
+  }
+  else if (HW_IPCC_TX_PENDING( HW_IPCC_MM_RELEASE_BUFFER_CHANNEL ))
+  {
     HW_IPCC_MM_FreeBufHandler();
-  } else if (HW_IPCC_TX_PENDING(HW_IPCC_HCI_ACL_DATA_CHANNEL)) {
+  }
+  else if (HW_IPCC_TX_PENDING( HW_IPCC_HCI_ACL_DATA_CHANNEL ))
+  {
     HW_IPCC_BLE_AclDataEvtHandler();
   }
 }
@@ -92,7 +105,7 @@ void IPCC_C1_TX_IRQHandler(void)
 /******************************************************************************
  * GENERAL
  ******************************************************************************/
-void HW_IPCC_Enable(void)
+void HW_IPCC_Enable( void )
 {
   /**
   * Such as IPCC IP available to the CPU2, it is required to keep the IPCC clock running
@@ -103,8 +116,8 @@ void HW_IPCC_Enable(void)
   /**
    * When the device is out of standby, it is required to use the EXTI mechanism to wakeup CPU2
    */
-  LL_C2_EXTI_EnableEvent_32_63(LL_EXTI_LINE_41);
-  LL_EXTI_EnableRisingTrig_32_63(LL_EXTI_LINE_41);
+  LL_C2_EXTI_EnableEvent_32_63( LL_EXTI_LINE_41 );
+  LL_EXTI_EnableRisingTrig_32_63( LL_EXTI_LINE_41 );
 
   /**
    * In case the SBSFU is implemented, it may have already set the C2BOOT bit to startup the CPU2.
@@ -115,19 +128,19 @@ void HW_IPCC_Enable(void)
    * When SHCI_C2_Reinit( ) is not called, generating an event to the CPU2 does not have any effect
    * So, by default, the application shall both set the event flag and set the C2BOOT bit.
    */
-  __SEV();        /* Set the internal event flag and send an event to the CPU2 */
-  __WFE();        /* Clear the internal event flag */
-  LL_PWR_EnableBootC2();
+  __SEV( );       /* Set the internal event flag and send an event to the CPU2 */
+  __WFE( );       /* Clear the internal event flag */
+  LL_PWR_EnableBootC2( );
 
   return;
 }
 
-void HW_IPCC_Init(void)
+void HW_IPCC_Init( void )
 {
-  LL_AHB3_GRP1_EnableClock(LL_AHB3_GRP1_PERIPH_IPCC);
+  LL_AHB3_GRP1_EnableClock( LL_AHB3_GRP1_PERIPH_IPCC );
 
-  LL_C1_IPCC_EnableIT_RXO(IPCC);
-  LL_C1_IPCC_EnableIT_TXF(IPCC);
+  LL_C1_IPCC_EnableIT_RXO( IPCC );
+  LL_C1_IPCC_EnableIT_TXF( IPCC );
 
   HAL_NVIC_EnableIRQ(IPCC_C1_RX_IRQn);
   HAL_NVIC_EnableIRQ(IPCC_C1_TX_IRQn);
@@ -138,188 +151,191 @@ void HW_IPCC_Init(void)
 /******************************************************************************
  * BLE
  ******************************************************************************/
-void HW_IPCC_BLE_Init(void)
+void HW_IPCC_BLE_Init( void )
 {
-  LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_BLE_EVENT_CHANNEL);
+  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_BLE_EVENT_CHANNEL );
 
   return;
 }
 
-void HW_IPCC_BLE_SendCmd(void)
+void HW_IPCC_BLE_SendCmd( void )
 {
-  LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_BLE_CMD_CHANNEL);
+  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_BLE_CMD_CHANNEL );
 
   return;
 }
 
-static void HW_IPCC_BLE_EvtHandler(void)
+static void HW_IPCC_BLE_EvtHandler( void )
 {
   HW_IPCC_BLE_RxEvtNot();
 
-  LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_BLE_EVENT_CHANNEL);
+  LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_BLE_EVENT_CHANNEL );
 
   return;
 }
 
-void HW_IPCC_BLE_SendAclData(void)
+void HW_IPCC_BLE_SendAclData( void )
 {
-  LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL);
-  LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL);
+  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL );
+  LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL );
 
   return;
 }
 
-static void HW_IPCC_BLE_AclDataEvtHandler(void)
+static void HW_IPCC_BLE_AclDataEvtHandler( void )
 {
-  LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL);
+  LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL );
 
   HW_IPCC_BLE_AclDataAckNot();
 
   return;
 }
 
-__WEAK void HW_IPCC_BLE_AclDataAckNot(void) {};
-__WEAK void HW_IPCC_BLE_RxEvtNot(void) {};
+__WEAK void HW_IPCC_BLE_AclDataAckNot( void ){};
+__WEAK void HW_IPCC_BLE_RxEvtNot( void ){};
 
 /******************************************************************************
  * SYSTEM
  ******************************************************************************/
-void HW_IPCC_SYS_Init(void)
+void HW_IPCC_SYS_Init( void )
 {
-  LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL);
+  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL );
 
   return;
 }
 
-void HW_IPCC_SYS_SendCmd(void)
+void HW_IPCC_SYS_SendCmd( void )
 {
-  LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
-  LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
+  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL );
+  LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL );
 
   return;
 }
 
-static void HW_IPCC_SYS_CmdEvtHandler(void)
+static void HW_IPCC_SYS_CmdEvtHandler( void )
 {
-  LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
+  LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL );
 
   HW_IPCC_SYS_CmdEvtNot();
 
   return;
 }
 
-static void HW_IPCC_SYS_EvtHandler(void)
+static void HW_IPCC_SYS_EvtHandler( void )
 {
   HW_IPCC_SYS_EvtNot();
 
-  LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL);
+  LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL );
 
   return;
 }
 
-__WEAK void HW_IPCC_SYS_CmdEvtNot(void) {};
-__WEAK void HW_IPCC_SYS_EvtNot(void) {};
+__WEAK void HW_IPCC_SYS_CmdEvtNot( void ){};
+__WEAK void HW_IPCC_SYS_EvtNot( void ){};
 
 /******************************************************************************
  * THREAD
  ******************************************************************************/
 #ifdef THREAD_WB
-void HW_IPCC_THREAD_Init(void)
+void HW_IPCC_THREAD_Init( void )
 {
-  LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
-  LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
+  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL );
+  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL );
 
   return;
 }
 
-void HW_IPCC_OT_SendCmd(void)
+void HW_IPCC_OT_SendCmd( void )
 {
-  LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL);
-  LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL);
+  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL );
+  LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL );
 
   return;
 }
 
-void HW_IPCC_CLI_SendCmd(void)
+void HW_IPCC_CLI_SendCmd( void )
 {
-  LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_THREAD_CLI_CMD_CHANNEL);
+  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_THREAD_CLI_CMD_CHANNEL );
 
   return;
 }
 
-void HW_IPCC_THREAD_SendAck(void)
+void HW_IPCC_THREAD_SendAck( void )
 {
-  LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
-  LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
+  LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL );
+  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL );
 
   return;
 }
 
-void HW_IPCC_THREAD_CliSendAck(void)
+void HW_IPCC_THREAD_CliSendAck( void )
 {
-  LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
-  LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
+  LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL );
+  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL );
 
   return;
 }
 
-static void HW_IPCC_OT_CmdEvtHandler(void)
+static void HW_IPCC_OT_CmdEvtHandler( void )
 {
-  LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL);
+  LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL );
 
   HW_IPCC_OT_CmdEvtNot();
 
   return;
 }
 
-static void HW_IPCC_THREAD_NotEvtHandler(void)
+static void HW_IPCC_THREAD_NotEvtHandler( void )
 {
-  LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL);
+  LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL );
 
   HW_IPCC_THREAD_EvtNot();
 
   return;
 }
 
-static void HW_IPCC_THREAD_CliNotEvtHandler(void)
+static void HW_IPCC_THREAD_CliNotEvtHandler( void )
 {
-  LL_C1_IPCC_DisableReceiveChannel(IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL);
+  LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL );
 
   HW_IPCC_THREAD_CliEvtNot();
 
   return;
 }
 
-__WEAK void HW_IPCC_OT_CmdEvtNot(void) {};
-__WEAK void HW_IPCC_CLI_CmdEvtNot(void) {};
-__WEAK void HW_IPCC_THREAD_EvtNot(void) {};
+__WEAK void HW_IPCC_OT_CmdEvtNot( void ){};
+__WEAK void HW_IPCC_CLI_CmdEvtNot( void ){};
+__WEAK void HW_IPCC_THREAD_EvtNot( void ){};
 
 #endif /* THREAD_WB */
 
 /******************************************************************************
  * MEMORY MANAGER
  ******************************************************************************/
-void HW_IPCC_MM_SendFreeBuf(void (*cb)(void))
+void HW_IPCC_MM_SendFreeBuf( void (*cb)( void ) )
 {
-  if (LL_C1_IPCC_IsActiveFlag_CHx(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL)) {
+  if ( LL_C1_IPCC_IsActiveFlag_CHx( IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL ) )
+  {
     FreeBufCb = cb;
-    LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
-  } else {
+    LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL );
+  }
+  else
+  {
     cb();
 
-    LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
+    LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL );
   }
 
   return;
 }
 
-static void HW_IPCC_MM_FreeBufHandler(void)
+static void HW_IPCC_MM_FreeBufHandler( void )
 {
-  LL_C1_IPCC_DisableTransmitChannel(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
+  LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL );
 
   FreeBufCb();
 
-  LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL);
+  LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL );
 
   return;
 }
@@ -327,22 +343,22 @@ static void HW_IPCC_MM_FreeBufHandler(void)
 /******************************************************************************
  * TRACES
  ******************************************************************************/
-void HW_IPCC_TRACES_Init(void)
+void HW_IPCC_TRACES_Init( void )
 {
-  LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_TRACES_CHANNEL);
+  LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_TRACES_CHANNEL );
 
   return;
 }
 
-static void HW_IPCC_TRACES_EvtHandler(void)
+static void HW_IPCC_TRACES_EvtHandler( void )
 {
   HW_IPCC_TRACES_EvtNot();
 
-  LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_TRACES_CHANNEL);
+  LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_TRACES_CHANNEL );
 
   return;
 }
 
-__WEAK void HW_IPCC_TRACES_EvtNot(void) {};
+__WEAK void HW_IPCC_TRACES_EvtNot( void ){};
 #endif /* STM32WBxx */
 /******************* (C) COPYRIGHT 2019 STMicroelectronics *****END OF FILE****/

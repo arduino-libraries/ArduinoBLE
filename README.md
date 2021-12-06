@@ -19,7 +19,9 @@ https://github.com/arduino-libraries/ArduinoBLE
 # Configuration
 STM32Cube_WPAN has several configuration options, which are set in the `app_conf.h`.
 This package has a default configuration named `app_conf_default.h`.
-The user can include the file `app_conf_custom.h` to customize the ble application. Options wrapped in `#ifndef, #endif` in `app_conf_default.h` can be overwritten. Additional options can be added.
+The user can include the file `app_conf_custom.h` to customize the BLE application.
+Options wrapped in `#ifndef`, `#endif` in `app_conf_default.h` can be overwritten.
+Additional options can be added.
 
 ## License
 

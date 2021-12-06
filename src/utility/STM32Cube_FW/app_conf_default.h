@@ -34,7 +34,7 @@
 #define HCI_RESET 0x0C03
 
 #ifndef BLE_SHARED_MEM_BYTE_ORDER
-#define BLE_SHARED_MEM_BYTE_ORDER MSBFIRST
+  #define BLE_SHARED_MEM_BYTE_ORDER MSBFIRST
 #endif
 #define BLE_MODULE_SHARED_MEM_BUFFER_SIZE 128
 
@@ -42,7 +42,7 @@
  * Define Tx Power
  */
 #ifndef CFG_TX_POWER
-#define CFG_TX_POWER (0x18) /* -0.15dBm */
+  #define CFG_TX_POWER (0x18) /* -0.15dBm */
 #endif
 
 /******************************************************************************
@@ -53,7 +53,7 @@
  * Valid values are from 1 to 8
  */
 #ifndef CFG_BLE_NUM_LINK
-#define CFG_BLE_NUM_LINK 8
+  #define CFG_BLE_NUM_LINK 8
 #endif
 
 /**
@@ -62,7 +62,7 @@
  * services
  */
 #ifndef CFG_BLE_NUM_GATT_SERVICES
-#define CFG_BLE_NUM_GATT_SERVICES 8
+  #define CFG_BLE_NUM_GATT_SERVICES 8
 #endif
 
 /**
@@ -72,14 +72,14 @@
  * added automatically during device initialization so this parameters should be 9 plus the number of user Attributes
  */
 #ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
-#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES 68
 #endif
 
 /**
  * Maximum supported ATT_MTU size
  */
 #ifndef CFG_BLE_MAX_ATT_MTU
-#define CFG_BLE_MAX_ATT_MTU (156)
+  #define CFG_BLE_MAX_ATT_MTU (156)
 #endif
 
 /**
@@ -94,7 +94,7 @@
  *  The total amount of memory needed is the sum of the above quantities for each attribute.
  */
 #ifndef CFG_BLE_ATT_VALUE_ARRAY_SIZE
-#define CFG_BLE_ATT_VALUE_ARRAY_SIZE (1344)
+  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE (1344)
 #endif
 
 /**
@@ -102,7 +102,7 @@
  */
 //#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
 #ifndef CFG_BLE_PREPARE_WRITE_LIST_SIZE
-#define CFG_BLE_PREPARE_WRITE_LIST_SIZE (0x3A)
+  #define CFG_BLE_PREPARE_WRITE_LIST_SIZE (0x3A)
 #endif
 
 /**
@@ -111,21 +111,21 @@
 //#define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU,
 // CFG_BLE_NUM_LINK))
 #ifndef CFG_BLE_MBLOCK_COUNT
-#define CFG_BLE_MBLOCK_COUNT (0x79)
+  #define CFG_BLE_MBLOCK_COUNT (0x79)
 #endif
 
 /**
  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
  */
 #ifndef CFG_BLE_DATA_LENGTH_EXTENSION
-#define CFG_BLE_DATA_LENGTH_EXTENSION 1
+  #define CFG_BLE_DATA_LENGTH_EXTENSION 1
 #endif
 
 /**
  * Sleep clock accuracy in Slave mode (ppm value)
  */
 #ifndef CFG_BLE_SLAVE_SCA
-#define CFG_BLE_SLAVE_SCA 500
+  #define CFG_BLE_SLAVE_SCA 500
 #endif
 
 /**
@@ -140,7 +140,7 @@
  * 7 : 0 ppm to 20 ppm
  */
 #ifndef CFG_BLE_MASTER_SCA
-#define CFG_BLE_MASTER_SCA 0
+  #define CFG_BLE_MASTER_SCA 0
 #endif
 
 /**
@@ -149,21 +149,21 @@
  *  0 : external crystal ( no calibration )
  */
 #ifndef CFG_BLE_LSE_SOURCE
-#define CFG_BLE_LSE_SOURCE 0
+  #define CFG_BLE_LSE_SOURCE 0
 #endif
 
 /**
  * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
  */
 #ifndef CFG_BLE_HSE_STARTUP_TIME
-#define CFG_BLE_HSE_STARTUP_TIME 0x148
+  #define CFG_BLE_HSE_STARTUP_TIME 0x148
 #endif
 
 /**
  * Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
  */
 #ifndef CFG_BLE_MAX_CONN_EVENT_LENGTH
-#define CFG_BLE_MAX_CONN_EVENT_LENGTH (0xFFFFFFFF)
+  #define CFG_BLE_MAX_CONN_EVENT_LENGTH (0xFFFFFFFF)
 #endif
 
 /**

@@ -90,35 +90,35 @@
 
 /*
  * BLE_FIXED_BUFFER_SIZE_BYTES:
- * A part of the RAM, is dynamically allocated by initializing all the pointers
+ * A part of the RAM, is dynamically allocated by initializing all the pointers 
  * defined in a global context variable "mem_alloc_ctx_p".
- * This initialization is made in the Dynamic_allocator functions, which
+ * This initialization is made in the Dynamic_allocator functions, which 
  * assign a portion of RAM given by the external application to the above
  * mentioned "global pointers".
  *
- * The size of this Dynamic RAM is made of 2 main components:
+ * The size of this Dynamic RAM is made of 2 main components: 
  * - a part that is parameters-dependent (num of links, GATT buffers, ...),
  *   and which value is defined by the following macro;
  * - a part, that may be considered "fixed", i.e. independent from the above
  *   mentioned parameters.
 */
 #if (SLAVE_ONLY == 0) && (LL_ONLY == 0)
-  #define BLE_FIXED_BUFFER_SIZE_BYTES  6960   /* Full stack */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6960   /* Full stack */
 #elif SLAVE_ONLY == 0
-  #define BLE_FIXED_BUFFER_SIZE_BYTES  6256   /* LL only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6256   /* LL only */
 #else
-  #define BLE_FIXED_BUFFER_SIZE_BYTES  6696   /* Slave only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6696   /* Slave only */
 #endif
 
 /*
  * BLE_PER_LINK_SIZE_BYTES: additional memory size used per link
  */
 #if (SLAVE_ONLY == 0) && (LL_ONLY == 0)
-  #define BLE_PER_LINK_SIZE_BYTES       380   /* Full stack */
+#define BLE_PER_LINK_SIZE_BYTES       380   /* Full stack */
 #elif SLAVE_ONLY == 0
-  #define BLE_PER_LINK_SIZE_BYTES       196   /* LL only */
+#define BLE_PER_LINK_SIZE_BYTES       196   /* LL only */
 #else
-  #define BLE_PER_LINK_SIZE_BYTES       332   /* Slave only */
+#define BLE_PER_LINK_SIZE_BYTES       332   /* Slave only */
 #endif
 
 /*

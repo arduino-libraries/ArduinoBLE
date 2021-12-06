@@ -6,11 +6,11 @@
  ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics. 
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
+  * the "License"; You may not use this file except in compliance with the 
   * License. You may obtain a copy of the License at:
   *                        opensource.org/licenses/BSD-3-Clause
   *
@@ -28,12 +28,14 @@ extern "C" {
 #include "tl.h"
 
 /* Exported defines -----------------------------------------------------------*/
-typedef enum {
+typedef enum
+{
   SHCI_TL_UserEventFlow_Disable,
   SHCI_TL_UserEventFlow_Enable,
 } SHCI_TL_UserEventFlowStatus_t;
 
-typedef enum {
+typedef enum
+{
   SHCI_TL_CmdBusy,
   SHCI_TL_CmdAvailable
 } SHCI_TL_CmdStatus_t;
@@ -42,15 +44,16 @@ typedef enum {
  * @brief Structure used to manage the BUS IO operations.
  *        All the structure fields will point to functions defined at user level.
  * @{
- */
-typedef struct {
-  int32_t (* Init)(void *pConf);     /**< Pointer to SHCI TL function for the IO Bus initialization */
-  int32_t (* DeInit)(void);   /**< Pointer to SHCI TL function for the IO Bus de-initialization */
-  int32_t (* Reset)(void);    /**< Pointer to SHCI TL function for the IO Bus reset */
-  int32_t (* Receive)(uint8_t *, uint16_t); /**< Pointer to SHCI TL function for the IO Bus data reception */
-  int32_t (* Send)(uint8_t *, uint16_t);    /**< Pointer to SHCI TL function for the IO Bus data transmission */
-  int32_t (* DataAck)(uint8_t *, uint16_t *len); /**< Pointer to SHCI TL function for the IO Bus data ack reception */
-  int32_t (* GetTick)(void);  /**< Pointer to BSP function for getting the HAL time base timestamp */
+ */ 
+typedef struct
+{                
+  int32_t (* Init)    (void* pConf); /**< Pointer to SHCI TL function for the IO Bus initialization */
+  int32_t (* DeInit)  (void); /**< Pointer to SHCI TL function for the IO Bus de-initialization */
+  int32_t (* Reset)   (void); /**< Pointer to SHCI TL function for the IO Bus reset */
+  int32_t (* Receive) (uint8_t*, uint16_t); /**< Pointer to SHCI TL function for the IO Bus data reception */
+  int32_t (* Send)    (uint8_t*, uint16_t); /**< Pointer to SHCI TL function for the IO Bus data transmission */
+  int32_t (* DataAck) (uint8_t*, uint16_t* len); /**< Pointer to SHCI TL function for the IO Bus data ack reception */
+  int32_t (* GetTick) (void); /**< Pointer to BSP function for getting the HAL time base timestamp */    
 } tSHciIO;
 /**
  * @}
@@ -60,19 +63,22 @@ typedef struct {
  * @brief Contain the SHCI context
  * @{
  */
-typedef struct {
+typedef struct
+{   
   tSHciIO io; /**< Manage the BUS IO operations */
-  void (* UserEvtRx)(void *pData);   /**< User System events callback function pointer */
+  void (* UserEvtRx) (void * pData); /**< User System events callback function pointer */
 } tSHciContext;
 
-typedef struct {
+typedef struct
+{
   SHCI_TL_UserEventFlowStatus_t status;
   TL_EvtPacket_t *pckt;
 } tSHCI_UserEvtRxParam;
 
-typedef struct {
+typedef struct
+{
   uint8_t *p_cmdbuffer;
-  void (* StatusNotCallBack)(SHCI_TL_CmdStatus_t status);
+  void (* StatusNotCallBack) (SHCI_TL_CmdStatus_t status);
 } SHCI_TL_HciInitConf_t;
 
 /**
@@ -85,14 +91,14 @@ typedef struct {
   * @param : p_rsp_status = Address of the full buffer holding the command complete event
   * @retval : None
   */
-void shci_send(uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t *p_cmd_payload, TL_EvtPacket_t *p_rsp_status);
-
+void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payload, TL_EvtPacket_t * p_rsp_status );
+ 
 /**
  * @brief  Register IO bus services.
  * @param  fops The SHCI IO structure managing the IO BUS
  * @retval None
  */
-void shci_register_io_bus(tSHciIO *fops);
+void shci_register_io_bus(tSHciIO* fops);
 
 /**
  * @brief  Interrupt service routine that must be called when the system channel
@@ -101,10 +107,10 @@ void shci_register_io_bus(tSHciIO *fops);
  * @param  pdata Packet or event pointer
  * @retval None
  */
-void shci_notify_asynch_evt(void *pdata);
+void shci_notify_asynch_evt(void* pdata);
 
 /**
- * @brief  This function resume the User Event Flow which has been stopped on return
+ * @brief  This function resume the User Event Flow which has been stopped on return 
  *         from UserEvtRx() when the User Event has not been processed.
  *
  * @param  None
@@ -160,7 +166,7 @@ void shci_user_evt_proc(void);
  * @param  pConf: Configuration structure pointer
  * @retval None
  */
-void shci_init(void(* UserEvtRx)(void *pData), void *pConf);
+void shci_init(void(* UserEvtRx)(void* pData), void* pConf);
 
 #ifdef __cplusplus
 }
