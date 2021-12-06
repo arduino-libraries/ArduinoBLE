@@ -4,26 +4,25 @@
   * @author  MCD Application Team
   * @brief   TCircular Linked List Implementation.
   ******************************************************************************
-   * @attention
+  * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics. 
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2018-2021 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the 
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
- */
+  */
 
-#if defined(STM32WBxx)
+
 /******************************************************************************
  * Include Files
  ******************************************************************************/
+#include "utilities_common.h"
+
 #include "stm_list.h"
-#include "cmsis_gcc.h"
-#include "stm32_wpan_common.h"
 
 /******************************************************************************
  * Function Definitions 
@@ -34,10 +33,10 @@ void LST_init_head (tListNode * listHead)
   listHead->prev = listHead;
 }
 
-bool LST_is_empty (tListNode * listHead)
+uint8_t LST_is_empty (tListNode * listHead)
 {
   uint32_t primask_bit;
-  bool return_value;
+  uint8_t return_value;
 
   primask_bit = __get_PRIMASK();  /**< backup PRIMASK bit */
   __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
@@ -206,4 +205,3 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
   __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
 }
 
-#endif /* STM32WBxx */

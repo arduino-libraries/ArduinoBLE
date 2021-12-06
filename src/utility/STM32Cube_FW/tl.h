@@ -4,17 +4,16 @@
  * @author  MCD Application Team
  * @brief   Header for tl module
  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2018-2021 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
  */
 
 
@@ -195,9 +194,22 @@ typedef struct
 
 typedef struct
 {
-  uint8_t *p_LldBleCmdRspBuffer;
-  uint8_t *p_LldBleM0CmdBuffer;
-} TL_LLD_BLE_Config_t;
+  uint8_t *p_BleLldCmdRspBuffer;
+  uint8_t *p_BleLldM0CmdBuffer;
+} TL_BLE_LLD_Config_t;
+
+typedef struct
+{
+  uint8_t *p_Mac_802_15_4_CmdRspBuffer;
+  uint8_t *p_Mac_802_15_4_NotAckBuffer;
+} TL_MAC_802_15_4_Config_t;
+
+typedef struct
+{
+  uint8_t *p_ZigbeeOtCmdRspBuffer;
+  uint8_t *p_ZigbeeNotAckBuffer;
+  uint8_t *p_ZigbeeNotifRequestBuffer;
+} TL_ZIGBEE_Config_t;
 
 /**
  * @brief Contain the BLE HCI Init Configuration
@@ -269,17 +281,17 @@ void TL_LLDTESTS_ReceiveM0Cmd( TL_CmdPacket_t * Notbuffer );
 void TL_LLDTESTS_SendM0CmdAck( void );
 
 /******************************************************************************
- * LLD BLE
+ * BLE LLD
  ******************************************************************************/
-void TL_LLD_BLE_Init( TL_LLD_BLE_Config_t *p_Config );
-void TL_LLD_BLE_SendCliCmd( void );
-void TL_LLD_BLE_ReceiveCliRsp( TL_CmdPacket_t * Notbuffer );
-void TL_LLD_BLE_SendCliRspAck( void );
-void TL_LLD_BLE_ReceiveM0Cmd( TL_CmdPacket_t * Notbuffer );
-void TL_LLD_BLE_SendM0CmdAck( void );
-void TL_LLD_BLE_SendCmd( void );
-void TL_LLD_BLE_ReceiveRsp( TL_CmdPacket_t * Notbuffer );
-void TL_LLD_BLE_SendRspAck( void );
+void TL_BLE_LLD_Init( TL_BLE_LLD_Config_t *p_Config );
+void TL_BLE_LLD_SendCliCmd( void );
+void TL_BLE_LLD_ReceiveCliRsp( TL_CmdPacket_t * Notbuffer );
+void TL_BLE_LLD_SendCliRspAck( void );
+void TL_BLE_LLD_ReceiveM0Cmd( TL_CmdPacket_t * Notbuffer );
+void TL_BLE_LLD_SendM0CmdAck( void );
+void TL_BLE_LLD_SendCmd( void );
+void TL_BLE_LLD_ReceiveRsp( TL_CmdPacket_t * Notbuffer );
+void TL_BLE_LLD_SendRspAck( void );
 /******************************************************************************
  * MEMORY MANAGER
  ******************************************************************************/
@@ -292,10 +304,29 @@ void TL_MM_EvtDone( TL_EvtPacket_t * hcievt );
 void TL_TRACES_Init( void );
 void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt );
 
+/******************************************************************************
+ * MAC 802.15.4
+ ******************************************************************************/
+void TL_MAC_802_15_4_Init( TL_MAC_802_15_4_Config_t *p_Config );
+void TL_MAC_802_15_4_SendCmd( void );
+void TL_MAC_802_15_4_CmdEvtReceived( TL_EvtPacket_t * Otbuffer );
+void TL_MAC_802_15_4_NotReceived( TL_EvtPacket_t * Notbuffer );
+void TL_MAC_802_15_4_SendAck ( void );
+
+/******************************************************************************
+ * ZIGBEE
+ ******************************************************************************/
+void TL_ZIGBEE_Init( TL_ZIGBEE_Config_t *p_Config );
+void TL_ZIGBEE_SendM4RequestToM0( void );
+void TL_ZIGBEE_SendM4AckToM0Notify ( void );
+void TL_ZIGBEE_NotReceived( TL_EvtPacket_t * Notbuffer );
+void TL_ZIGBEE_CmdEvtReceived( TL_EvtPacket_t * Otbuffer );
+void TL_ZIGBEE_M0RequestReceived(TL_EvtPacket_t * Otbuffer );
+void TL_ZIGBEE_SendM4AckToM0Request(void);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
 #endif /*__TL_H */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

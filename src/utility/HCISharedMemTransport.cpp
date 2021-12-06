@@ -735,8 +735,12 @@ int HCISharedMemTransportClass::stm32wb_start_ble(void)
     CFG_BLE_MAX_CONN_EVENT_LENGTH,
     CFG_BLE_HSE_STARTUP_TIME,
     CFG_BLE_VITERBI_MODE,
-    CFG_BLE_LL_ONLY,
-    0                                   /** TODO Should be read from HW */
+    CFG_BLE_OPTIONS,
+    0,                                  /** TODO Should be read from HW */
+    CFG_BLE_MAX_COC_INITIATOR_NBR,
+    CFG_BLE_MIN_TX_POWER,
+    CFG_BLE_MAX_TX_POWER,
+    CFG_BLE_RX_MODEL_CONFIG
   };
   /**
    * Starts the BLE Stack on CPU2

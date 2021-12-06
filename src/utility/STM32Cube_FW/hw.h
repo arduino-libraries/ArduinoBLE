@@ -6,13 +6,12 @@
   ******************************************************************************
    * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2018-2021 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
  */
@@ -27,21 +26,14 @@ extern "C" {
 #endif
 
   /* Includes ------------------------------------------------------------------*/
-#include "stm32_def.h"
-#include "stm32wbxx_ll_bus.h"
-#include "stm32wbxx_ll_exti.h"
-#include "stm32wbxx_ll_system.h"
-#include "stm32wbxx_ll_rcc.h"
-#include "stm32wbxx_ll_ipcc.h"
-#include "stm32wbxx_ll_cortex.h"
-#include "stm32wbxx_ll_utils.h"
-#include "stm32wbxx_ll_pwr.h"
 
   /******************************************************************************
    * HW IPCC
    ******************************************************************************/
   void HW_IPCC_Enable( void );
   void HW_IPCC_Init( void );
+  void HW_IPCC_Rx_Handler( void );
+  void HW_IPCC_Tx_Handler( void );
 
   void HW_IPCC_BLE_Init( void );
   void HW_IPCC_BLE_SendCmd( void );
@@ -74,19 +66,36 @@ extern "C" {
   void HW_IPCC_LLDTESTS_SendM0CmdAck( void );
 
 
-  void HW_IPCC_LLD_BLE_Init( void );
-  void HW_IPCC_LLD_BLE_SendCliCmd( void );
-  void HW_IPCC_LLD_BLE_ReceiveCliRsp( void );
-  void HW_IPCC_LLD_BLE_SendCliRspAck( void );
-  void HW_IPCC_LLD_BLE_ReceiveM0Cmd( void );
-  void HW_IPCC_LLD_BLE_SendM0CmdAck( void );  
-  void HW_IPCC_LLD_BLE_SendCmd( void );
-  void HW_IPCC_LLD_BLE_ReceiveRsp( void );
-  void HW_IPCC_LLD_BLE_SendRspAck( void );
+  void HW_IPCC_BLE_LLD_Init( void );
+  void HW_IPCC_BLE_LLD_SendCliCmd( void );
+  void HW_IPCC_BLE_LLD_ReceiveCliRsp( void );
+  void HW_IPCC_BLE_LLD_SendCliRspAck( void );
+  void HW_IPCC_BLE_LLD_ReceiveM0Cmd( void );
+  void HW_IPCC_BLE_LLD_SendM0CmdAck( void );
+  void HW_IPCC_BLE_LLD_SendCmd( void );
+  void HW_IPCC_BLE_LLD_ReceiveRsp( void );
+  void HW_IPCC_BLE_LLD_SendRspAck( void );
 
   
   void HW_IPCC_TRACES_Init( void );
   void HW_IPCC_TRACES_EvtNot( void );
+
+  void HW_IPCC_MAC_802_15_4_Init( void );
+  void HW_IPCC_MAC_802_15_4_SendCmd( void );
+  void HW_IPCC_MAC_802_15_4_SendAck( void );
+  void HW_IPCC_MAC_802_15_4_CmdEvtNot( void );
+  void HW_IPCC_MAC_802_15_4_EvtNot( void );
+
+  void HW_IPCC_ZIGBEE_Init( void );
+
+  void HW_IPCC_ZIGBEE_SendM4RequestToM0(void); /* M4 Request to M0 */
+  void HW_IPCC_ZIGBEE_RecvAppliAckFromM0(void); /* Request ACK from M0 */
+
+  void HW_IPCC_ZIGBEE_RecvM0NotifyToM4(void); /* M0 Notify to M4 */
+  void HW_IPCC_ZIGBEE_SendM4AckToM0Notify(void); /* Notify ACK from M4 */
+  void HW_IPCC_ZIGBEE_RecvM0RequestToM4(void); /* M0 Request to M4 */
+  void HW_IPCC_ZIGBEE_SendM4AckToM0Request(void); /* Request ACK from M4 */
+
 
 #ifdef __cplusplus
 }
@@ -94,4 +103,3 @@ extern "C" {
 
 #endif /*__HW_H */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

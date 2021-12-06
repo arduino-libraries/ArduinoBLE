@@ -4,36 +4,33 @@
   * @author  MCD Application Team
   * @brief   Header file for linked list library.
   ******************************************************************************
-   * @attention
+  * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics. 
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2018-2021 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the 
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
- */
+  */
 
 
 #ifndef _STM_LIST_H_
 #define _STM_LIST_H_
-#include "stm32_wpan_common.h"
 
 /* Includes ------------------------------------------------------------------*/
-#include "stdint.h"
-#include "stdbool.h"
+#include "stm32_wpan_common.h"
 
-typedef  PACKED_STRUCT _tListNode {
+typedef PACKED_STRUCT _tListNode {
     struct _tListNode * next;
     struct _tListNode * prev;
 } tListNode;
 
 void LST_init_head (tListNode * listHead);
 
-bool LST_is_empty (tListNode * listHead);
+uint8_t LST_is_empty (tListNode * listHead);
 
 void LST_insert_head (tListNode * listHead, tListNode * node);
 

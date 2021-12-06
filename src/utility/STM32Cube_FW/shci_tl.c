@@ -4,53 +4,24 @@
  * @author  MCD Application Team
  * @brief   System HCI command implementation
  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics. 
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the 
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2018-2021 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
  */
 
-#if defined(STM32WBxx)
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
-#include <Arduino.h>
-
 #include "stm_list.h"
 #include "shci_tl.h"
-#include "stm32_def.h"
-
-/**
- * These traces are not yet supported in an usual way in the delivery package
- * They can enabled by adding the definition of TL_SHCI_CMD_DBG_EN and/or TL_SHCI_EVT_DBG_EN in the preprocessor option in the IDE
- */
-#if ( (TL_SHCI_CMD_DBG_EN != 0) || (TL_SHCI_EVT_DBG_EN != 0) )
-#include "app_conf.h"
-#include "dbg_trace.h"
-#endif
-
-#if (TL_SHCI_CMD_DBG_EN != 0)
-#define TL_SHCI_CMD_DBG_MSG             PRINT_MESG_DBG
-#define TL_SHCI_CMD_DBG_BUF             PRINT_LOG_BUFF_DBG
-#else
-#define TL_SHCI_CMD_DBG_MSG(...)
-#define TL_SHCI_CMD_DBG_BUF(...)
-#endif
-
-#if (TL_SHCI_EVT_DBG_EN != 0)
-#define TL_SHCI_EVT_DBG_MSG             PRINT_MESG_DBG
-#define TL_SHCI_EVT_DBG_BUF             PRINT_LOG_BUFF_DBG
-#else
-#define TL_SHCI_EVT_DBG_MSG(...)
-#define TL_SHCI_EVT_DBG_BUF(...)
-#endif
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum
@@ -89,9 +60,6 @@ static void Cmd_SetStatus(SHCI_TL_CmdStatus_t shcicmdstatus);
 static void TlCmdEvtReceived(TL_EvtPacket_t *shcievt);
 static void TlUserEvtReceived(TL_EvtPacket_t *shcievt);
 static void TlInit( TL_CmdPacket_t * p_cmdbuffer );
-static void OutputCmdTrace(TL_CmdPacket_t *pCmdBuffer);
-static void OutputRspTrace(TL_EvtPacket_t *p_rsp);
-static void OutputEvtTrace(TL_EvtPacket_t *phcievtbuffer);
 
 /* Interface ------- ---------------------------------------------------------*/
 void shci_init(void(* UserEvtRx)(void* pData), void* pConf)
@@ -128,8 +96,6 @@ void shci_user_evt_proc(void)
   if((LST_is_empty(&SHciAsynchEventQueue) == FALSE) && (SHCI_TL_UserEventFlow != SHCI_TL_UserEventFlow_Disable))
   {
     LST_remove_head ( &SHciAsynchEventQueue, (tListNode **)&phcievtbuffer );
-
-    OutputEvtTrace(phcievtbuffer);
 
     if (shciContext.UserEvtRx != NULL)
     {
@@ -187,8 +153,6 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
 
   memcpy(pCmdBuffer->cmdserial.cmd.payload, p_cmd_payload, len_cmd_payload );
 
-  OutputCmdTrace(pCmdBuffer);
-
   shciContext.io.Send(0,0);
 
   shci_cmd_resp_wait(SHCI_TL_DEFAULT_TIMEOUT);
@@ -199,25 +163,9 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
    */
   memcpy( &(p_rsp->evtserial), pCmdBuffer, ((TL_EvtSerial_t*)pCmdBuffer)->evt.plen + TL_EVT_HDR_SIZE );
 
-  OutputRspTrace(p_rsp);
-
   Cmd_SetStatus(SHCI_TL_CmdAvailable);
 
   return;
-}
-
-void shci_notify_asynch_evt(void *pdata)
-{
-  UNUSED(pdata);
-  /* Need to parse data in future version */
-  shci_user_evt_proc();
-}
-
-void shci_register_io_bus(tSHciIO *fops)
-{
-  /* Register IO bus services */
-  fops->Init    = TL_SYS_Init;
-  fops->Send    = TL_SYS_SendCmd;
 }
 
 /* Private functions ---------------------------------------------------------*/
@@ -284,76 +232,14 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
   return;
 }
 
-static void OutputCmdTrace(TL_CmdPacket_t *pCmdBuffer)
-{
-  TL_SHCI_CMD_DBG_MSG("sys cmd: 0x%04X", pCmdBuffer->cmdserial.cmd.cmdcode);
-
-  if(pCmdBuffer->cmdserial.cmd.plen != 0)
-  {
-    TL_SHCI_CMD_DBG_MSG(" payload:");
-    TL_SHCI_CMD_DBG_BUF(pCmdBuffer->cmdserial.cmd.payload, pCmdBuffer->cmdserial.cmd.plen, "");
-  }
-  TL_SHCI_CMD_DBG_MSG("\r\n");
-
-  return;
-}
-
-static void OutputRspTrace(TL_EvtPacket_t *p_rsp)
-{
-  switch(p_rsp->evtserial.evt.evtcode)
-  {
-    case TL_BLEEVT_CC_OPCODE:
-      TL_SHCI_CMD_DBG_MSG("sys rsp: 0x%02X", p_rsp->evtserial.evt.evtcode);
-      TL_SHCI_CMD_DBG_MSG(" cmd opcode: 0x%02X", ((TL_CcEvt_t*)(p_rsp->evtserial.evt.payload))->cmdcode);
-      TL_SHCI_CMD_DBG_MSG(" status: 0x%02X", ((TL_CcEvt_t*)(p_rsp->evtserial.evt.payload))->payload[0]);
-      if((p_rsp->evtserial.evt.plen-4) != 0)
-      {
-        TL_SHCI_CMD_DBG_MSG(" payload:");
-        TL_SHCI_CMD_DBG_BUF(&((TL_CcEvt_t*)(p_rsp->evtserial.evt.payload))->payload[1], p_rsp->evtserial.evt.plen-4, "");
-      }
-      break;
-
-    default:
-      TL_SHCI_CMD_DBG_MSG("unknown sys rsp received: %02X", p_rsp->evtserial.evt.evtcode);
-      break;
-  }
-
-  TL_SHCI_CMD_DBG_MSG("\r\n");
-
-  return;
-}
-
-static void OutputEvtTrace(TL_EvtPacket_t *phcievtbuffer)
-{
-  if(phcievtbuffer->evtserial.evt.evtcode != TL_BLEEVT_VS_OPCODE)
-  {
-    TL_SHCI_EVT_DBG_MSG("unknown sys evt received: %02X", phcievtbuffer->evtserial.evt.evtcode);
-  }
-  else
-  {
-    TL_SHCI_EVT_DBG_MSG("sys evt: 0x%02X", phcievtbuffer->evtserial.evt.evtcode);
-    TL_SHCI_EVT_DBG_MSG(" subevtcode: 0x%04X", ((TL_AsynchEvt_t*)(phcievtbuffer->evtserial.evt.payload))->subevtcode);
-    if((phcievtbuffer->evtserial.evt.plen-2) != 0)
-    {
-      TL_SHCI_EVT_DBG_MSG(" payload:");
-      TL_SHCI_EVT_DBG_BUF(((TL_AsynchEvt_t*)(phcievtbuffer->evtserial.evt.payload))->payload, phcievtbuffer->evtserial.evt.plen-2, "");
-    }
-  }
-
-  TL_SHCI_EVT_DBG_MSG("\r\n");
-
-  return;
-}
-
 /* Weak implementation ----------------------------------------------------------------*/
 __WEAK void shci_cmd_resp_wait(uint32_t timeout)
 {
+  (void)timeout;
+
   CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
-  for (unsigned long start = millis(); (millis() - start) < timeout;) {
-    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
-      break;
-    }
-  }
+  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
+
   return;
 }
 
@@ -366,4 +252,3 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
   return;
 }
 
-#endif /* STM32WBxx */

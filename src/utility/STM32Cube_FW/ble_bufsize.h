@@ -1,17 +1,16 @@
 /*****************************************************************************
  * @file    ble_bufsize.h
- * @author  MCD Application Team
+ * @author  MCD
  * @brief   Definition of BLE stack buffers size
  *****************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
- * All rights reserved.</center></h2>
+ * Copyright (c) 2018-2021 STMicroelectronics.
+ * All rights reserved.
  *
- * This software component is licensed by ST under Ultimate Liberty license
- * SLA0044, the "License"; You may not use this file except in compliance with
- * the License. You may obtain a copy of the License at:
- *                             www.st.com/SLA0044
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
  *
  *****************************************************************************
  */
@@ -24,11 +23,6 @@
  * BLE_DEFAULT_ATT_MTU: minimum MTU value that GATT must support.
  */
 #define BLE_DEFAULT_ATT_MTU                  23
-
-/*
- * BLE_DEFAULT_MAX_ATT_MTU: maximum supported ATT MTU size.
- */
-#define BLE_DEFAULT_MAX_ATT_MTU             158
 
 /*
  * BLE_DEFAULT_MAX_ATT_SIZE: maximum attribute size.
@@ -82,43 +76,44 @@
                       BLE_MBLOCKS_SECURE_CONNECTIONS))
 
 /*
- * BLE_DEFAULT_MBLOCKS_COUNT: default memory blocks count
- */
-#define BLE_DEFAULT_MBLOCKS_COUNT(n_link) \
-          BLE_MBLOCKS_CALC(BLE_DEFAULT_PREP_WRITE_LIST_SIZE, \
-                           BLE_DEFAULT_MAX_ATT_MTU, n_link)
-
-/*
  * BLE_FIXED_BUFFER_SIZE_BYTES:
- * A part of the RAM, is dynamically allocated by initializing all the pointers 
+ * A part of the RAM, is dinamically allocated by initilizing all the pointers
  * defined in a global context variable "mem_alloc_ctx_p".
  * This initialization is made in the Dynamic_allocator functions, which 
- * assign a portion of RAM given by the external application to the above
+ * assing a portion of RAM given by the external application to the above
  * mentioned "global pointers".
  *
  * The size of this Dynamic RAM is made of 2 main components: 
  * - a part that is parameters-dependent (num of links, GATT buffers, ...),
- *   and which value is defined by the following macro;
+ *   and which value is explicited by the following macro;
  * - a part, that may be considered "fixed", i.e. independent from the above
  *   mentioned parameters.
 */
-#if (SLAVE_ONLY == 0) && (LL_ONLY == 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6960   /* Full stack */
-#elif SLAVE_ONLY == 0
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6256   /* LL only */
+#if (BEACON_ONLY != 0)
+#define BLE_FIXED_BUFFER_SIZE_BYTES  4184   /* Beacon only */
+#elif (LL_ONLY != 0)
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6068   /* LL only */
+#elif (SLAVE_ONLY != 0)
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6096   /* Peripheral only */
+#elif (BASIC_FEATURES != 0)
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6400   /* Basic Features */
 #else
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6696   /* Slave only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  7312   /* Full stack */
 #endif
 
 /*
  * BLE_PER_LINK_SIZE_BYTES: additional memory size used per link
  */
-#if (SLAVE_ONLY == 0) && (LL_ONLY == 0)
-#define BLE_PER_LINK_SIZE_BYTES       380   /* Full stack */
-#elif SLAVE_ONLY == 0
-#define BLE_PER_LINK_SIZE_BYTES       196   /* LL only */
+#if (BEACON_ONLY != 0)
+#define BLE_PER_LINK_SIZE_BYTES       192   /* Beacon only */
+#elif (LL_ONLY != 0)
+#define BLE_PER_LINK_SIZE_BYTES       260   /* LL only */
+#elif (SLAVE_ONLY != 0)
+#define BLE_PER_LINK_SIZE_BYTES       388   /* Peripheral only */
+#elif (BASIC_FEATURES != 0)
+#define BLE_PER_LINK_SIZE_BYTES       388   /* Basic Features */
 #else
-#define BLE_PER_LINK_SIZE_BYTES       332   /* Slave only */
+#define BLE_PER_LINK_SIZE_BYTES       444   /* Full stack */
 #endif
 
 /*
@@ -126,15 +121,23 @@
  * needed for the storage of data structures (except GATT database elements)
  * whose size depends on the number of supported connections.
  *
- * @param num_links: Maximum number of simultaneous connections that the device
+ * @param n_link: Maximum number of simultaneous connections that the device
  * will support. Valid values are from 1 to 8.
  *
  * @param mblocks_count: Number of memory blocks allocated for packets.
  */
 #define BLE_TOTAL_BUFFER_SIZE(n_link, mblocks_count) \
-          (BLE_FIXED_BUFFER_SIZE_BYTES + \
+          (16 + BLE_FIXED_BUFFER_SIZE_BYTES + \
            (BLE_PER_LINK_SIZE_BYTES * (n_link)) + \
            ((BLE_MEM_BLOCK_SIZE + 12) * (mblocks_count)))
+
+/*
+ * BLE_EXT_ADV_BUFFER_SIZE
+ * additional memory size used for Extended advertising;
+ * It has to be added to BLE_TOTAL_BUFFER_SIZE().
+ * The formula used is based on:(1792 + ((set_nbr) * (60 + (2 * (data_len)))))
+ */
+#define BLE_EXT_ADV_BUFFER_SIZE(set_nbr, data_len) (7596)
 
 /*
  * BLE_TOTAL_BUFFER_SIZE_GATT: this macro returns the amount of memory,
@@ -158,4 +161,4 @@
            (40 * (num_gatt_attributes)) + (48 * (num_gatt_services)))
 
 
-#endif /* ! BLE_BUFSIZE_H__ */
+#endif /* BLE_BUFSIZE_H__ */
