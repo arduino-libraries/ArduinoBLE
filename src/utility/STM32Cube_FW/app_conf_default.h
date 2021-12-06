@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    app_conf.h
+  * @file    app_conf_default.h
   * @author  MCD Application Team
-  * @brief   Application configuration file for STM32WPAN Middleware.
+  * @brief   Default application configuration file for STM32WPAN Middleware.
   ******************************************************************************
   * @attention
   *
@@ -17,11 +17,8 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef APP_CONF_H
-#define APP_CONF_H
-
-#include "hw.h"
-#include "ble_bufsize.h"
+#ifndef APP_CONF_DEFAULT_H
+#define APP_CONF_DEFAULT_H
 
 /******************************************************************************
  * Application Config
@@ -44,7 +41,9 @@
 /**
  * Define Tx Power
  */
-#define CFG_TX_POWER                      (0x18) /* -0.15dBm */
+#ifndef CFG_TX_POWER
+  #define CFG_TX_POWER (0x18) /* -0.15dBm */
+#endif
 
 /******************************************************************************
  * BLE Stack
@@ -53,32 +52,41 @@
  * Maximum number of simultaneous connections that the device will support.
  * Valid values are from 1 to 8
  */
-#define CFG_BLE_NUM_LINK            2
+#ifndef CFG_BLE_NUM_LINK
+  #define CFG_BLE_NUM_LINK 2
+#endif
 
 /**
  * Maximum number of Services that can be stored in the GATT database.
- * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
+ * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user
+ * services
  */
+#ifndef CFG_BLE_NUM_GATT_SERVICES
 #define CFG_BLE_NUM_GATT_SERVICES   8
+#endif
 
 /**
  * Maximum number of Attributes
- * (i.e. the number of characteristic + the number of characteristic values + the number of descriptors, excluding the services)
- * that can be stored in the GATT database.
- * Note that certain characteristics and relative descriptors are added automatically during device initialization
- * so this parameters should be 9 plus the number of user Attributes
+ * (i.e. the number of characteristic + the number of characteristic values + the number of descriptors, excluding the
+ * services) that can be stored in the GATT database. Note that certain characteristics and relative descriptors are
+ * added automatically during device initialization so this parameters should be 9 plus the number of user Attributes
  */
-#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
+#ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES 68
+#endif
 
 /**
  * Maximum supported ATT_MTU size
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS is set to 1"
  */
-#define CFG_BLE_MAX_ATT_MTU             (156)
+#ifndef CFG_BLE_MAX_ATT_MTU
+  #define CFG_BLE_MAX_ATT_MTU (156)
+#endif
 
 /**
  * Size of the storage area for Attribute values
- *  This value depends on the number of attributes used by application. In particular the sum of the following quantities (in octets) should be made for each attribute:
+ *  This value depends on the number of attributes used by application. In particular the sum of the following
+ *  quantities (in octets) should be made for each attribute:
  *  - attribute value length
  *  - 5, if UUID is 16 bit; 19, if UUID is 128 bit
  *  - 2, if server configuration descriptor is used
@@ -87,14 +95,18 @@
  *  The total amount of memory needed is the sum of the above quantities for each attribute.
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS is set to 1"
  */
+#ifndef CFG_BLE_ATT_VALUE_ARRAY_SIZE
 #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
+#endif
 
 /**
  * Prepare Write List size in terms of number of packet
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS is set to 1"
  */
 // #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
-#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
+#ifndef CFG_BLE_PREPARE_WRITE_LIST_SIZE
+  #define CFG_BLE_PREPARE_WRITE_LIST_SIZE (0x3A)
+#endif
 
 /**
  * Number of allocated memory blocks
@@ -106,12 +118,16 @@
 /**
  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
  */
-#define CFG_BLE_DATA_LENGTH_EXTENSION   1
+#ifndef CFG_BLE_DATA_LENGTH_EXTENSION
+  #define CFG_BLE_DATA_LENGTH_EXTENSION 1
+#endif
 
 /**
  * Sleep clock accuracy in Slave mode (ppm value)
  */
-#define CFG_BLE_SLAVE_SCA   500
+#ifndef CFG_BLE_SLAVE_SCA
+  #define CFG_BLE_SLAVE_SCA 500
+#endif
 
 /**
  * Sleep clock accuracy in Master mode
@@ -124,24 +140,32 @@
  * 6 : 21 ppm to 30 ppm
  * 7 : 0 ppm to 20 ppm
  */
-#define CFG_BLE_MASTER_SCA   0
+#ifndef CFG_BLE_MASTER_SCA
+  #define CFG_BLE_MASTER_SCA 0
+#endif
 
 /**
  *  Source for the low speed clock for RF wake-up
  *  1 : external high speed crystal HSE/32/32
  *  0 : external low speed crystal ( no calibration )
  */
-#define CFG_BLE_LSE_SOURCE  0
+#ifndef CFG_BLE_LSE_SOURCE
+  #define CFG_BLE_LSE_SOURCE 0
+#endif
 
 /**
  * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
  */
-#define CFG_BLE_HSE_STARTUP_TIME  0x148
+#ifndef CFG_BLE_HSE_STARTUP_TIME
+  #define CFG_BLE_HSE_STARTUP_TIME 0x148
+#endif
 
 /**
  * Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
  */
-#define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
+#ifndef CFG_BLE_MAX_CONN_EVENT_LENGTH
+  #define CFG_BLE_MAX_CONN_EVENT_LENGTH (0xFFFFFFFF)
+#endif
 
 /**
  * Viterbi Mode
@@ -199,5 +223,4 @@
 
 #define CFG_BLE_RX_MODEL_CONFIG         SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY
 
-
-#endif /*APP_CONF_H */
+#endif /* APP_CONF_DEFAULT_H */
