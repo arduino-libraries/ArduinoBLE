@@ -1359,14 +1359,14 @@ void ATTClass::handleNotifyOrInd(uint16_t connectionHandle, uint8_t opcode, uint
     uint16_t handle;
   } *handleNotifyOrInd = (HandleNotifyOrInd*)data;
 
-  uint8_t handle = handleNotifyOrInd->handle;
+  uint16_t handle = handleNotifyOrInd->handle;
 
-  for (int i = 0; i < ATT_MAX_PEERS; i++) {
-    if (_peers[i].connectionHandle != connectionHandle) {
+  for (int peer = 0; peer < ATT_MAX_PEERS; peer++) {
+    if (_peers[peer].connectionHandle != connectionHandle) {
       continue;
     }
 
-    BLERemoteDevice* device = _peers[i].device;
+    BLERemoteDevice* device = _peers[peer].device;
 
     if (!device) {
       break;
@@ -1384,7 +1384,7 @@ void ATTClass::handleNotifyOrInd(uint16_t connectionHandle, uint8_t opcode, uint
           BLERemoteCharacteristic* c = s->characteristic(j);
 
           if (c->valueHandle() == handle) {
-            c->writeValue(BLEDevice(_peers[i].addressType, _peers[i].address), &data[2], dlen - 2);
+            c->writeValue(BLEDevice(_peers[peer].addressType, _peers[peer].address), &data[2], dlen - 2);
           }
         }
 
