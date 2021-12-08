@@ -13,5 +13,5 @@ jobs:
       - name: Spell check
         uses: arduino/actions/libraries/spell-check@master
         with:
-          skip-paths: ./extras/test, ./extras/STM32Cube_FW
+          skip-paths: ./extras/test,./extras/STM32Cube_FW
           
