@@ -1,0 +1,44 @@
+From ac18897f0f9b87bb3196efb93ef47ccaaa0eff64 Mon Sep 17 00:00:00 2001
+From: Alexandre Bourdiol <alexandre.bourdiol@st.com>
+Date: Mon, 6 Dec 2021 11:18:02 +0100
+Subject: [PATCH 2/4] fix: include a timeout when waiting for the cmd_resp
+
+Signed-off-by: Francois Ramu <francois.ramu@st.com>
+Signed-off-by: Alexandre Bourdiol <alexandre.bourdiol@st.com>
+---
+ src/utility/STM32Cube_FW/shci_tl.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/src/utility/STM32Cube_FW/shci_tl.c b/src/utility/STM32Cube_FW/shci_tl.c
+index ef403aa..6cccc5d 100644
+--- a/src/utility/STM32Cube_FW/shci_tl.c
++++ b/src/utility/STM32Cube_FW/shci_tl.c
+@@ -20,6 +20,8 @@
+ /* Includes ------------------------------------------------------------------*/
+ #include "stm32_wpan_common.h"
+ 
++#include <Arduino.h>
++
+ #include "stm_list.h"
+ #include "shci_tl.h"
+ #include "stm32_def.h"
+@@ -250,11 +252,12 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
+ /* Weak implementation ----------------------------------------------------------------*/
+ __WEAK void shci_cmd_resp_wait(uint32_t timeout)
+ {
+-  (void)timeout;
+-
+   CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
+-  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
+-
++  for (unsigned long start = millis(); (millis() - start) < timeout;) {
++    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
++      break;
++    }
++  }
+   return;
+ }
+ 
+-- 
+2.31.1.windows.1
+

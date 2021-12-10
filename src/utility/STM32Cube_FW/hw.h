@@ -6,13 +6,12 @@
   ******************************************************************************
    * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2018-2021 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
  */
@@ -74,15 +73,15 @@ extern "C" {
   void HW_IPCC_LLDTESTS_SendM0CmdAck( void );
 
 
-  void HW_IPCC_LLD_BLE_Init( void );
-  void HW_IPCC_LLD_BLE_SendCliCmd( void );
-  void HW_IPCC_LLD_BLE_ReceiveCliRsp( void );
-  void HW_IPCC_LLD_BLE_SendCliRspAck( void );
-  void HW_IPCC_LLD_BLE_ReceiveM0Cmd( void );
-  void HW_IPCC_LLD_BLE_SendM0CmdAck( void );  
-  void HW_IPCC_LLD_BLE_SendCmd( void );
-  void HW_IPCC_LLD_BLE_ReceiveRsp( void );
-  void HW_IPCC_LLD_BLE_SendRspAck( void );
+  void HW_IPCC_BLE_LLD_Init( void );
+  void HW_IPCC_BLE_LLD_SendCliCmd( void );
+  void HW_IPCC_BLE_LLD_ReceiveCliRsp( void );
+  void HW_IPCC_BLE_LLD_SendCliRspAck( void );
+  void HW_IPCC_BLE_LLD_ReceiveM0Cmd( void );
+  void HW_IPCC_BLE_LLD_SendM0CmdAck( void );
+  void HW_IPCC_BLE_LLD_SendCmd( void );
+  void HW_IPCC_BLE_LLD_ReceiveRsp( void );
+  void HW_IPCC_BLE_LLD_SendRspAck( void );
 
   
   void HW_IPCC_TRACES_Init( void );
@@ -94,4 +93,3 @@ extern "C" {
 
 #endif /*__HW_H */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
