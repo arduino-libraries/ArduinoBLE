@@ -113,14 +113,9 @@ void HCIClass::poll(unsigned long timeout)
   while (HCITransport.available()) {
     byte b = HCITransport.read();
 	
-	if (_recvIndex >= sizeof(_recvBuffer))
-	{
-	  _recvIndex = 0;
-	  if (_debug) {
-			_debug->println("_recvBuffer overflow");
-		  }
-	  continue;
-	}
+    if (_recvIndex >= sizeof(_recvBuffer)) {
+        _recvIndex = 0;
+    }
 
     _recvBuffer[_recvIndex++] = b;
 
