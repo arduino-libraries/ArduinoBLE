@@ -115,6 +115,9 @@ void HCIClass::poll(unsigned long timeout)
 	
     if (_recvIndex >= sizeof(_recvBuffer)) {
         _recvIndex = 0;
+        if (_debug) {
+            _debug->println("_recvBuffer overflow");
+        }
     }
 
     _recvBuffer[_recvIndex++] = b;
