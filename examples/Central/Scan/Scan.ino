@@ -1,7 +1,7 @@
 /*
   Scan
 
-  This example scans for BLE peripherals and prints out their advertising details:
+  This example scans for Bluetooth® Low Energy peripherals and prints out their advertising details:
   address, local name, advertised service UUID's.
 
   The circuit:
@@ -19,12 +19,12 @@ void setup() {
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
 
-  Serial.println("BLE Central scan");
+  Serial.println("Bluetooth® Low Energy Central scan");
 
   // start scanning for peripheral
   BLE.scan();

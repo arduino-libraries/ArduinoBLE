@@ -1,27 +1,27 @@
 # ArduinoBLE library
 
-This library supports all the Arduino boards that have the hardware enabled for BLE and Bluetooth 4.0 and above; these include Nano 33 BLE, Arduino NANO 33 IoT, Uno WiFi Rev 2, MKR WiFi 1010, Nicla Sense ME.
+This library supports all the Arduino boards that have the hardware enabled for Bluetooth® Low Energy and Bluetooth® 4.0 and above; these include Nano 33 BLE, Arduino NANO 33 IoT, Uno WiFi Rev 2, MKR WiFi 1010, Nicla Sense ME.
 
 To use this library
 ``#include <ArduinoBLE.h>``
 
 ## A quick introduction to BLE
 
-Bluetooth 4.0 includes both traditional Bluetooth, now labeled "Bluetooth Classic", and the Bluetooth Low Energy (Bluetooth LE, or BLE). BLE is optimized for low power use at low data rates, and was designed to operate from simple lithium coin cell batteries.
+Bluetooth® 4.0 includes both traditional Bluetooth®, now labeled "Bluetooth® Classic", and the Bluetooth® Low Energy. Bluetooth® Low Energy is optimized for low power use at low data rates, and was designed to operate from simple lithium coin cell batteries.
 
-Unlike standard bluetooth communication basically based on an asynchronous serial connection (UART) a Bluetooth LE radio acts like a community bulletin board. The computers that connect to it are like community members that read the bulletin board. Each radio acts as either the bulletin board or the reader. If your radio is a bulletin board (called a peripheral device in Bluetooth LE parlance) it posts data for all radios in the community to read. If your radio is a reader (called a central device in Blueooth LE terms) it reads from any of the bulletin boards (peripheral devices) that have information about which it cares. You can also think of peripheral devices as the servers in a client-server transaction, because they contain the information that reader radios ask for. Similarly, central devices are the clients of the Bluetooth LE world because they read information available from the peripherals.
+Unlike standard Bluetooth® communication basically based on an asynchronous serial connection (UART) a Bluetooth® LE radio acts like a community bulletin board. The computers that connect to it are like community members that read the bulletin board. Each radio acts as either the bulletin board or the reader. If your radio is a bulletin board (called a peripheral device in Bluetooth® LE parlance) it posts data for all radios in the community to read. If your radio is a reader (called a central device in Blueooth LE terms) it reads from any of the bulletin boards (peripheral devices) that have information about which it cares. You can also think of peripheral devices as the servers in a client-server transaction, because they contain the information that reader radios ask for. Similarly, central devices are the clients of the Bluetooth® LE world because they read information available from the peripherals.
 
 ![Communication between central and peripheral devices](www.arduino.cc/en/uploads/Reference/ble-bulletin-board-model.png)
 
-Think of a Bluetooth LE peripheral device as a bulletin board and central devices as viewers of the board. Central devices view the services, get the data, then move on. Each transaction is quick (a few milliseconds), so multiple central devices can get data from one peripheral.
+Think of a Bluetooth® LE peripheral device as a bulletin board and central devices as viewers of the board. Central devices view the services, get the data, then move on. Each transaction is quick (a few milliseconds), so multiple central devices can get data from one peripheral.
 
 The information presented by a peripheral is structured as **services**, each of which is subdivided into **characteristics**. You can think of services as the notices on a bulletin board, and characteristics as the individual paragraphs of those notices. If you're a peripheral device, you just update each service characteristic when it needs updating and don't worry about whether the central devices read them or not. If you're a central device, you connect to the peripheral then read the boxes you want. If a given characteristic is readable and writable, then the peripheral and central can both change it.
 
 ## Notify
 
-The Bluetooth LE specification includes a mechanism known as **notify** that lets you know when data's changed. When notify on a characteristic is enabled and the sender writes to it, the new value is automatically sent to the receiver, without the receiver explicitly issuing a read command. This is commonly used for streaming data such as accelerometer or other sensor readings. There's a variation on this specification called **indicate** which works similarly, but in the indicate specification, the reader sends an acknowledgement of the pushed data.
+The Bluetooth® LE specification includes a mechanism known as **notify** that lets you know when data's changed. When notify on a characteristic is enabled and the sender writes to it, the new value is automatically sent to the receiver, without the receiver explicitly issuing a read command. This is commonly used for streaming data such as accelerometer or other sensor readings. There's a variation on this specification called **indicate** which works similarly, but in the indicate specification, the reader sends an acknowledgement of the pushed data.
 
-The client-server structure of Bluetooth LE, combined with the notify characteristic, is generally called a **publish-and-subscribe model**.
+The client-server structure of Bluetooth® LE, combined with the notify characteristic, is generally called a **publish-and-subscribe model**.
 
 ## Update a characteristic
 
@@ -35,7 +35,7 @@ Just as with writing to a characteristic, you could update your characteristics 
 
 ## Services, characteristics, and UUIDs
 
-A BLE peripheral will provide **services**, which in turn provide **characteristics**. You can define your own services, or use [standard services](https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx).
+A Bluetooth® Low Energy peripheral will provide **services**, which in turn provide **characteristics**. You can define your own services, or use [standard services](https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx).
 
 Services are identified by unique numbers known as UUIDs. You know about UUIDs from other contexts. Standard services have a 16-bit UUID and custom services have a 128-bit UUID. The ability to define services and characteristics depends on the radio you're using and its firmware.
 
@@ -84,8 +84,8 @@ The Bluetooth LE protocol operates on multiple layers. **General Attribute Profi
 
 As the library enables multiple types of functionality, there are a number of different classes.
 
-- BLE used to enable the BLE module.
-- BLEDevice used to get information about the devices connected or discovered while scanning.
-- BLEService used to enable the services board provides or interact with services a remote board provides.
-- BLECharacteristic used to enable the characteristics board offers in a service or interact with characteristics a remote board provides.
-- BLEDescriptor used to describe a characteristic the board offers.
+- `BLE` used to enable the Bluetooth® Low Energy module.
+- `BLEDevice` used to get information about the devices connected or discovered while scanning.
+- `BLEService` used to enable the services board provides or interact with services a remote board provides.
+- `BLECharacteristic` used to enable the characteristics board offers in a service or interact with characteristics a remote board provides.
+- `BLEDescriptor` used to describe a characteristic the board offers.

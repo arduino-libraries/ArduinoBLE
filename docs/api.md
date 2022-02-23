@@ -2,11 +2,11 @@
 
 ## BLE class
 
-Used to enable the BLE module.
+Used to enable the Bluetooth® Low Energy module.
 
 ### `begin()`
 
-Initializes the BLE device.
+Initializes the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -28,7 +28,7 @@ None
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -38,7 +38,7 @@ None
 
 ### `end()`
 
-Stops the BLE device.
+Stops the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -60,7 +60,7 @@ Nothing
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -74,12 +74,13 @@ Nothing
 
 ### `poll()`
 
-Poll for BLE radio events and handle them.
+Poll for Bluetooth® Low Energy radio events and handle them.
 
 #### Syntax
 
 ```
-BLE.poll() BLE.poll(timeout)
+BLE.poll() 
+BLE.poll(timeout)
 
 ```
 
@@ -129,7 +130,7 @@ Nothing.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -160,7 +161,7 @@ void blePeripheralDisconnectHandler(BLEDevice central) {
 
 ### `connected()`
 
-Query if another BLE device is connected
+Query if another Bluetooth® Low Energy device is connected
 
 #### Syntax
 
@@ -174,7 +175,7 @@ BLE.connected()
 None
 
 #### Returns
-**true** if another BLE device is connected, otherwise **false**.
+**true** if another Bluetooth® Low Energy device is connected, otherwise **false**.
 
 #### Example
 
@@ -191,7 +192,7 @@ None
 
 ### `disconnect()`
 
-Disconnect any BLE devices that are connected
+Disconnect any Bluetooth® Low Energy devices that are connected
 
 #### Syntax
 
@@ -205,7 +206,7 @@ BLE.disconnect()
 None
 
 #### Returns
-**true** if any BLE device that was previously connected was disconnected, otherwise **false**.
+**true** if any Bluetooth® Low Energy device that was previously connected was disconnected, otherwise **false**.
 
 #### Example
 
@@ -222,7 +223,7 @@ None
 
 ### `address()`
 
-Query the Bluetooth address of the BLE device.
+Query the Bluetooth® address of the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -236,7 +237,7 @@ BLE.address()
 None
 
 #### Returns
-The **Bluetooth address** of the BLE device (as a String).
+The **Bluetooth® address** of the Bluetooth® Low Energy device (as a String).
 
 #### Example
 
@@ -252,7 +253,7 @@ The **Bluetooth address** of the BLE device (as a String).
 
 ### `rssi()`
 
-Query the RSSI (Received signal strength indication) of the connected BLE device.
+Query the RSSI (Received signal strength indication) of the connected Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -266,7 +267,7 @@ BLE.rssi()
 None
 
 #### Returns
-The **RSSI** of the connected BLE device, 127 if no BLE device is connected.
+The **RSSI** of the connected Bluetooth® Low Energy device, 127 if no Bluetooth® Low Energy device is connected.
 
 #### Example
 
@@ -295,7 +296,7 @@ BLE.setAdvertisedServiceUuid(uuid)
 
 #### Parameters
 
-**uuid:** 16-bit or 128-bit BLE UUID in **String** format
+**uuid:** 16-bit or 128-bit Bluetooth® Low Energy UUID in **String** format
 
 #### Returns
 Nothing
@@ -306,7 +307,7 @@ Nothing
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -343,13 +344,13 @@ Nothing
 
 ```arduino
 
-BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
+BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 
 // ...
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -389,7 +390,7 @@ Nothing
 
  // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -431,7 +432,7 @@ Nothing
 
  // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -471,7 +472,7 @@ Nothing
 
  // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -511,7 +512,7 @@ Nothing
 
  // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -529,7 +530,7 @@ Nothing
 
 ### `addService()`
 
-Add a BLEService to the set of services the BLE device provides
+Add a BLEService to the set of services the Bluetooth® Low Energy device provides
 
 #### Syntax
 
@@ -549,13 +550,13 @@ Nothing
 
 ```arduino
 
-BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
+BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 
 
 
  // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -593,7 +594,7 @@ None
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -631,7 +632,7 @@ Nothing
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -649,7 +650,7 @@ Nothing
 
 ### `central()`
 
-Query the central BLE device connected.
+Query the central Bluetooth® Low Energy device connected.
 
 #### Syntax
 
@@ -669,7 +670,7 @@ None
 
 ```arduino
 
-  // listen for BLE peripherals to connect:
+  // listen for Bluetooth® Low Energy peripherals to connect:
   BLEDevice central = BLE.central();
 
   // if a central is connected to peripheral:
@@ -708,7 +709,7 @@ Nothing.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -747,7 +748,7 @@ Nothing.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -785,7 +786,7 @@ Nothing.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -800,7 +801,7 @@ Nothing.
 
 ### `scan()`
 
-Start scanning for BLE devices that are advertising.
+Start scanning for Bluetooth® Low Energy devices that are advertising.
 
 #### Syntax
 
@@ -823,7 +824,7 @@ BLE.scan(withDuplicates)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -846,7 +847,7 @@ BLE.scan(withDuplicates)
 
 ### `scanForName()`
 
-Start scanning for BLE devices that are advertising with a particular (local) name.
+Start scanning for Bluetooth® Low Energy devices that are advertising with a particular (local) name.
 
 #### Syntax
 
@@ -870,7 +871,7 @@ BLE.scanForName(name, withDuplicates)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -893,7 +894,7 @@ BLE.scanForName(name, withDuplicates)
 
 ### `scanForAddress()`
 
-Start scanning for BLE devices that are advertising with a particular (Bluetooth) address.
+Start scanning for Bluetooth® Low Energy devices that are advertising with a particular (Bluetooth®) address.
 
 #### Syntax
 
@@ -905,7 +906,7 @@ BLE.scanForAddress(address, withDuplicates)
 
 #### Parameters
 
-**address:** (Bluetooth) address (as a String) to filter for
+**address:** (Bluetooth®) address (as a String) to filter for
 **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered
 
 #### Returns
@@ -917,7 +918,7 @@ BLE.scanForAddress(address, withDuplicates)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -940,7 +941,7 @@ BLE.scanForAddress(address, withDuplicates)
 
 ### `scanForUuid()`
 
-Start scanning for BLE devices that are advertising with a particular (service) UUID.
+Start scanning for Bluetooth® Low Energy devices that are advertising with a particular (service) UUID.
 
 #### Syntax
 
@@ -964,7 +965,7 @@ BLE.scanForUuid(uuid, withDuplicates)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -987,7 +988,7 @@ BLE.scanForUuid(uuid, withDuplicates)
 
 ### `stopScan()`
 
-Stop scanning for BLE devices that are advertising.
+Stop scanning for Bluetooth® Low Energy devices that are advertising.
 
 #### Syntax
 
@@ -1009,7 +1010,7 @@ Nothing
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1027,7 +1028,7 @@ Nothing
 
 ### `available()`
 
-Query for a discovered BLE device that was found during scanning.
+Query for a discovered Bluetooth® Low Energy device that was found during scanning.
 
 #### Syntax
 
@@ -1049,7 +1050,7 @@ Nothing
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1076,7 +1077,7 @@ Used to get information about the devices connected or discovered while scanning
 
 ### `poll()`
 
-Poll for BLE radio events for the specified BLE device and handle them.
+Poll for Bluetooth® Low Energy radio events for the specified Bluetooth® Low Energy device and handle them.
 
 #### Syntax
 
@@ -1097,7 +1098,7 @@ Nothing
 
 ```arduino
 
-  // listen for BLE centrals to connect:
+  // listen for Bluetooth® Low Energy centrals to connect:
   BLEDevice central = BLE.central();
 
   // if a central is connected to peripheral:
@@ -1114,7 +1115,7 @@ Nothing
 
 ### `connected()`
 
-Query if a BLE device is connected
+Query if a Bluetooth® Low Energy device is connected
 
 #### Syntax
 
@@ -1128,13 +1129,13 @@ bleDevice.connected()
 None
 
 #### Returns
-**true** if the BLE device is connected, otherwise **false**.
+**true** if the Bluetooth® Low Energy device is connected, otherwise **false**.
 
 #### Example
 
 ```arduino
 
-  // listen for BLE centrals to connect:
+  // listen for Bluetooth® Low Energy centrals to connect:
   BLEDevice central = BLE.central();
 
     // while the central is still connected
@@ -1148,7 +1149,7 @@ None
 
 ### `disconnect()`
 
-Disconnect the BLE device, if connected
+Disconnect the Bluetooth® Low Energy device, if connected
 
 #### Syntax
 
@@ -1162,13 +1163,13 @@ bleDevice.disconnect()
 None
 
 #### Returns
-**true** if the BLE device was disconnected, otherwise **false**.
+**true** if the Bluetooth® Low Energy device was disconnected, otherwise **false**.
 
 #### Example
 
 ```arduino
 
- // listen for BLE centrals to connect:
+ // listen for Bluetooth® Low Energy centrals to connect:
   BLEDevice central = BLE.central();
 
   
@@ -1180,7 +1181,7 @@ None
 
 ### `address()`
 
-Query the Bluetooth address of the BLE device.
+Query the Bluetooth® address of the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1194,13 +1195,13 @@ bleDevice.address()
 None
 
 #### Returns
-The **Bluetooth address** of the BLE device (as a String).
+The **Bluetooth® address** of the Bluetooth® Low Energy device (as a String).
 
 #### Example
 
 ```arduino
 
-  // listen for BLE peripherals to connect:
+  // listen for Bluetooth® Low Energy peripherals to connect:
   BLEDevice central = BLE.central();
 
   // if a central is connected to peripheral:
@@ -1217,7 +1218,7 @@ The **Bluetooth address** of the BLE device (as a String).
 
 ### `rssi()`
 
-Query the RSSI (Received signal strength indication) of the BLE device.
+Query the RSSI (Received signal strength indication) of the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1231,7 +1232,7 @@ bleDevice.rssi()
 None
 
 #### Returns
-The **RSSI** of the connected BLE device, 127 if the BLE device is not connected.
+The **RSSI** of the connected Bluetooth® Low Energy device, 127 if the Bluetooth® Low Energy device is not connected.
 
 #### Example
 
@@ -1249,7 +1250,7 @@ The **RSSI** of the connected BLE device, 127 if the BLE device is not connected
 
 ### `characteristic()`
 
-Get a BLECharacteristic representing a BLE characteristic the device provides.
+Get a BLECharacteristic representing a Bluetooth® Low Energy characteristic the device provides.
 
 #### Syntax
 
@@ -1274,7 +1275,7 @@ bleDevice.characteristic(uuid, index)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1326,7 +1327,7 @@ bleDevice.characteristic(uuid, index)
 
 ### `discoverAttributes()`
 
-Discover all of the attributes of BLE device.
+Discover all of the attributes of Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1348,7 +1349,7 @@ None
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1392,7 +1393,7 @@ None
 
 ### `discoverService()`
 
-Discover the attributes of a particular service on the BLE device.
+Discover the attributes of a particular service on the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1414,7 +1415,7 @@ bleDevice.discoverService(serviceUuid)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1458,7 +1459,7 @@ bleDevice.discoverService(serviceUuid)
 
 ### `deviceName()`
 
-Query the device name (BLE characteristic UUID 0x2a00) of a BLE device.
+Query the device name (BLE characteristic UUID 0x2a00) of a Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1480,7 +1481,7 @@ None
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1532,7 +1533,7 @@ None
 
 ### `appearance()`
 
-Query the appearance (BLE characteristic UUID 0x2a01) of a BLE device.
+Query the appearance (BLE characteristic UUID 0x2a01) of a Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1554,7 +1555,7 @@ None
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1606,7 +1607,7 @@ None
 
 ### `serviceCount()`
 
-Query the number of services discovered for the BLE device.
+Query the number of services discovered for the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1620,7 +1621,7 @@ bleDevice.serviceCount()
 None
 
 #### Returns
-The number of **services discovered** for the BLE device.
+The number of **services discovered** for the Bluetooth® Low Energy device.
 
 #### Example
 
@@ -1628,7 +1629,7 @@ The number of **services discovered** for the BLE device.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1677,7 +1678,7 @@ The number of **services discovered** for the BLE device.
 
 ### `hasService()`
 
-Query if the BLE device has a particular service.
+Query if the Bluetooth® Low Energy device has a particular service.
 
 #### Syntax
 
@@ -1701,7 +1702,7 @@ bleDevice.hasService(uuid, index)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1749,7 +1750,7 @@ bleDevice.hasService(uuid, index)
 
 ### `service()`
 
-Get a BLEService representing a BLE service the device provides.
+Get a BLEService representing a Bluetooth® Low Energy service the device provides.
 
 #### Syntax
 
@@ -1774,7 +1775,7 @@ bleDevice.service(uuid, index)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1826,7 +1827,7 @@ bleDevice.service(uuid, index)
 
 ### `characteristicCount()`
 
-Query the number of characteristics discovered for the BLE device.
+Query the number of characteristics discovered for the Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -1840,7 +1841,7 @@ bleDevice.characteristicCount()
 None
 
 #### Returns
-The **number of characteristics** discovered for the BLE device.
+The **number of characteristics** discovered for the Bluetooth® Low Energy device.
 
 #### Example
 
@@ -1848,7 +1849,7 @@ The **number of characteristics** discovered for the BLE device.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1897,7 +1898,7 @@ The **number of characteristics** discovered for the BLE device.
 
 ### `hasCharacteristic()`
 
-Query if the BLE device has a particular characteristic.
+Query if the Bluetooth® Low Energy device has a particular characteristic.
 
 #### Syntax
 
@@ -1921,7 +1922,7 @@ bleDevice.hasCharacteristic(uuid, index)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -1969,7 +1970,7 @@ bleDevice.hasCharacteristic(uuid, index)
 
 ### `hasLocalName()`
 
-Query if a discovered BLE device is advertising a local name.
+Query if a discovered Bluetooth® Low Energy device is advertising a local name.
 
 #### Syntax
 
@@ -1991,7 +1992,7 @@ Nothing
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2022,7 +2023,7 @@ Nothing
 
 ### `hasAdvertisedServiceUuid()`
 
-Query if a discovered BLE device is advertising a service UUID.
+Query if a discovered Bluetooth® Low Energy device is advertising a service UUID.
 
 #### Syntax
 
@@ -2045,7 +2046,7 @@ bleDevice.hasAdvertisedServiceUuid(index)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2080,7 +2081,7 @@ bleDevice.hasAdvertisedServiceUuid(index)
 
 ### `advertisedServiceUuidCount()`
 
-Query the number of advertised services a discovered BLE device is advertising.
+Query the number of advertised services a discovered Bluetooth® Low Energy device is advertising.
 
 #### Syntax
 
@@ -2094,7 +2095,7 @@ bleDevice.advertisedServiceUuidCount()
 None
 
 #### Returns
-The **number of advertised services** a discovered BLE device is advertising.
+The **number of advertised services** a discovered Bluetooth® Low Energy device is advertising.
 
 #### Example
 
@@ -2102,7 +2103,7 @@ The **number of advertised services** a discovered BLE device is advertising.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2137,7 +2138,7 @@ The **number of advertised services** a discovered BLE device is advertising.
 
 ### `localName()`
 
-Query the local name a discovered BLE device is advertising with.
+Query the local name a discovered Bluetooth® Low Energy device is advertising with.
 
 #### Syntax
 
@@ -2159,7 +2160,7 @@ Nothing
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2190,7 +2191,7 @@ Nothing
 
 ### `advertisedServiceUuid()`
 
-Query an advertised service UUID discovered BLE device is advertising.
+Query an advertised service UUID discovered Bluetooth® Low Energy device is advertising.
 
 #### Syntax
 
@@ -2213,7 +2214,7 @@ Advertised service **UUID** (as a String).
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2248,7 +2249,7 @@ Advertised service **UUID** (as a String).
 
 ### `connect()`
 
-Connect to a BLE device.
+Connect to a Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -2270,7 +2271,7 @@ None
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2308,7 +2309,7 @@ Used to enable the services board provides or interact with services a remote bo
 
 ### `BLEService()`
 
-Create a new BLE service.
+Create a new Bluetooth® Low Energy service.
 
 #### Syntax
 
@@ -2328,7 +2329,7 @@ New **BLEService** with the specified **UUID**
 
 ```arduino
 
-BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
+BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 
 
 ```
@@ -2349,13 +2350,13 @@ bleService.uuid()
 None
 
 #### Returns
-UUID of the BLE service as a **String**.
+UUID of the Bluetooth® Low Energy service as a **String**.
 
 #### Example
 
 ```arduino
 
-BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
+BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 
 
 Serial.print(“LED service UUID = “);
@@ -2367,7 +2368,7 @@ Serial.println(ledService.uuid());
 
 ### `addCharacteristic()`
 
-Add a BLECharateristic to the BLE service.
+Add a BLECharateristic to the Bluetooth® Low Energy service.
 
 #### Syntax
 
@@ -2387,9 +2388,9 @@ Nothing
 
 ```arduino
 
-BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
+BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, readable and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, readable and writable by central
 BLECharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite, 1);
 
 
@@ -2404,7 +2405,7 @@ ledService.addCharacteristic(switchCharacteristic);
 
 ### `characteristicCount()`
 
-Query the number of characteristics discovered for the BLE service.
+Query the number of characteristics discovered for the Bluetooth® Low Energy service.
 
 #### Syntax
 
@@ -2418,7 +2419,7 @@ bleService.characteristicCount()
 None
 
 #### Returns
-The **number of characteristics** discovered for the BLE service.
+The **number of characteristics** discovered for the Bluetooth® Low Energy service.
 
 #### Example
 
@@ -2426,7 +2427,7 @@ The **number of characteristics** discovered for the BLE service.
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2482,7 +2483,7 @@ The **number of characteristics** discovered for the BLE service.
 
 ### `hasCharacteristic()`
 
-Query if the BLE service has a particular characteristic.
+Query if the Bluetooth® Low Energy service has a particular characteristic.
 
 #### Syntax
 
@@ -2506,7 +2507,7 @@ bleService.hasCharacteristic(uuid, index)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2560,7 +2561,7 @@ bleService.hasCharacteristic(uuid, index)
 
 ### `characteristic()`
 
-Get a BLECharacteristic representing a BLE characteristic the service provides.
+Get a BLECharacteristic representing a Bluetooth® Low Energy characteristic the service provides.
 
 #### Syntax
 
@@ -2585,7 +2586,7 @@ bleService.characteristic(uuid, index)
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -2648,7 +2649,7 @@ Used to enable the characteristics board offers in a service or interact with ch
 
 ### `BLECharacteristic()`
 
-Create a new BLE characteristic.
+Create a new Bluetooth® Low Energy characteristic.
 
 #### Syntax
 
@@ -2686,7 +2687,7 @@ New **BLECharacteristic** with the specified **UUID** and value
 
 ```arduino
 
-// BLE Battery Level Characteristic
+// Bluetooth® Low Energy Battery Level Characteristic
 BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
@@ -2710,13 +2711,13 @@ bleCharacteristic.uuid()
 None
 
 #### Returns
-**UUID** of the BLE service as a **String**.
+**UUID** of the Bluetooth® Low Energy service as a **String**.
 
 #### Example
 
 ```arduino
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
@@ -2749,7 +2750,7 @@ None
 
 ```arduino
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
@@ -2788,7 +2789,7 @@ The **maximum value** size of the characteristic (in bytes)
 
 ```arduino
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
@@ -2821,7 +2822,7 @@ The **current value** of the characteristic, value type depends on the construct
 
 ```arduino
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
@@ -2860,7 +2861,7 @@ The **current value** size of the characteristic (in bytes)
 
 ```arduino
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
@@ -3054,7 +3055,7 @@ buttonCharacteristic.broadcast();
 
 ### `written()`
 
-Query if the characteristic value has been written by another BLE device.
+Query if the characteristic value has been written by another Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -3068,19 +3069,19 @@ bleCharacteristic.written()
 None
 
 #### Returns
-**true** if the characteristic value has been written by another BLE device, **false** otherwise
+**true** if the characteristic value has been written by another Bluetooth® Low Energy device, **false** otherwise
 
 #### Example
 
 ```arduino
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
 
 
- // listen for BLE peripherals to connect:
+ // listen for Bluetooth® Low Energy peripherals to connect:
   BLEDevice central = BLE.central();
 
   // if a central is connected to peripheral:
@@ -3116,7 +3117,7 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
 
 ### `subscribed()`
 
-Query if the characteristic has been subscribed to by another BLE device.
+Query if the characteristic has been subscribed to by another Bluetooth® Low Energy device.
 
 #### Syntax
 
@@ -3130,13 +3131,13 @@ bleCharacteristic.subscribed()
 None
 
 #### Returns
-**true** if the characteristic value has been subscribed to by another BLE device, **false** otherwise
+**true** if the characteristic value has been subscribed to by another Bluetooth® Low Energy device, **false** otherwise
 
 #### Example
 
 ```arduino
 
-// BLE Battery Level Characteristic
+// Bluetooth® Low Energy Battery Level Characteristic
 BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
@@ -3145,7 +3146,7 @@ BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit chara
 
 
   if (batteryLevelChar.subscribed()) {
-     // set a new value , that well be pushed to subscribed BLE devices
+     // set a new value , that well be pushed to subscribed Bluetooth® Low Energy devices
     batteryLevelChar.writeValue(0xab);
   }
 
@@ -3174,7 +3175,7 @@ Nothing
 
 ```arduino
 
-// BLE Battery Level Characteristic
+// Bluetooth® Low Energy Battery Level Characteristic
 BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
@@ -3191,7 +3192,7 @@ BLEDescriptor batteryLevelDescriptor("2901", "millis");
 
 ### `descriptorCount`
 
-Query the number of BLE descriptors discovered for the characteristic.
+Query the number of Bluetooth® Low Energy descriptors discovered for the characteristic.
 
 #### Syntax
 
@@ -3205,7 +3206,7 @@ bleCharacteristic.descriptorCount()
 None
 
 #### Returns
-The **number of BLE descriptors** discovered for the characteristic
+The **number of Bluetooth® Low Energy descriptors** discovered for the characteristic
 
 #### Example
 
@@ -3254,7 +3255,7 @@ bleCharacteristic.hasDescriptor(uuid, index)
 
 ### `descriptor()`
 
-Get a BLEDescriptor that represents a characteristics BLE descriptor.
+Get a BLEDescriptor that represents a characteristics Bluetooth® Low Energy descriptor.
 
 #### Syntax
 
@@ -3271,7 +3272,7 @@ bleCharacteristic.descriptor(uuid, index)
 **uuid**: uuid (as a **String**)
 
 #### Returns
-BLEDescriptor that represents a characteristics BLE descriptor
+BLEDescriptor that represents a characteristics Bluetooth® Low Energy descriptor
 
 #### Example
 
@@ -3286,7 +3287,7 @@ BLEDescriptor that represents a characteristics BLE descriptor
 
 ### `canRead()`
 
-Query if a BLE characteristic is readable.
+Query if a Bluetooth® Low Energy characteristic is readable.
 
 #### Syntax
 
@@ -3348,7 +3349,7 @@ None
 
 ### `canWrite()`
 
-Query if a BLE characteristic is writable.
+Query if a Bluetooth® Low Energy characteristic is writable.
 
 #### Syntax
 
@@ -3377,7 +3378,7 @@ None
 
 ### `canSubscribe()`
 
-Query if a BLE characteristic is subscribable.
+Query if a Bluetooth® Low Energy characteristic is subscribable.
 
 #### Syntax
 
@@ -3406,7 +3407,7 @@ None
 
 ### `subscribe()`
 
-Subscribe to a BLE characteristics notification or indications.
+Subscribe to a Bluetooth® Low Energy characteristics notification or indications.
 
 #### Syntax
 
@@ -3454,7 +3455,7 @@ None
 
 ### `canUnsubscribe()`
 
-Query if a BLE characteristic is unsubscribable.
+Query if a Bluetooth® Low Energy characteristic is unsubscribable.
 
 #### Syntax
 
@@ -3483,7 +3484,7 @@ None
 
 ### `unsubscribe()`
 
-Unsubscribe to a BLE characteristics notifications or indications.
+Unsubscribe to a Bluetooth® Low Energy characteristics notifications or indications.
 
 #### Syntax
 
@@ -3584,7 +3585,7 @@ Used to describe a characteristic the board offers
 
 ### `BLEDescriptor()`
 
-Create a new BLE descriptor.
+Create a new Bluetooth® Low Energy descriptor.
 
 #### Syntax
 
@@ -3629,7 +3630,7 @@ bleDescriptor.uuid()
 None
 
 #### Returns
-**UUID** of the BLE descriptor (as a String).
+**UUID** of the Bluetooth® Low Energy descriptor (as a String).
 
 #### Example
 
@@ -3661,7 +3662,7 @@ bleDescriptor.valueSize()
 None
 
 #### Returns
-**Value size** (in bytes) of the BLE descriptor.
+**Value size** (in bytes) of the Bluetooth® Low Energy descriptor.
 
 #### Example
 

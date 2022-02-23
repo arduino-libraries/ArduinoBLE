@@ -1,7 +1,7 @@
 /*
   Callback LED
 
-  This example creates a BLE peripheral with service that contains a
+  This example creates a Bluetooth® Low Energy peripheral with service that contains a
   characteristic to control an LED. The callback features of the
   library are used.
 
@@ -9,7 +9,7 @@
   - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
     Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
 
-  You can use a generic BLE central app, like LightBlue (iOS and Android) or
+  You can use a generic Bluetooth® Low Energy central app, like LightBlue (iOS and Android) or
   nRF Connect (Android), to interact with the services and characteristics
   created in this sketch.
 
@@ -33,7 +33,7 @@ void setup() {
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -61,11 +61,11 @@ void setup() {
   // start advertising
   BLE.advertise();
 
-  Serial.println(("Bluetooth device active, waiting for connections..."));
+  Serial.println(("Bluetooth® device active, waiting for connections..."));
 }
 
 void loop() {
-  // poll for BLE events
+  // poll for Bluetooth® Low Energy events
   BLE.poll();
 }
 

@@ -1,7 +1,7 @@
 /*
   Scan Callback
 
-  This example scans for BLE peripherals and prints out their advertising details:
+  This example scans for Bluetooth® Low Energy peripherals and prints out their advertising details:
   address, local name, advertised service UUIDs. Unlike the Scan example, it uses
   the callback style APIs and disables filtering so the peripheral discovery is
   reported for every single advertisement it makes.
@@ -21,12 +21,12 @@ void setup() {
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
 
-  Serial.println("BLE Central scan callback");
+  Serial.println("Bluetooth® Low Energy Central scan callback");
 
   // set the discovered event handle
   BLE.setEventHandler(BLEDiscovered, bleCentralDiscoverHandler);

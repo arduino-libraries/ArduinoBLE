@@ -1,14 +1,14 @@
 /*
   Battery Monitor
 
-  This example creates a BLE peripheral with the standard battery service and
+  This example creates a Bluetooth® Low Energy peripheral with the standard battery service and
   level characteristic. The A0 pin is used to calculate the battery level.
 
   The circuit:
   - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
     Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
 
-  You can use a generic BLE central app, like LightBlue (iOS and Android) or
+  You can use a generic Bluetooth® Low Energy central app, like LightBlue (iOS and Android) or
   nRF Connect (Android), to interact with the services and characteristics
   created in this sketch.
 
@@ -17,10 +17,10 @@
 
 #include <ArduinoBLE.h>
 
- // BLE Battery Service
+ // Bluetooth® Low Energy Battery Service
 BLEService batteryService("180F");
 
-// BLE Battery Level Characteristic
+// Bluetooth® Low Energy Battery Level Characteristic
 BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
@@ -40,9 +40,9 @@ void setup() {
     while (1);
   }
 
-  /* Set a local name for the BLE device
+  /* Set a local name for the Bluetooth® Low Energy device
      This name will appear in advertising packets
-     and can be used by remote devices to identify this BLE device
+     and can be used by remote devices to identify this Bluetooth® Low Energy device
      The name can be changed but maybe be truncated based on space left in advertisement packet
   */
   BLE.setLocalName("BatteryMonitor");
@@ -51,18 +51,18 @@ void setup() {
   BLE.addService(batteryService); // Add the battery service
   batteryLevelChar.writeValue(oldBatteryLevel); // set initial value for this characteristic
 
-  /* Start advertising BLE.  It will start continuously transmitting BLE
-     advertising packets and will be visible to remote BLE central devices
+  /* Start advertising Bluetooth® Low Energy.  It will start continuously transmitting Bluetooth® Low Energy
+     advertising packets and will be visible to remote Bluetooth® Low Energy central devices
      until it receives a new connection */
 
   // start advertising
   BLE.advertise();
 
-  Serial.println("Bluetooth device active, waiting for connections...");
+  Serial.println("Bluetooth® device active, waiting for connections...");
 }
 
 void loop() {
-  // wait for a BLE central
+  // wait for a Bluetooth® Low Energy central
   BLEDevice central = BLE.central();
 
   // if a central is connected to the peripheral:
