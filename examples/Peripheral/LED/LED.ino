@@ -1,14 +1,14 @@
 /*
   LED
 
-  This example creates a BLE peripheral with service that contains a
+  This example creates a Bluetooth® Low Energy peripheral with service that contains a
   characteristic to control an LED.
 
   The circuit:
   - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
     Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
 
-  You can use a generic BLE central app, like LightBlue (iOS and Android) or
+  You can use a generic Bluetooth® Low Energy central app, like LightBlue (iOS and Android) or
   nRF Connect (Android), to interact with the services and characteristics
   created in this sketch.
 
@@ -17,9 +17,9 @@
 
 #include <ArduinoBLE.h>
 
-BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
+BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 
-// BLE LED Switch Characteristic - custom 128-bit UUID, read and writable by central
+// Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 const int ledPin = LED_BUILTIN; // pin to use for the LED
@@ -33,7 +33,7 @@ void setup() {
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -58,7 +58,7 @@ void setup() {
 }
 
 void loop() {
-  // listen for BLE peripherals to connect:
+  // listen for Bluetooth® Low Energy peripherals to connect:
   BLEDevice central = BLE.central();
 
   // if a central is connected to peripheral:
