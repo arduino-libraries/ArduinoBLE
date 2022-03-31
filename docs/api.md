@@ -4,7 +4,7 @@
 
 Used to enable the Bluetooth® Low Energy module.
 
-### `begin()`
+### `BLE.begin()`
 
 Initializes the Bluetooth® Low Energy device.
 
@@ -36,7 +36,7 @@ None
 
 ```
 
-### `end()`
+### `BLE.end()`
 
 Stops the Bluetooth® Low Energy device.
 
@@ -72,7 +72,7 @@ Nothing
 
 ```
 
-### `poll()`
+### `BLE.poll()`
 
 Poll for Bluetooth® Low Energy radio events and handle them.
 
@@ -106,7 +106,7 @@ Nothing
 
 ```
 
-### `setEventHandler()`
+### `BLE.setEventHandler()`
 
 Set the event handler (callback) function that will be called when the specified event occurs.
 
@@ -159,7 +159,7 @@ void blePeripheralDisconnectHandler(BLEDevice central) {
 
 ```
 
-### `connected()`
+### `BLE.connected()`
 
 Query if another Bluetooth® Low Energy device is connected
 
@@ -190,7 +190,7 @@ None
 
 ```
 
-### `disconnect()`
+### `BLE.disconnect()`
 
 Disconnect any Bluetooth® Low Energy devices that are connected
 
@@ -221,7 +221,7 @@ None
 
 ```
 
-### `address()`
+### `BLE.address()`
 
 Query the Bluetooth® address of the Bluetooth® Low Energy device.
 
@@ -251,7 +251,7 @@ The **Bluetooth® address** of the Bluetooth® Low Energy device (as a String).
 
 ```
 
-### `rssi()`
+### `BLE.rssi()`
 
 Query the RSSI (Received signal strength indication) of the connected Bluetooth® Low Energy device.
 
@@ -283,7 +283,7 @@ The **RSSI** of the connected Bluetooth® Low Energy device, 127 if no Bluetooth
 
 ```
 
-### `setAdvertisedServiceUuid()`
+### `BLE.setAdvertisedServiceUuid()`
 
 Set the advertised service UUID used when advertising.
 
@@ -322,7 +322,7 @@ Nothing
 
 ```
 
-### `setAdvertisedService()`
+### `BLE.setAdvertisedService()`
 
 Set the advertised service UUID used when advertising to the value of the BLEService provided.
 
@@ -365,7 +365,7 @@ BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Lo
 
 ```
 
-### `setManufacturerData()`
+### `BLE.setManufacturerData()`
 
 Set the manufacturer data value used when advertising.
 
@@ -408,7 +408,7 @@ Nothing
 
 ```
 
-### `setLocalName()`
+### `BLE.setLocalName()`
 
 Set the local value used when advertising.
 
@@ -448,7 +448,7 @@ Nothing
 
 ```
 
-### `setDeviceName()`
+### `BLE.setDeviceName()`
 
 Set the device name in the built in device name characteristic. If not set, the value defaults “Arduino”.
 
@@ -488,7 +488,7 @@ Nothing
 
 ```
 
-### `setAppearance()`
+### `BLE.setAppearance()`
 
 Set the appearance in the built in appearance characteristic. If not set, the value defaults 0x0000.
 
@@ -528,7 +528,7 @@ Nothing
 
 ```
 
-### `addService()`
+### `BLE.addService()`
 
 Add a BLEService to the set of services the Bluetooth® Low Energy device provides
 
@@ -570,7 +570,7 @@ BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Lo
 
 ```
 
-### `advertise()`
+### `BLE.advertise()`
 
 Start advertising.
 
@@ -608,7 +608,7 @@ None
 
 ```
 
-### `stopAdvertise()`
+### `BLE.stopAdvertise()`
 
 Stop advertising.
 
@@ -648,7 +648,7 @@ Nothing
 
 ```
 
-### `central()`
+### `BLE.central()`
 
 Query the central Bluetooth® Low Energy device connected.
 
@@ -685,7 +685,7 @@ None
 
 ```
 
-### `setAdvertisingInterval()`
+### `BLE.setAdvertisingInterval()`
 
 Set the advertising interval in units of 0.625 ms. Defaults to 100ms (160 * 0.625 ms) if not provided.
 
@@ -723,7 +723,7 @@ Nothing.
 
 ```
 
-### `setConnectionInterval()`
+### `BLE.setConnectionInterval()`
 
 Set the minimum and maximum desired connection intervals in units of 1.25 ms.
 
@@ -761,7 +761,7 @@ Nothing.
 
 ```
 
-### `setConnectable()`
+### `BLE.setConnectable()`
 
 Set if the device is connectable after advertising, defaults to **true**.
 
@@ -799,7 +799,7 @@ Nothing.
 
 ```
 
-### `scan()`
+### `BLE.scan()`
 
 Start scanning for Bluetooth® Low Energy devices that are advertising.
 
@@ -845,7 +845,7 @@ BLE.scan(withDuplicates)
 
 ```
 
-### `scanForName()`
+### `BLE.scanForName()`
 
 Start scanning for Bluetooth® Low Energy devices that are advertising with a particular (local) name.
 
@@ -892,7 +892,7 @@ BLE.scanForName(name, withDuplicates)
 
 ```
 
-### `scanForAddress()`
+### `BLE.scanForAddress()`
 
 Start scanning for Bluetooth® Low Energy devices that are advertising with a particular (Bluetooth®) address.
 
@@ -939,7 +939,7 @@ BLE.scanForAddress(address, withDuplicates)
 
 ```
 
-### `scanForUuid()`
+### `BLE.scanForUuid()`
 
 Start scanning for Bluetooth® Low Energy devices that are advertising with a particular (service) UUID.
 
@@ -986,7 +986,7 @@ BLE.scanForUuid(uuid, withDuplicates)
 
 ```
 
-### `stopScan()`
+### `BLE.stopScan()`
 
 Stop scanning for Bluetooth® Low Energy devices that are advertising.
 
@@ -1026,7 +1026,7 @@ Nothing
 
 ```
 
-### `available()`
+### `BLE.available()`
 
 Query for a discovered Bluetooth® Low Energy device that was found during scanning.
 
@@ -1075,7 +1075,7 @@ Nothing
 
 Used to get information about the devices connected or discovered while scanning
 
-### `poll()`
+### `bleDevice.poll()`
 
 Poll for Bluetooth® Low Energy radio events for the specified Bluetooth® Low Energy device and handle them.
 
@@ -1113,7 +1113,7 @@ Nothing
 
 ```
 
-### `connected()`
+### `bleDevice.connected()`
 
 Query if a Bluetooth® Low Energy device is connected
 
@@ -1147,7 +1147,7 @@ None
 
 ```
 
-### `disconnect()`
+### `bleDevice.disconnect()`
 
 Disconnect the Bluetooth® Low Energy device, if connected
 
@@ -1179,7 +1179,7 @@ None
 
 ```
 
-### `address()`
+### `bleDevice.address()`
 
 Query the Bluetooth® address of the Bluetooth® Low Energy device.
 
@@ -1216,7 +1216,7 @@ The **Bluetooth® address** of the Bluetooth® Low Energy device (as a String).
 
 ```
 
-### `rssi()`
+### `bleDevice.rssi()`
 
 Query the RSSI (Received signal strength indication) of the Bluetooth® Low Energy device.
 
@@ -1248,7 +1248,7 @@ The **RSSI** of the connected Bluetooth® Low Energy device, 127 if the Bluetoot
 
 ```
 
-### `characteristic()`
+### `bleDevice.characteristic()`
 
 Get a BLECharacteristic representing a Bluetooth® Low Energy characteristic the device provides.
 
@@ -1325,7 +1325,7 @@ bleDevice.characteristic(uuid, index)
 
 ```
 
-### `discoverAttributes()`
+### `bleDevice.discoverAttributes()`
 
 Discover all of the attributes of Bluetooth® Low Energy device.
 
@@ -1391,7 +1391,7 @@ None
 
 ```
 
-### `discoverService()`
+### `bleDevice.discoverService()`
 
 Discover the attributes of a particular service on the Bluetooth® Low Energy device.
 
@@ -1457,7 +1457,7 @@ bleDevice.discoverService(serviceUuid)
 
 ```
 
-### `deviceName()`
+### `bleDevice.deviceName()`
 
 Query the device name (BLE characteristic UUID 0x2a00) of a Bluetooth® Low Energy device.
 
@@ -1531,7 +1531,7 @@ None
 
 ```
 
-### `appearance()`
+### `bleDevice.appearance()`
 
 Query the appearance (BLE characteristic UUID 0x2a01) of a Bluetooth® Low Energy device.
 
@@ -1605,7 +1605,7 @@ None
 
 ```
 
-### `serviceCount()`
+### `bleDevice.serviceCount()`
 
 Query the number of services discovered for the Bluetooth® Low Energy device.
 
@@ -1676,7 +1676,7 @@ The number of **services discovered** for the Bluetooth® Low Energy device.
 
 ```
 
-### `hasService()`
+### `bleDevice.hasService()`
 
 Query if the Bluetooth® Low Energy device has a particular service.
 
@@ -1748,7 +1748,7 @@ bleDevice.hasService(uuid, index)
 
 ```
 
-### `service()`
+### `bleDevice.service()`
 
 Get a BLEService representing a Bluetooth® Low Energy service the device provides.
 
@@ -1825,7 +1825,7 @@ bleDevice.service(uuid, index)
 
 ```
 
-### `characteristicCount()`
+### `bleDevice.characteristicCount()`
 
 Query the number of characteristics discovered for the Bluetooth® Low Energy device.
 
@@ -1896,7 +1896,7 @@ The **number of characteristics** discovered for the Bluetooth® Low Energy devi
 
 ```
 
-### `hasCharacteristic()`
+### `bleDevice.hasCharacteristic()`
 
 Query if the Bluetooth® Low Energy device has a particular characteristic.
 
@@ -1968,7 +1968,7 @@ bleDevice.hasCharacteristic(uuid, index)
 
 ```
 
-### `hasLocalName()`
+### `bleDevice.hasLocalName()`
 
 Query if a discovered Bluetooth® Low Energy device is advertising a local name.
 
@@ -2021,7 +2021,7 @@ Nothing
 
 ```
 
-### `hasAdvertisedServiceUuid()`
+### `bleDevice.hasAdvertisedServiceUuid()`
 
 Query if a discovered Bluetooth® Low Energy device is advertising a service UUID.
 
@@ -2079,7 +2079,7 @@ bleDevice.hasAdvertisedServiceUuid(index)
 
 ```
 
-### `advertisedServiceUuidCount()`
+### `bleDevice.advertisedServiceUuidCount()`
 
 Query the number of advertised services a discovered Bluetooth® Low Energy device is advertising.
 
@@ -2136,7 +2136,7 @@ The **number of advertised services** a discovered Bluetooth® Low Energy device
 
 ```
 
-### `localName()`
+### `bleDevice.localName()`
 
 Query the local name a discovered Bluetooth® Low Energy device is advertising with.
 
@@ -2189,7 +2189,7 @@ Nothing
 
 ```
 
-### `advertisedServiceUuid()`
+### `bleDevice.advertisedServiceUuid()`
 
 Query an advertised service UUID discovered Bluetooth® Low Energy device is advertising.
 
@@ -2247,7 +2247,7 @@ Advertised service **UUID** (as a String).
 
 ```
 
-### `connect()`
+### `bleDevice.connect()`
 
 Connect to a Bluetooth® Low Energy device.
 
@@ -2334,7 +2334,7 @@ BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Lo
 
 ```
 
-### `uuid()`
+### `bleService.uuid()`
 
 Query the UUID of the specified BLEService.
 
@@ -2366,7 +2366,7 @@ Serial.println(ledService.uuid());
 
 ```
 
-### `addCharacteristic()`
+### `bleService.addCharacteristic()`
 
 Add a BLECharateristic to the Bluetooth® Low Energy service.
 
@@ -2403,7 +2403,7 @@ ledService.addCharacteristic(switchCharacteristic);
 
 ```
 
-### `characteristicCount()`
+### `bleService.characteristicCount()`
 
 Query the number of characteristics discovered for the Bluetooth® Low Energy service.
 
@@ -2481,7 +2481,7 @@ The **number of characteristics** discovered for the Bluetooth® Low Energy serv
 
 ```
 
-### `hasCharacteristic()`
+### `bleService.hasCharacteristic()`
 
 Query if the Bluetooth® Low Energy service has a particular characteristic.
 
@@ -2559,7 +2559,7 @@ bleService.hasCharacteristic(uuid, index)
 
 ```
 
-### `characteristic()`
+### `bleService.characteristic()`
 
 Get a BLECharacteristic representing a Bluetooth® Low Energy characteristic the service provides.
 
@@ -2695,7 +2695,7 @@ BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit chara
 
 ```
 
-### `uuid()`
+### `bleCharacteristic.uuid()`
 
 Query the UUID of the specified BLECharacteristic.
 
@@ -2728,7 +2728,7 @@ Serial.println(switchCharacteristic.uuid());
 
 ```
 
-### `properties()`
+### `bleCharacteristic.properties()`
 
 Query the property mask of the specified BLECharacteristic.
 
@@ -2767,7 +2767,7 @@ if (properties & (BLEWrite | BLEWriteWithoutResponse)) {
 
 ```
 
-### `valueSize()`
+### `bleCharacteristic.valueSize()`
 
 Query the maximum value size of the specified BLECharacteristic.
 
@@ -2800,7 +2800,7 @@ Serial.println(switchCharacteristic.valueSize());
 
 ```
 
-### `value()`
+### `bleCharacteristic.value()`
 
 Query the current value of the specified BLECharacteristic.
 
@@ -2839,7 +2839,7 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
 
 ```
 
-### `valueLength()`
+### `bleCharacteristic.valueLength()`
 
 Query the current value size of the specified BLECharacteristic.
 
@@ -2872,7 +2872,7 @@ Serial.println(switchCharacteristic.valueLength());
 
 ```
 
-### `readValue()`
+### `bleCharacteristic.readValue()`
 
 Read the current value of the characteristic. If the characteristic is on a remote device, a read request will be sent.
 
@@ -2921,7 +2921,7 @@ Number of bytes read
 
 ```
 
-### `writeValue()`
+### `bleCharacteristic.writeValue()`
 
 Write the value of the characteristic. If the characteristic is on a remote device, a write request or command will be sent.
 
@@ -2969,7 +2969,7 @@ bleCharacteristic.writeValue(value)
 
 ```
 
-### `setEventHandler()`
+### `bleCharacteristic.setEventHandler()`
 
 Set the event handler (callback) function that will be called when the specified event occurs.
 
@@ -3020,7 +3020,7 @@ void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteri
 
 ```
 
-### `broadcast()`
+### `bleCharacteristic.broadcast()`
 
 Broadcast the characteristics value as service data when advertising.
 
@@ -3053,7 +3053,7 @@ buttonCharacteristic.broadcast();
 
 ```
 
-### `written()`
+### `bleCharacteristic.written()`
 
 Query if the characteristic value has been written by another Bluetooth® Low Energy device.
 
@@ -3115,7 +3115,7 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
 
 ```
 
-### `subscribed()`
+### `bleCharacteristic.subscribed()`
 
 Query if the characteristic has been subscribed to by another Bluetooth® Low Energy device.
 
@@ -3153,7 +3153,7 @@ BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit chara
 
 ```
 
-### `addDescriptor()`
+### `bleCharacteristic.addDescriptor()`
 
 Add a BLEDescriptor to the characteristic.
 
@@ -3190,7 +3190,7 @@ BLEDescriptor batteryLevelDescriptor("2901", "millis");
 
 ```
 
-### `descriptorCount`
+### `bleCharacteristic.descriptorCount`
 
 Query the number of Bluetooth® Low Energy descriptors discovered for the characteristic.
 
@@ -3222,7 +3222,7 @@ The **number of Bluetooth® Low Energy descriptors** discovered for the characte
 
 ```
 
-### `hasDescriptor`
+### `bleCharacteristic.hasDescriptor`
 
 Check if a characteristic has a particular descriptor.
 
@@ -3253,7 +3253,7 @@ bleCharacteristic.hasDescriptor(uuid, index)
 
 ```
 
-### `descriptor()`
+### `bleCharacteristic.descriptor()`
 
 Get a BLEDescriptor that represents a characteristics Bluetooth® Low Energy descriptor.
 
@@ -3285,7 +3285,7 @@ BLEDescriptor that represents a characteristics Bluetooth® Low Energy descripto
 
 ```
 
-### `canRead()`
+### `bleCharacteristic.canRead()`
 
 Query if a Bluetooth® Low Energy characteristic is readable.
 
@@ -3347,7 +3347,7 @@ None
 
 ```
 
-### `canWrite()`
+### `bleCharacteristic.canWrite()`
 
 Query if a Bluetooth® Low Energy characteristic is writable.
 
@@ -3376,7 +3376,7 @@ None
 
 ```
 
-### `canSubscribe()`
+### `bleCharacteristic.canSubscribe()`
 
 Query if a Bluetooth® Low Energy characteristic is subscribable.
 
@@ -3405,7 +3405,7 @@ None
 
 ```
 
-### `subscribe()`
+### `bleCharacteristic.subscribe()`
 
 Subscribe to a Bluetooth® Low Energy characteristics notification or indications.
 
@@ -3453,7 +3453,7 @@ None
 
 ```
 
-### `canUnsubscribe()`
+### `bleCharacteristic.canUnsubscribe()`
 
 Query if a Bluetooth® Low Energy characteristic is unsubscribable.
 
@@ -3482,7 +3482,7 @@ None
 
 ```
 
-### `unsubscribe()`
+### `bleCharacteristic.unsubscribe()`
 
 Unsubscribe to a Bluetooth® Low Energy characteristics notifications or indications.
 
@@ -3532,7 +3532,7 @@ None
 
 ```
 
-### `valueUpdated()`
+### `bleCharacteristic.valueUpdated()`
 
 Has the characteristics value been updated via a notification or indication.
 
@@ -3614,7 +3614,7 @@ BLEDescriptor millisLabelDescriptor("2901", "millis");
 
 ```
 
-### `uuid()`
+### `bleDescriptor.uuid()`
 
 Query the UUID of the specified BLEDescriptor.
 
@@ -3646,7 +3646,7 @@ Serial.println(millisLabelDescriptor.uuid());
 
 ```
 
-### `valueSize()`
+### `bleDescriptor.valueSize()`
 
 Query the value size of the specified BLEDescriptor.
 
@@ -3678,7 +3678,7 @@ Serial.println(millisLabelDescriptor.valueSize());
 
 ```
 
-### `valueLength()`
+### `bleDescriptor.valueLength()`
 
 Query the length, in bytes, of the descriptor current value.
 
@@ -3724,7 +3724,7 @@ None
 
 ```
 
-### `value()`
+### `bleDescriptor.value()`
 
 Query the value of the specified BLEDescriptor.
 
@@ -3761,7 +3761,7 @@ BLEDescriptor millisLabelDescriptor("2901", "millis");
 
 ```
 
-### `readValue()`
+### `bleDescriptor.readValue()`
 
 Read the current value of the descriptor. If the descriptor is on a remote device, a read request will be sent.
 
@@ -3795,7 +3795,7 @@ bleDescriptor.readValue(value)
 
 ```
 
-### `read()`
+### `bleDescriptor.read()`
 
 Perform a read request for the descriptor.
 
