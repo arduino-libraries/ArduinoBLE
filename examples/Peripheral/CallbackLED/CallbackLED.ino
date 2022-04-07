@@ -49,9 +49,9 @@ void setup() {
   // add service
   BLE.addService(ledService);
 
-  // assign event handlers for connected, disconnected to peripheral
-  BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
-  BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
+  // assign event handlers for connected, disconnected to central
+  BLE.setEventHandler(BLEConnected, bleCentralConnectedHandler);
+  BLE.setEventHandler(BLEDisconnected, bleCentralDisconnectedHandler);
 
   // assign event handlers for characteristic
   switchCharacteristic.setEventHandler(BLEWritten, switchCharacteristicWritten);
@@ -69,13 +69,13 @@ void loop() {
   BLE.poll();
 }
 
-void blePeripheralConnectHandler(BLEDevice central) {
+void bleCentralConnectedHandler(BLEDevice central) {
   // central connected event handler
   Serial.print("Connected event, central: ");
   Serial.println(central.address());
 }
 
-void blePeripheralDisconnectHandler(BLEDevice central) {
+void bleCentralDisconnectedHandler(BLEDevice central) {
   // central disconnected event handler
   Serial.print("Disconnected event, central: ");
   Serial.println(central.address());
