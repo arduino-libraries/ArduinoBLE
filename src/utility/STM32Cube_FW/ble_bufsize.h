@@ -1,11 +1,11 @@
 /*****************************************************************************
  * @file    ble_bufsize.h
- * @author  MCD
+ * @author  MDG
  * @brief   Definition of BLE stack buffers size
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2021 STMicroelectronics.
+ * Copyright (c) 2018-2022 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -97,28 +97,28 @@
  *   mentioned parameters.
 */
 #if (BEACON_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  4184   /* Beacon only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  4076   /* Beacon only */
 #elif (LL_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6068   /* LL only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  5936   /* LL only */
 #elif (SLAVE_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6096   /* Peripheral only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6204   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6400   /* Basic Features */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6532   /* Basic Features */
 #else
-#define BLE_FIXED_BUFFER_SIZE_BYTES  7312   /* Full stack */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  7052   /* Full stack */
 #endif
 
 /*
  * BLE_PER_LINK_SIZE_BYTES: additional memory size used per link
  */
 #if (BEACON_ONLY != 0)
-#define BLE_PER_LINK_SIZE_BYTES       192   /* Beacon only */
+#define BLE_PER_LINK_SIZE_BYTES       128   /* Beacon only */
 #elif (LL_ONLY != 0)
 #define BLE_PER_LINK_SIZE_BYTES       260   /* LL only */
 #elif (SLAVE_ONLY != 0)
-#define BLE_PER_LINK_SIZE_BYTES       388   /* Peripheral only */
+#define BLE_PER_LINK_SIZE_BYTES       392   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)
-#define BLE_PER_LINK_SIZE_BYTES       388   /* Basic Features */
+#define BLE_PER_LINK_SIZE_BYTES       440   /* Basic Features */
 #else
 #define BLE_PER_LINK_SIZE_BYTES       444   /* Full stack */
 #endif
@@ -141,10 +141,17 @@
 /*
  * BLE_EXT_ADV_BUFFER_SIZE
  * additional memory size used for Extended advertising;
- * It has to be added to BLE_TOTAL_BUFFER_SIZE().
- * The formula used is based on:(1792 + ((set_nbr) * (60 + (2 * (data_len)))))
+ * It has to be added to BLE_TOTAL_BUFFER_SIZE() if the Extended advertising
+ * feature is used.
+ *
+ * @param set_nbr: Maximum number of advertising sets.
+ * Valid values are from 1 to 8.
+ *
+ * @param data_len: Maximum size of advertising data.
+ * Valid values are from 31 to 1650.
  */
-#define BLE_EXT_ADV_BUFFER_SIZE(set_nbr, data_len) (7596)
+#define BLE_EXT_ADV_BUFFER_SIZE(set_nbr, data_len) \
+          (2304 + ((892 + (DIVC(data_len, 207) * 244)) * (set_nbr)))
 
 /*
  * BLE_TOTAL_BUFFER_SIZE_GATT: this macro returns the amount of memory,

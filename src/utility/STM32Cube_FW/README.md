@@ -1,6 +1,6 @@
 
 ## Source
 
-[STMicroelectronics/STM32CubeWB Release v1.13.0](https://github.com/STMicroelectronics/STM32CubeWB/releases/tag/v1.13.0)
-- Application: [BLE_TransparentMode](https://github.com/STMicroelectronics/STM32CubeWB/tree/v1.13.0/Projects/P-NUCLEO-WB55.Nucleo/Applications/BLE/BLE_TransparentMode)
+[STMicroelectronics/STM32CubeWB Release v1.13.3](https://github.com/STMicroelectronics/STM32CubeWB/releases/tag/v1.13.3)
+- Application: [BLE_TransparentMode](https://github.com/STMicroelectronics/STM32CubeWB/tree/v1.13.3/Projects/P-NUCLEO-WB55.Nucleo/Applications/BLE/BLE_TransparentMode)
 

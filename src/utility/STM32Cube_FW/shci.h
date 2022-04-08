@@ -526,7 +526,7 @@ extern "C" {
    * - bit 0:   1: LL only                          0: LL + host
    * - bit 1:   1: no service change desc.          0: with service change desc.
    * - bit 2:   1: device name Read-Only            0: device name R/W
-   * - bit 3:   1: extended advertizing supported   0: extended advertizing not supported   [NOT SUPPORTED]
+   * - bit 3:   1: extended advertizing supported   0: extended advertizing not supported
    * - bit 4:   1: CS Algo #2 supported             0: CS Algo #2 not supported
    * - bit 7:   1: LE Power Class 1                 0: LE Power Classe 2-3
    * - other bits: reserved ( shall be set to 0)
@@ -585,8 +585,8 @@ extern "C" {
 #define SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO                       (1<<2)
 #define SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW                       (0<<2)
 
-#define SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV                              (1<<3)   /*NOT SUPPORTED*/
-#define SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV                           (0<<3)   /*NOT SUPPORTED*/
+#define SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV                              (1<<3)
+#define SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV                           (0<<3)
 
 #define SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2                             (1<<4)
 #define SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2                          (0<<4)
@@ -856,6 +856,9 @@ extern "C" {
 #define INFO_STACK_TYPE_BLE_HCI                     0x02
 #define INFO_STACK_TYPE_BLE_LIGHT                   0x03
 #define INFO_STACK_TYPE_BLE_BEACON                  0x04
+#define INFO_STACK_TYPE_BLE_BASIC                   0x05
+#define INFO_STACK_TYPE_BLE_FULL_EXT_ADV            0x06
+#define INFO_STACK_TYPE_BLE_HCI_EXT_ADV             0x07
 #define INFO_STACK_TYPE_THREAD_FTD                  0x10
 #define INFO_STACK_TYPE_THREAD_MTD                  0x11
 #define INFO_STACK_TYPE_BLE_THREAD_FTD_STATIC       0x50
