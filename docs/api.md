@@ -3190,7 +3190,7 @@ BLEDescriptor batteryLevelDescriptor("2901", "millis");
 
 ```
 
-### `bleCharacteristic.descriptorCount`
+### `bleCharacteristic.descriptorCount()`
 
 Query the number of Bluetooth® Low Energy descriptors discovered for the characteristic.
 
@@ -3222,7 +3222,7 @@ The **number of Bluetooth® Low Energy descriptors** discovered for the characte
 
 ```
 
-### `bleCharacteristic.hasDescriptor`
+### `bleCharacteristic.hasDescriptor()`
 
 Check if a characteristic has a particular descriptor.
 
