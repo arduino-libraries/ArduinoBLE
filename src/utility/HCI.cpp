@@ -627,6 +627,10 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
         uint16_t supervisionTimeout;
         uint8_t masterClockAccuracy;
       } *leConnectionComplete = (EvtLeConnectionComplete*)&pdata[sizeof(HCIEventHdr) + sizeof(LeMetaEventHeader)];
+
+      // CLIENT: 0x01 / PERIPHERAL: 0x00
+      Serial.println("role:");
+      Serial.println(leConnectionComplete->role);
     
       if (leConnectionComplete->status == 0x00) {
         ATT.addConnection(leConnectionComplete->handle,

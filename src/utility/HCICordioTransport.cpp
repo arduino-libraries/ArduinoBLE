@@ -287,6 +287,8 @@ size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
 void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
 {
   if (_rxBuf.availableForStore() < len) {
+    // This drop can cause many problems
+    Serial.println("DROP");
     // drop!
     return;
   }
