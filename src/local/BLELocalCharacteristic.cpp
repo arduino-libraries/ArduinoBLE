@@ -62,7 +62,7 @@ BLELocalCharacteristic::~BLELocalCharacteristic()
   for (unsigned int i = 0; i < descriptorCount(); i++) {
     BLELocalDescriptor* d = descriptor(i);
 
-    if (d->release() <= 0) {
+    if (d->release() == 0) {
       delete d;
     }
   }

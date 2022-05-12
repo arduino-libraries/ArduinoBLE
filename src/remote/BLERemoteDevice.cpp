@@ -50,7 +50,7 @@ void BLERemoteDevice::clearServices()
   for (unsigned int i = 0; i < serviceCount(); i++) {
     BLERemoteService* s = service(i);
 
-    if (s->release() <= 0) {
+    if (s->release() == 0) {
       delete s;
     }
   }
