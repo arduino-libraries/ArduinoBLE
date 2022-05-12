@@ -31,7 +31,7 @@ BLERemoteService::~BLERemoteService()
   for (unsigned int i = 0; i < characteristicCount(); i++) {
     BLERemoteCharacteristic* c = characteristic(i);
 
-    if (c->release() <= 0) {
+    if (c->release() == 0) {
       delete c;
     }
   }

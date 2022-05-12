@@ -179,7 +179,7 @@ void GATTClass::clearAttributes()
   for (unsigned int i = 0; i < attributeCount(); i++) {
     BLELocalAttribute* a = attribute(i);
 
-    if (a->release() <= 0) {
+    if (a->release() == 0) {
       delete a;
     }
   }
