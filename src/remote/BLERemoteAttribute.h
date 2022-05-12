@@ -21,7 +21,10 @@
 #define _BLE_REMOTE_ATTRIBUTE_H_
 
 #include <Arduino.h>
+
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
 #include <map>
+#endif
 
 class BLERemoteAttribute
 {
@@ -36,7 +39,10 @@ public:
 
 private:
   String _uuid;
+
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
   static std::map<BLERemoteAttribute*,int> _refCount;
+#endif
 };
 
 #endif

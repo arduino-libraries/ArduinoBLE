@@ -21,7 +21,9 @@
 
 #include "BLERemoteAttribute.h"
 
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
 std::map<BLERemoteAttribute*,int> BLERemoteAttribute::_refCount;
+#endif
 
 BLERemoteAttribute::BLERemoteAttribute(const uint8_t uuid[], uint8_t uuidLen) :
   _uuid(BLEUuid::uuidToString(uuid, uuidLen))
@@ -39,15 +41,21 @@ const char* BLERemoteAttribute::uuid() const
 
 int BLERemoteAttribute::retain()
 {
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
   _refCount[this]++;
-
   return _refCount[this];
+#else
+  return -1;
+#endif
 }
 
 int BLERemoteAttribute::release()
 {
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
   _refCount[this]--;
   if (_refCount[this] == 0) _refCount.erase(this);
-
   return _refCount[this];
+#else
+  return -1;
+#endif
 }

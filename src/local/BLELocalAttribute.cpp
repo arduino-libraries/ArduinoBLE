@@ -19,7 +19,9 @@
 
 #include "BLELocalAttribute.h"
 
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
 std::map<BLELocalAttribute*,int> BLELocalAttribute::_refCount;
+#endif
 
 BLELocalAttribute::BLELocalAttribute(const char* uuid) :
   _uuid(uuid)
@@ -52,15 +54,21 @@ enum BLEAttributeType BLELocalAttribute::type() const
 
 int BLELocalAttribute::retain()
 {
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
   _refCount[this]++;
-
   return _refCount[this];
+#else
+  return -1;
+#endif
 }
 
 int BLELocalAttribute::release()
 {
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
   _refCount[this]--;
   if (_refCount[this] == 0) _refCount.erase(this);
-
   return _refCount[this];
+#else
+  return -1;
+#endif
 }

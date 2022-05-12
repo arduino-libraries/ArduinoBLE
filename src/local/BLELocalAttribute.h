@@ -22,7 +22,9 @@
 
 #include "utility/BLEUuid.h"
 
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
 #include <map>
+#endif
 
 #define BLE_ATTRIBUTE_TYPE_SIZE 2
 
@@ -56,7 +58,10 @@ protected:
 
 private:
   BLEUuid _uuid;
+
+#ifndef ARDUINO_AVR_UNO_WIFI_REV2
   static std::map<BLELocalAttribute*,int> _refCount;
+#endif
 };
 
 #endif
