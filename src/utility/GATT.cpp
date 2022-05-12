@@ -70,7 +70,12 @@ void GATTClass::begin()
 
 void GATTClass::end()
 {
-  _attributes.clear();
+  delete(_genericAccessService);
+  delete(_deviceNameCharacteristic);
+  delete(_appearanceCharacteristic);
+  delete(_genericAttributeService);
+  delete(_servicesChangedCharacteristic);
+  clearAttributes();
 }
 
 void GATTClass::setDeviceName(const char* deviceName)
