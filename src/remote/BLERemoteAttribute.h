@@ -21,6 +21,7 @@
 #define _BLE_REMOTE_ATTRIBUTE_H_
 
 #include <Arduino.h>
+#include <map>
 
 class BLERemoteAttribute
 {
@@ -35,7 +36,7 @@ public:
 
 private:
   String _uuid;
-  int _refCount;
+  static std::map<BLERemoteAttribute*,int> _refCount;
 };
 
 #endif

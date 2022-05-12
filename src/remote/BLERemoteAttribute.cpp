@@ -21,9 +21,10 @@
 
 #include "BLERemoteAttribute.h"
 
+std::map<BLERemoteAttribute*,int> BLERemoteAttribute::_refCount;
+
 BLERemoteAttribute::BLERemoteAttribute(const uint8_t uuid[], uint8_t uuidLen) :
-  _uuid(BLEUuid::uuidToString(uuid, uuidLen)),
-  _refCount(0)
+  _uuid(BLEUuid::uuidToString(uuid, uuidLen))
 {
 }
 
@@ -38,14 +39,15 @@ const char* BLERemoteAttribute::uuid() const
 
 int BLERemoteAttribute::retain()
 {
-  _refCount++;
+  _refCount[this]++;
 
-  return _refCount;
+  return _refCount[this];
 }
 
 int BLERemoteAttribute::release()
 {
-  _refCount--;
+  _refCount[this]--;
+  if (_refCount[this] == 0) _refCount.erase(this);
 
-  return _refCount;
+  return _refCount[this];
 }

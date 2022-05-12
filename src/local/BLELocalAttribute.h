@@ -22,6 +22,8 @@
 
 #include "utility/BLEUuid.h"
 
+#include <map>
+
 #define BLE_ATTRIBUTE_TYPE_SIZE 2
 
 enum BLEAttributeType {
@@ -54,7 +56,7 @@ protected:
 
 private:
   BLEUuid _uuid;
-  int _refCount;
+  static std::map<BLELocalAttribute*,int> _refCount;
 };
 
 #endif

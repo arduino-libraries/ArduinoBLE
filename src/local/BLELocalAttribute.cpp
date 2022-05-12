@@ -19,9 +19,10 @@
 
 #include "BLELocalAttribute.h"
 
+std::map<BLELocalAttribute*,int> BLELocalAttribute::_refCount;
+
 BLELocalAttribute::BLELocalAttribute(const char* uuid) :
-  _uuid(uuid),
-  _refCount(0)
+  _uuid(uuid)
 {
 }
 
@@ -51,14 +52,15 @@ enum BLEAttributeType BLELocalAttribute::type() const
 
 int BLELocalAttribute::retain()
 {
-  _refCount++;
+  _refCount[this]++;
 
-  return _refCount;
+  return _refCount[this];
 }
 
 int BLELocalAttribute::release()
 {
-  _refCount--;
+  _refCount[this]--;
+  if (_refCount[this] == 0) _refCount.erase(this);
 
-  return _refCount;
+  return _refCount[this];
 }
