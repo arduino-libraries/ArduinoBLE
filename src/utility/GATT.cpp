@@ -38,7 +38,7 @@ GATTClass::GATTClass() :
 
 GATTClass::~GATTClass()
 {
-  clearAttributes();
+  end();
 }
 
 void GATTClass::begin()
