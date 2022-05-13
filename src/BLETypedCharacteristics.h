@@ -24,72 +24,72 @@
 
 class BLEBoolCharacteristic : public BLETypedCharacteristic<bool> {
 public:
-  BLEBoolCharacteristic(const char* uuid, unsigned char properties);
+  BLEBoolCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEBooleanCharacteristic : public BLETypedCharacteristic<bool> {
 public:
-  BLEBooleanCharacteristic(const char* uuid, unsigned char properties);
+  BLEBooleanCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLECharCharacteristic : public BLETypedCharacteristic<char> {
 public:
-  BLECharCharacteristic(const char* uuid, unsigned char properties);
+  BLECharCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEUnsignedCharCharacteristic : public BLETypedCharacteristic<unsigned char> {
 public:
-  BLEUnsignedCharCharacteristic(const char* uuid, unsigned char properties);
+  BLEUnsignedCharCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEByteCharacteristic : public BLETypedCharacteristic<byte> {
 public:
-  BLEByteCharacteristic(const char* uuid, unsigned char properties);
+  BLEByteCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEShortCharacteristic : public BLETypedCharacteristic<short> {
 public:
-  BLEShortCharacteristic(const char* uuid, unsigned char properties);
+  BLEShortCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEUnsignedShortCharacteristic : public BLETypedCharacteristic<unsigned short> {
 public:
-  BLEUnsignedShortCharacteristic(const char* uuid, unsigned char properties);
+  BLEUnsignedShortCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEWordCharacteristic : public BLETypedCharacteristic<word> {
 public:
-  BLEWordCharacteristic(const char* uuid, unsigned char properties);
+  BLEWordCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEIntCharacteristic : public BLETypedCharacteristic<int> {
 public:
-  BLEIntCharacteristic(const char* uuid, unsigned char properties);
+  BLEIntCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEUnsignedIntCharacteristic : public BLETypedCharacteristic<unsigned int> {
 public:
-  BLEUnsignedIntCharacteristic(const char* uuid, unsigned char properties);
+  BLEUnsignedIntCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLELongCharacteristic : public BLETypedCharacteristic<long> {
 public:
-  BLELongCharacteristic(const char* uuid, unsigned char properties);
+  BLELongCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEUnsignedLongCharacteristic : public BLETypedCharacteristic<unsigned long> {
 public:
-  BLEUnsignedLongCharacteristic(const char* uuid, unsigned char properties);
+  BLEUnsignedLongCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEFloatCharacteristic : public BLETypedCharacteristic<float> {
 public:
-  BLEFloatCharacteristic(const char* uuid, unsigned char properties);
+  BLEFloatCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 class BLEDoubleCharacteristic : public BLETypedCharacteristic<double> {
 public:
-  BLEDoubleCharacteristic(const char* uuid, unsigned char properties);
+  BLEDoubleCharacteristic(const char* uuid, unsigned int permissions);
 };
 
 #endif
