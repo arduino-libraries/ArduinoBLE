@@ -234,7 +234,10 @@ void HCICordioTransportClass::end()
     delete bleLoopThread;
     bleLoopThread = NULL;
   }
+
+#if !defined(ARDUINO_PORTENTA_H7_M4) && !defined(ARDUINO_PORTENTA_H7_M7) && !defined(ARDUINO_NICLA_VISION)
   CordioHCIHook::getDriver().terminate();
+#endif
 
   _begun = false;
 }
