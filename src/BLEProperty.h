@@ -63,10 +63,10 @@ enum BLEPermission {
 #define    ESP_GATT_PERM_WRITE_AUTHORIZATION   (1 << 10)  /* bit 10 - 0x0400 */
 
 enum BLE_GATT_PERM_ {
-  READ                = 1 << 0,
+  BLE_GATT_READ       = 1 << 0,
   READ_ENCRYPTED      = 1 << 1,
   READ_ENC_MITM       = 1 << 2,
-  WRITE               = 1 << 4,
+  BLE_GATT_WRITE      = 1 << 4,
   WRITE_ENCRYPTED     = 1 << 5,
   WRITE_ENC_MITM      = 1 << 6,
   WRITE_SIGNED        = 1 << 7,
