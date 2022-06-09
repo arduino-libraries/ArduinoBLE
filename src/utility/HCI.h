@@ -35,7 +35,7 @@ enum LE_COMMAND {
   ENCRYPT                      = 0x0017,
   RANDOM                       = 0x0018,
   LONG_TERM_KEY_REPLY          = 0x001A,
-  LONG_TERM_KEY_NEGATIVE_REPLY = 0x1B,
+  LONG_TERM_KEY_NEGATIVE_REPLY = 0x001B,
   READ_LOCAL_P256              = 0x0025,
   GENERATE_DH_KEY_V1           = 0x0026,
   GENERATE_DH_KEY_V2           = 0x005E
