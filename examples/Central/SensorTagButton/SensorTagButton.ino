@@ -1,7 +1,7 @@
 /*
   SensorTag Button
 
-  This example scans for BLE peripherals until a TI SensorTag is discovered.
+  This example scans for Bluetooth® Low Energy peripherals until a TI SensorTag is discovered.
   It then connects to it, discovers the attributes of the 0xffe0 service,
   subscribes to the Simple Key Characteristic (UUID 0xffe1). When a button is
   pressed on the SensorTag a notification is received and the button state is
@@ -23,12 +23,12 @@ void setup() {
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
 
-  Serial.println("BLE Central - SensorTag button");
+  Serial.println("Bluetooth® Low Energy Central - SensorTag button");
   Serial.println("Make sure to turn on the device.");
 
   // start scanning for peripheral

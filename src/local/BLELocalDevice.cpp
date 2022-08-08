@@ -29,6 +29,10 @@
 #ifndef BT_REG_ON
 #define BT_REG_ON PJ_12
 #endif
+#elif defined(ARDUINO_NICLA_VISION)
+#ifndef BT_REG_ON
+#define BT_REG_ON PF_14
+#endif
 #endif
 
 BLELocalDevice::BLELocalDevice()
@@ -61,7 +65,7 @@ int BLELocalDevice::begin()
   delay(100);
   digitalWrite(NINA_RESETN, HIGH);
   delay(750);
-#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
+#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION)
   // BT_REG_ON -> HIGH
   pinMode(BT_REG_ON, OUTPUT);
   digitalWrite(BT_REG_ON, HIGH);
@@ -108,6 +112,10 @@ int BLELocalDevice::begin()
     end();
     return 0;
   }
+  if (HCI.setLeEventMask(0x00000000000003FF) != 0) {
+    end();
+    return 0;
+  }
 
   uint16_t pktLen;
   uint8_t maxPkt;
@@ -116,6 +124,59 @@ int BLELocalDevice::begin()
     end();
     return 0;
   }
+
+  /// The HCI should allow automatic address resolution.
+
+  // // If we have callbacks to remember bonded devices:
+  // if(HCI._getIRKs!=0){
+  //   uint8_t nIRKs = 0;
+  //   uint8_t** BADDR_Type = new uint8_t*;
+  //   uint8_t*** BADDRs = new uint8_t**;
+  //   uint8_t*** IRKs = new uint8_t**;
+  //   uint8_t* memcheck;
+
+
+  //   if(!HCI._getIRKs(&nIRKs, BADDR_Type, BADDRs, IRKs)){
+  //     Serial.println("error");
+  //   }
+  //   for(int i=0; i<nIRKs; i++){
+  //     Serial.print("Baddr type: ");
+  //     Serial.println((*BADDR_Type)[i]);
+  //     Serial.print("BADDR:");
+  //     for(int k=0; k<6; k++){
+  //       Serial.print(", 0x");
+  //       Serial.print((*BADDRs)[i][k],HEX);
+  //     }
+  //     Serial.println();
+  //     Serial.print("IRK:");
+  //     for(int k=0; k<16; k++){
+  //       Serial.print(", 0x");
+  //       Serial.print((*IRKs)[i][k],HEX);
+  //     }
+  //     Serial.println();
+
+  //     // save this 
+  //     uint8_t zeros[16];
+  //     for(int k=0; k<16; k++) zeros[15-k] = 0;
+      
+  //     // HCI.leAddResolvingAddress((*BADDR_Type)[i],(*BADDRs)[i],(*IRKs)[i], zeros);
+
+  //     delete[] (*BADDRs)[i];
+  //     delete[] (*IRKs)[i];
+  //   }
+  //   delete[] (*BADDR_Type);
+  //   delete BADDR_Type;
+  //   delete[] (*BADDRs);
+  //   delete BADDRs;
+  //   delete[] (*IRKs);
+  //   delete IRKs;
+    
+  //   memcheck = new uint8_t[1];
+  //   Serial.print("nIRK location: 0x");
+  //   Serial.println((int)memcheck,HEX);
+  //   delete[] memcheck;
+
+  // }
 
   GATT.begin();
 
@@ -134,8 +195,7 @@ void BLELocalDevice::end()
 #elif defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
   // disable the NINA
   digitalWrite(NINA_RESETN, LOW);
-#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7)
-  // BT_REG_ON -> LOW
+#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION)
   digitalWrite(BT_REG_ON, LOW);
 #endif
 }
@@ -155,6 +215,16 @@ bool BLELocalDevice::connected() const
   HCI.poll();
 
   return ATT.connected();
+}
+
+/*
+ * Whether there is at least one paired device
+ */
+bool BLELocalDevice::paired()
+{
+  HCI.poll();
+
+  return ATT.paired();
 }
 
 bool BLELocalDevice::disconnect()
@@ -336,6 +406,42 @@ void BLELocalDevice::setConnectable(bool connectable)
 void BLELocalDevice::setTimeout(unsigned long timeout)
 {
   ATT.setTimeout(timeout);
+}
+
+/*
+ * Control whether pairing is allowed or rejected
+ * Use true/false or the Pairable enum
+ */
+void BLELocalDevice::setPairable(uint8_t pairable)
+{
+  L2CAPSignaling.setPairingEnabled(pairable);
+}
+
+/*
+ * Whether pairing is currently allowed
+ */
+bool BLELocalDevice::pairable()
+{
+  return L2CAPSignaling.isPairingEnabled();
+}
+
+void BLELocalDevice::setGetIRKs(int (*getIRKs)(uint8_t* nIRKs, uint8_t** BADDR_type, uint8_t*** BADDRs, uint8_t*** IRKs)){
+  HCI._getIRKs = getIRKs;
+}
+void BLELocalDevice::setGetLTK(int (*getLTK)(uint8_t* BADDR, uint8_t* LTK)){
+  HCI._getLTK = getLTK;
+}
+void BLELocalDevice::setStoreLTK(int (*storeLTK)(uint8_t*, uint8_t*)){
+  HCI._storeLTK = storeLTK;
+}
+void BLELocalDevice::setStoreIRK(int (*storeIRK)(uint8_t*, uint8_t*)){
+  HCI._storeIRK = storeIRK;
+}
+void BLELocalDevice::setDisplayCode(void (*displayCode)(uint32_t confirmationCode)){
+  HCI._displayCode = displayCode;
+}
+void BLELocalDevice::setBinaryConfirmPairing(bool (*binaryConfirmPairing)()){
+  HCI._binaryConfirmPairing = binaryConfirmPairing;
 }
 
 void BLELocalDevice::debug(Stream& stream)

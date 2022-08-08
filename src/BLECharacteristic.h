@@ -45,8 +45,8 @@ class BLERemoteCharacteristic;
 class BLECharacteristic  {
 public:
   BLECharacteristic();
-  BLECharacteristic(const char* uuid, uint8_t properties, int valueSize, bool fixedLength = false);
-  BLECharacteristic(const char* uuid, uint8_t properties, const char* value);
+  BLECharacteristic(const char* uuid, uint16_t permissions, int valueSize, bool fixedLength = false);
+  BLECharacteristic(const char* uuid, uint16_t permissions, const char* value);
   BLECharacteristic(const BLECharacteristic& other);
   virtual ~BLECharacteristic();
 

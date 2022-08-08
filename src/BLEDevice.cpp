@@ -184,6 +184,70 @@ String BLEDevice::advertisedServiceUuid(int index) const
   return serviceUuid;
 }
 
+bool BLEDevice::hasAdvertisementData() const
+{
+  return (_eirDataLength > 0);
+}
+
+int BLEDevice::advertisementDataLength() const
+{
+  return _eirDataLength;
+}
+
+int BLEDevice::advertisementData(uint8_t value[], int length) const
+{
+  if (length > _eirDataLength) length = _eirDataLength;
+
+  if (length) {
+    memcpy(value, _eirData, length);
+  }
+
+  return length;
+}
+
+bool BLEDevice::hasManufacturerData() const
+{
+  return (manufacturerDataLength() > 0);
+}
+
+int BLEDevice::manufacturerDataLength() const
+{
+  int length = 0;
+
+  for (int i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+
+    if (eirType == 0xFF) {
+      length = (eirLength - 1);
+      break;
+    }
+
+    i += (eirLength - 1);
+  }
+
+  return length;
+}
+
+int BLEDevice::manufacturerData(uint8_t value[], int length) const
+{
+  for (int i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+
+    if (eirType == 0xFF) {
+      if (length > (eirLength - 1)) length = (eirLength - 1);
+
+      memcpy(value, &_eirData[i], length);
+      break;
+    }
+
+    i += (eirLength - 1);
+  }
+
+  return length;
+}
+
 int BLEDevice::rssi()
 {
   uint16_t handle = ATT.connectionHandle(_addressType, _address);

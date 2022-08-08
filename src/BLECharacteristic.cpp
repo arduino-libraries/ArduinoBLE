@@ -47,13 +47,13 @@ BLECharacteristic::BLECharacteristic(BLERemoteCharacteristic* remote) :
   }
 }
 
-BLECharacteristic::BLECharacteristic(const char* uuid, uint8_t properties, int valueSize, bool fixedLength) :
-  BLECharacteristic(new BLELocalCharacteristic(uuid, properties, valueSize, fixedLength))
+BLECharacteristic::BLECharacteristic(const char* uuid, uint16_t permissions, int valueSize, bool fixedLength) :
+  BLECharacteristic(new BLELocalCharacteristic(uuid, permissions, valueSize, fixedLength))
 {
 }
 
-BLECharacteristic::BLECharacteristic(const char* uuid, uint8_t properties, const char* value) :
-  BLECharacteristic(new BLELocalCharacteristic(uuid, properties, value))
+BLECharacteristic::BLECharacteristic(const char* uuid, uint16_t permissions, const char* value) :
+  BLECharacteristic(new BLELocalCharacteristic(uuid, permissions, value))
 {
 }
 
@@ -72,11 +72,11 @@ BLECharacteristic::BLECharacteristic(const BLECharacteristic& other)
 
 BLECharacteristic::~BLECharacteristic()
 {
-  if (_local && _local->release() <= 0) {
+  if (_local && _local->release() == 0) {
     delete _local;
   }
 
-  if (_remote && _remote->release() <= 0) {
+  if (_remote && _remote->release() == 0) {
     delete _remote;
   }
 }

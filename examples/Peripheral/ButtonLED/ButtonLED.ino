@@ -1,7 +1,7 @@
 /*
   Button LED
 
-  This example creates a BLE peripheral with service that contains a
+  This example creates a Bluetooth® Low Energy peripheral with service that contains a
   characteristic to control an LED and another characteristic that
   represents the state of the button.
 
@@ -10,7 +10,7 @@
     Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
   - Button connected to pin 4
 
-  You can use a generic BLE central app, like LightBlue (iOS and Android) or
+  You can use a generic Bluetooth® Low Energy central app, like LightBlue (iOS and Android) or
   nRF Connect (Android), to interact with the services and characteristics
   created in this sketch.
 
@@ -38,7 +38,7 @@ void setup() {
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
@@ -61,18 +61,18 @@ void setup() {
   // start advertising
   BLE.advertise();
 
-  Serial.println("Bluetooth device active, waiting for connections...");
+  Serial.println("Bluetooth® device active, waiting for connections...");
 }
 
 void loop() {
-  // poll for BLE events
+  // poll for Bluetooth® Low Energy events
   BLE.poll();
 
   // read the current button pin state
   char buttonValue = digitalRead(buttonPin);
 
   // has the value changed since the last read
-  boolean buttonChanged = (buttonCharacteristic.value() != buttonValue);
+  bool buttonChanged = (buttonCharacteristic.value() != buttonValue);
 
   if (buttonChanged) {
     // button state changed, update characteristics

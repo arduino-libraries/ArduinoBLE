@@ -24,5 +24,6 @@
 #include "BLEProperty.h"
 #include "BLEStringCharacteristic.h"
 #include "BLETypedCharacteristics.h"
+#include "utility/btct.h"
 
 #endif

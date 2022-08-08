@@ -25,7 +25,7 @@
 template<typename T> class BLETypedCharacteristic : public BLECharacteristic
 {
 public:
-  BLETypedCharacteristic(const char* uuid, unsigned char properties);
+  BLETypedCharacteristic(const char* uuid, unsigned int permissions);
 
   int writeValue(T value);
   int setValue(T value) { return writeValue(value); }
@@ -43,8 +43,8 @@ private:
   T byteSwap(T value);
 };
 
-template<typename T> BLETypedCharacteristic<T>::BLETypedCharacteristic(const char* uuid, unsigned char properties) :
-  BLECharacteristic(uuid, properties, sizeof(T), true)
+template<typename T> BLETypedCharacteristic<T>::BLETypedCharacteristic(const char* uuid, unsigned int permissions) :
+  BLECharacteristic(uuid, permissions, sizeof(T), true)
 {
   T value;
   memset(&value, 0x00, sizeof(value));

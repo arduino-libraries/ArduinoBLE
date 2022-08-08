@@ -1,7 +1,7 @@
 /*
   Peripheral Explorer
 
-  This example scans for BLE peripherals until one with a particular name ("LED")
+  This example scans for Bluetooth® Low Energy peripherals until one with a particular name ("LED")
   is found. Then connects, and discovers + prints all the peripheral's attributes.
 
   The circuit:
@@ -22,12 +22,12 @@ void setup() {
 
   // begin initialization
   if (!BLE.begin()) {
-    Serial.println("starting BLE failed!");
+    Serial.println("starting Bluetooth® Low Energy module failed!");
 
     while (1);
   }
 
-  Serial.println("BLE Central - Peripheral Explorer");
+  Serial.println("Bluetooth® Low Energy Central - Peripheral Explorer");
 
   // start scanning for peripherals
   BLE.scan();

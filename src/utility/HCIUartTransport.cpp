@@ -27,7 +27,7 @@
 // SerialHCI is already defined in the variant
 #elif defined(ARDUINO_PORTENTA_H7_M4)
 // SerialHCI is already defined in the variant
-#elif defined(ARDUINO_PORTENTA_H7_M7)
+#elif defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION)
 #define SerialHCI Serial2
 #else
 #error "Unsupported board selected!"
