@@ -113,6 +113,11 @@ int HCISpiTransportClass::available()
 
     data_avail = 0;
 
+    // Wait for BlueNRG-LP to be ready (needs to be done after each HCI RESET)
+    if (_ble_chip == BLUENRG_LP && _initial_phase) {
+      delay(100);
+    }
+
     while (digitalRead(_spi_irq) == 1 && _write_index != BLE_MODULE_SPI_BUFFER_SIZE) {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
