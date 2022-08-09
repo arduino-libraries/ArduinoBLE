@@ -940,8 +940,16 @@ void HCISpiTransportClass::wait_for_aci_gap_init()
 void HCISpiTransportClass::aci_gap_init()
 {
   uint8_t header_master[5] = {0x0a, 0x00, 0x00, 0x00, 0x00};
-  uint8_t cmd[7] = {0x01, 0x8A, 0xFC, 0x03, 0x0F, 0x00, 0x00}; // ACI_GAP_INIT
-  uint8_t cmd_lp[8] = {0x01, 0x8A, 0xFC, 0x04, 0x0F, 0x00, 0x00, 0x00}; // ACI_GAP_INIT for BlueNRG-LP
+  uint8_t cmd_lp[8] = {0x01, 0x8A, 0xFC, 0x04, 0x0F, 0x00, 0x00, 0x00}; // ACI_GAP_INIT
+  uint8_t cmd_others[7] = {0x01, 0x8A, 0xFC, 0x03, 0x0F, 0x00, 0x00}; // ACI_GAP_INIT
+  uint8_t *cmd, cmd_size;
+  if (_ble_chip == BLUENRG_LP) {
+    cmd = cmd_lp;
+    cmd_size = 8;
+  } else {
+    cmd = cmd_others;
+    cmd_size = 7;
+  }
   int result = 0;
 
   do {
@@ -958,9 +966,9 @@ void HCISpiTransportClass::aci_gap_init()
       /* device is ready */
       if (header_master[0] == 0x02) {
         /* Write the data */
-        if (header_master[1] >= 7) {
+        if (header_master[1] >= cmd_size) {
           /* Write the data */
-          _spi->transfer((void *)cmd, 7);
+          _spi->transfer((void *)cmd, cmd_size);
         } else {
           result = -2;
         }
@@ -971,7 +979,7 @@ void HCISpiTransportClass::aci_gap_init()
       digitalWrite(_cs_pin, HIGH);
 
       _spi->endTransaction();
-    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
       uint32_t tickstart_data_available = millis();
       result = 0;
 
@@ -998,48 +1006,9 @@ void HCISpiTransportClass::aci_gap_init()
       /* Write the header */
       _spi->transfer(header_master, 5);
 
-      if ((int)((((uint16_t)header_master[2]) << 8) | ((uint16_t)header_master[1])) >= 7) {
+      if ((int)((((uint16_t)header_master[2]) << 8) | ((uint16_t)header_master[1])) >= cmd_size) {
         /* Write the data */
-        _spi->transfer((void *)cmd, 7);
-      } else {
-        result = -2;
-      }
-
-      digitalWrite(_cs_pin, HIGH);
-
-      _spi->endTransaction();
-
-      attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
-    } else if (_ble_chip == BLUENRG_LP) {
-      uint32_t tickstart_data_available = millis();
-      result = 0;
-
-      detachInterrupt(_spi_irq);
-
-      _spi->beginTransaction(_spiSettings);
-
-      digitalWrite(_cs_pin, LOW);
-
-      while (!(digitalRead(_spi_irq) == 1)) {
-        if ((millis() - tickstart_data_available) > 1000) {
-          result = -3;
-          break;
-        }
-      }
-
-      if (result == -3) {
-        digitalWrite(_cs_pin, HIGH);
-        _spi->endTransaction();
-        attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
-        break;
-      }
-
-      /* Write the header */
-      _spi->transfer(header_master, 5);
-
-      if ((int)((((uint16_t)header_master[2]) << 8) | ((uint16_t)header_master[1])) >= 8) {
-        /* Write the data */
-        _spi->transfer((void *)cmd_lp, 8);
+        _spi->transfer((void *)cmd, cmd_size);
       } else {
         result = -2;
       }
