@@ -33,6 +33,7 @@ HCISpiTransportClass::HCISpiTransportClass(SPIClass &spi, BLEChip_t ble_chip, ui
   _write_index = 0;
   _write_index_initial = 0;
   _initial_phase = 1;
+  _random_addr_done = false;
 }
 
 HCISpiTransportClass::~HCISpiTransportClass()
@@ -66,7 +67,7 @@ int HCISpiTransportClass::begin()
   digitalWrite(_ble_rst, HIGH);
   delay(5);
 
-  if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0) {
+  if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0 || _ble_chip == BLUENRG_LP) {
     // Wait for Blue Initialize
     wait_for_blue_initialize();
   } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
@@ -97,7 +98,7 @@ void HCISpiTransportClass::wait(unsigned long timeout)
 
 int HCISpiTransportClass::available()
 {
-  if (_ble_chip != SPBTLE_RF && _ble_chip != SPBTLE_1S && _ble_chip != BLUENRG_M2SP && _ble_chip != BLUENRG_M0) {
+  if (_ble_chip != SPBTLE_RF && _ble_chip != SPBTLE_1S && _ble_chip != BLUENRG_M2SP && _ble_chip != BLUENRG_M0 && _ble_chip != BLUENRG_LP) {
     return 0;
   }
 
@@ -115,7 +116,7 @@ int HCISpiTransportClass::available()
     while (digitalRead(_spi_irq) == 1 && _write_index != BLE_MODULE_SPI_BUFFER_SIZE) {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         detachInterrupt(_spi_irq);
       }
 
@@ -172,7 +173,7 @@ int HCISpiTransportClass::available()
             }
           }
         }
-      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         uint16_t byte_count = (header_master[4] << 8) | header_master[3];
 
         if (byte_count > 0) {
@@ -222,13 +223,13 @@ int HCISpiTransportClass::available()
 
       _spi->endTransaction();
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
       }
     }
 
     if (ble_reset) {
-      if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0) {
+      if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0 || _ble_chip == BLUENRG_LP) {
         /* BLE chip was reset: we need to enable LL_ONLY */
         enable_ll_only();
         wait_for_enable_ll_only();
@@ -238,18 +239,32 @@ int HCISpiTransportClass::available()
       }
 
       /* Call Gatt Init and Gap Init to activate the random BLE address */
-      aci_gatt_init();
-      wait_for_aci_gatt_init();
-      aci_gap_init();
-      wait_for_aci_gap_init();
-      /* Call Read Config Parameter to retrieve the random BLE address */
-      aci_read_config_parameter();
-      wait_for_aci_read_config_parameter();
-
-      /* Now we can update the write index and close the initial phase */
-      _write_index = _write_index_initial;
-      _initial_phase = 0;
-      _write_index_initial = 0;
+      if (!_random_addr_done) {
+        aci_gatt_init();
+        wait_for_aci_gatt_init();
+        aci_gap_init();
+        wait_for_aci_gap_init();
+        /* Call Read Config Parameter to retrieve the random BLE address */
+        aci_read_config_parameter();
+        wait_for_aci_read_config_parameter();
+        if (_ble_chip == BLUENRG_LP) {
+          hci_reset();
+          _read_index = _write_index = _write_index_initial = 0;
+          _initial_phase = 1;
+        } else {
+          /* Now we can update the write index and close the initial phase */
+          _write_index = _write_index_initial;
+          _initial_phase = 0;
+          _write_index_initial = 0;
+        }
+      } else {
+        set_address();
+        wait_for_set_address();
+        /* Now we can update the write index and close the initial phase */
+        _write_index = _write_index_initial;
+        _initial_phase = 0;
+        _write_index_initial = 0;
+      }
     }
 
     if (_read_index != _write_index) {
@@ -297,7 +312,7 @@ size_t HCISpiTransportClass::write(const uint8_t *data, size_t length)
   int result = 0;
   uint32_t tickstart = millis();
 
-  if (_ble_chip != SPBTLE_RF && _ble_chip != SPBTLE_1S && _ble_chip != BLUENRG_M2SP && _ble_chip != BLUENRG_M0) {
+  if (_ble_chip != SPBTLE_RF && _ble_chip != SPBTLE_1S && _ble_chip != BLUENRG_M2SP && _ble_chip != BLUENRG_M0 && _ble_chip != BLUENRG_LP) {
     return 0;
   }
 
@@ -332,7 +347,7 @@ size_t HCISpiTransportClass::write(const uint8_t *data, size_t length)
         result = -3;
         break;
       }
-    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
       uint32_t tickstart_data_available = millis();
       result = 0;
 
@@ -406,7 +421,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
     while (digitalRead(_spi_irq) == 1) {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         detachInterrupt(_spi_irq);
       }
 
@@ -469,13 +484,38 @@ void HCISpiTransportClass::wait_for_blue_initialize()
             }
           }
         }
+      } else if (_ble_chip == BLUENRG_LP) {
+        uint8_t byte_count = (header_master[4] << 8) | header_master[3];
+
+        if (byte_count > 0) {
+          /* Read the response */
+          if (byte_count == 7) {
+            for (int j = 0; j < byte_count; j++) {
+              event[j] = _spi->transfer(0xFF);
+            }
+
+            if (event[0] == 0x82 &&
+                event[1] == 0xFF &&
+                event[2] == 0x03 &&
+                event[3] == 0x00 &&
+                event[4] == 0x01 &&
+                event[5] == 0x00 &&
+                event[6] == 0x01) {
+              event_blue_initialize = 1;
+            }
+          } else {
+            for (int j = 0; j < byte_count; j++) {
+              _spi->transfer(0xFF);
+            }
+          }
+        }
       }
 
       digitalWrite(_cs_pin, HIGH);
 
       _spi->endTransaction();
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
       }
     }
@@ -498,7 +538,7 @@ void HCISpiTransportClass::wait_for_enable_ll_only()
     while (digitalRead(_spi_irq) == 1) {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         detachInterrupt(_spi_irq);
       }
 
@@ -534,7 +574,7 @@ void HCISpiTransportClass::wait_for_enable_ll_only()
             }
           }
         }
-      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         uint16_t byte_count = (header_master[4] << 8) | header_master[3];
 
         if (byte_count > 0) {
@@ -561,7 +601,7 @@ void HCISpiTransportClass::wait_for_enable_ll_only()
 
       _spi->endTransaction();
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
       }
     }
@@ -601,7 +641,7 @@ void HCISpiTransportClass::enable_ll_only()
       digitalWrite(_cs_pin, HIGH);
 
       _spi->endTransaction();
-    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
       uint32_t tickstart_data_available = millis();
       result = 0;
 
@@ -660,7 +700,7 @@ void HCISpiTransportClass::wait_for_aci_gatt_init()
     while (digitalRead(_spi_irq) == 1) {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         detachInterrupt(_spi_irq);
       }
 
@@ -696,7 +736,7 @@ void HCISpiTransportClass::wait_for_aci_gatt_init()
             }
           }
         }
-      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         uint16_t byte_count = (header_master[4] << 8) | header_master[3];
 
         if (byte_count > 0) {
@@ -723,7 +763,7 @@ void HCISpiTransportClass::wait_for_aci_gatt_init()
 
       _spi->endTransaction();
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
       }
     }
@@ -763,7 +803,7 @@ void HCISpiTransportClass::aci_gatt_init()
       digitalWrite(_cs_pin, HIGH);
 
       _spi->endTransaction();
-    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
       uint32_t tickstart_data_available = millis();
       result = 0;
 
@@ -822,7 +862,7 @@ void HCISpiTransportClass::wait_for_aci_gap_init()
     while (digitalRead(_spi_irq) == 1) {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         detachInterrupt(_spi_irq);
       }
 
@@ -858,7 +898,7 @@ void HCISpiTransportClass::wait_for_aci_gap_init()
             }
           }
         }
-      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         uint16_t byte_count = (header_master[4] << 8) | header_master[3];
 
         if (byte_count > 0) {
@@ -885,7 +925,7 @@ void HCISpiTransportClass::wait_for_aci_gap_init()
 
       _spi->endTransaction();
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
       }
     }
@@ -896,6 +936,7 @@ void HCISpiTransportClass::aci_gap_init()
 {
   uint8_t header_master[5] = {0x0a, 0x00, 0x00, 0x00, 0x00};
   uint8_t cmd[7] = {0x01, 0x8A, 0xFC, 0x03, 0x0F, 0x00, 0x00}; // ACI_GAP_INIT
+  uint8_t cmd_lp[8] = {0x01, 0x8A, 0xFC, 0x04, 0x0F, 0x00, 0x00, 0x00}; // ACI_GAP_INIT for BlueNRG-LP
   int result = 0;
 
   do {
@@ -964,6 +1005,45 @@ void HCISpiTransportClass::aci_gap_init()
       _spi->endTransaction();
 
       attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+    } else if (_ble_chip == BLUENRG_LP) {
+      uint32_t tickstart_data_available = millis();
+      result = 0;
+
+      detachInterrupt(_spi_irq);
+
+      _spi->beginTransaction(_spiSettings);
+
+      digitalWrite(_cs_pin, LOW);
+
+      while (!(digitalRead(_spi_irq) == 1)) {
+        if ((millis() - tickstart_data_available) > 1000) {
+          result = -3;
+          break;
+        }
+      }
+
+      if (result == -3) {
+        digitalWrite(_cs_pin, HIGH);
+        _spi->endTransaction();
+        attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+        break;
+      }
+
+      /* Write the header */
+      _spi->transfer(header_master, 5);
+
+      if ((int)((((uint16_t)header_master[2]) << 8) | ((uint16_t)header_master[1])) >= 8) {
+        /* Write the data */
+        _spi->transfer((void *)cmd_lp, 8);
+      } else {
+        result = -2;
+      }
+
+      digitalWrite(_cs_pin, HIGH);
+
+      _spi->endTransaction();
+
+      attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
     }
   } while (result < 0);
 }
@@ -984,7 +1064,7 @@ void HCISpiTransportClass::wait_for_aci_read_config_parameter()
     while (digitalRead(_spi_irq) == 1) {
       uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         detachInterrupt(_spi_irq);
       }
 
@@ -1021,7 +1101,7 @@ void HCISpiTransportClass::wait_for_aci_read_config_parameter()
             }
           }
         }
-      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         uint16_t byte_count = (header_master[4] << 8) | header_master[3];
 
         if (byte_count > 0) {
@@ -1040,6 +1120,7 @@ void HCISpiTransportClass::wait_for_aci_read_config_parameter()
                 data[6] == 0x00) {
               memcpy(_random_addr, &data[8], 6);
               status = 1;
+              _random_addr_done = true;
             }
           }
         }
@@ -1049,7 +1130,7 @@ void HCISpiTransportClass::wait_for_aci_read_config_parameter()
 
       _spi->endTransaction();
 
-      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
         attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
       }
     }
@@ -1089,7 +1170,7 @@ void HCISpiTransportClass::aci_read_config_parameter()
       digitalWrite(_cs_pin, HIGH);
 
       _spi->endTransaction();
-    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+    } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP || _ble_chip == BLUENRG_LP) {
       uint32_t tickstart_data_available = millis();
       result = 0;
 
@@ -1130,4 +1211,163 @@ void HCISpiTransportClass::aci_read_config_parameter()
       attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
     }
   } while (result < 0);
+}
+
+void HCISpiTransportClass::hci_reset()
+{
+  uint8_t header_master[5] = {0x0a, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[4] = {0x01, 0x03, 0x0C, 0x00}; // HCI_RESET
+  int result = 0;
+
+  do {
+    if (_ble_chip == BLUENRG_LP) {
+      uint32_t tickstart_data_available = millis();
+      result = 0;
+
+      detachInterrupt(_spi_irq);
+
+      _spi->beginTransaction(_spiSettings);
+
+      digitalWrite(_cs_pin, LOW);
+
+      while (!(digitalRead(_spi_irq) == 1)) {
+        if ((millis() - tickstart_data_available) > 1000) {
+          result = -3;
+          break;
+        }
+      }
+
+      if (result == -3) {
+        digitalWrite(_cs_pin, HIGH);
+        _spi->endTransaction();
+        attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+        break;
+      }
+
+      /* Write the header */
+      _spi->transfer(header_master, 5);
+
+      if ((int)((((uint16_t)header_master[2]) << 8) | ((uint16_t)header_master[1])) >= 4) {
+        /* Write the data */
+        _spi->transfer((void *)cmd, 4);
+      } else {
+        result = -2;
+      }
+
+      digitalWrite(_cs_pin, HIGH);
+
+      _spi->endTransaction();
+
+      attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+    }
+  } while (result < 0);
+}
+
+void HCISpiTransportClass::set_address()
+{
+  uint8_t header_master[5] = {0x0a, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[10] = {0x01, 0x05, 0x20, 0x06}; // SET ADDR
+  int result = 0;
+  memcpy(&cmd[4], _random_addr, 6);
+
+  do {
+    if (_ble_chip == BLUENRG_LP) {
+      uint32_t tickstart_data_available = millis();
+      result = 0;
+
+      detachInterrupt(_spi_irq);
+
+      _spi->beginTransaction(_spiSettings);
+
+      digitalWrite(_cs_pin, LOW);
+
+      while (!(digitalRead(_spi_irq) == 1)) {
+        if ((millis() - tickstart_data_available) > 1000) {
+          result = -3;
+          break;
+        }
+      }
+
+      if (result == -3) {
+        digitalWrite(_cs_pin, HIGH);
+        _spi->endTransaction();
+        attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+        break;
+      }
+
+      /* Write the header */
+      _spi->transfer(header_master, 5);
+
+      if ((int)((((uint16_t)header_master[2]) << 8) | ((uint16_t)header_master[1])) >= 10) {
+        /* Write the data */
+        _spi->transfer((void *)cmd, 10);
+      } else {
+        result = -2;
+      }
+
+      digitalWrite(_cs_pin, HIGH);
+
+      _spi->endTransaction();
+
+      attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+    }
+  } while (result < 0);
+}
+
+void HCISpiTransportClass::wait_for_set_address()
+{
+  uint8_t data[15];
+  int status = 0;
+
+  if (_ble_chip != BLUENRG_LP) return;
+
+  do {
+    while (!data_avail);
+
+    if (digitalRead(_spi_irq) == 0) {
+      continue;
+    }
+
+    data_avail = 0;
+    while (digitalRead(_spi_irq) == 1) {
+      uint8_t header_master[5] = {0x0b, 0x00, 0x00, 0x00, 0x00};
+      uint16_t byte_count = 0;
+
+      detachInterrupt(_spi_irq);
+
+      _spi->beginTransaction(_spiSettings);
+
+      digitalWrite(_cs_pin, LOW);
+
+      /* Write the header */
+      _spi->transfer(header_master, 5);
+
+      byte_count = (header_master[4] << 8) | header_master[3];
+
+      if (byte_count > 0) {
+        /* Read the response */
+        for (int j = 0; j < byte_count; j++) {
+          data[j] = _spi->transfer(0xFF);
+        }
+
+        if (byte_count >= 7) { // 040E0401052000
+          if (data[0] == 0x04 &&
+              data[1] == 0x0E &&
+              data[2] == 0x04 &&
+              data[3] == 0x01 &&
+              data[4] == 0x05 &&
+              data[5] == 0x20 &&
+              data[6] == 0x00) {
+            status = 1;
+          }
+        }
+      }
+
+      digitalWrite(_cs_pin, HIGH);
+
+      _spi->endTransaction();
+
+      attachInterrupt(_spi_irq, SPI_Irq_Callback, RISING);
+    }
+  } while (!status);
 }

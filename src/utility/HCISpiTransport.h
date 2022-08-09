@@ -27,7 +27,8 @@ typedef enum BLEChip_s {
   SPBTLE_RF,
   SPBTLE_1S,
   BLUENRG_M2SP,
-  BLUENRG_M0
+  BLUENRG_M0,
+  BLUENRG_LP
 } BLEChip_t;
 
 #ifndef BLE_SPI_BYTE_ORDER
@@ -61,6 +62,9 @@ class HCISpiTransportClass : public HCITransportInterface {
     void aci_gap_init();
     void wait_for_aci_read_config_parameter();
     void aci_read_config_parameter();
+    void hci_reset();
+    void set_address();
+    void wait_for_set_address();
     SPIClass *_spi;
     SPISettings _spiSettings;
     BLEChip_t _ble_chip;
@@ -73,6 +77,7 @@ class HCISpiTransportClass : public HCITransportInterface {
     uint16_t _write_index_initial;
     uint8_t _initial_phase;
     uint8_t _random_addr[6];
+    bool _random_addr_done;
 };
 
 #endif /* _HCI_SPI_TRANSPORT_H_ */
