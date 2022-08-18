@@ -23,6 +23,7 @@
 
 StreamBufferHandle_t rec_buffer;
 StreamBufferHandle_t send_buffer;
+TaskHandle_t bleHandle;
 
 
 static void notify_host_send_available(void)
@@ -31,9 +32,6 @@ static void notify_host_send_available(void)
 
 static int notify_host_recv(uint8_t *data, uint16_t length)
 {
-  for (uint8_t i = 0; i < length; i++) {
-    char b = data[i];
-  }
   xStreamBufferSend(rec_buffer,data,length,portMAX_DELAY);  // !!!potentially waiting forever
   return 0;
 }
@@ -47,14 +45,11 @@ void bleTask(void *pvParameters)
 {
   esp_vhci_host_register_callback(&vhci_host_cb);
   size_t length;
-  uint8_t mybuf[256];
+  uint8_t mybuf[258];
 
   while(true){
-    length = xStreamBufferReceive(send_buffer,mybuf,256,portMAX_DELAY);
+    length = xStreamBufferReceive(send_buffer,mybuf,258,portMAX_DELAY);
     while (!esp_vhci_host_check_send_available()) {}
-    for (uint8_t i = 0; i < length; i++) {
-      char b = mybuf[i];
-    }
     esp_vhci_host_send_packet(mybuf, length);
   }
 }
@@ -80,24 +75,18 @@ int HCIVirtualTransportClass::begin()
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
-  ESP_ERROR_CHECK( ret );
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+  
 #if CONFIG_IDF_TARGET_ESP32C3
   bt_cfg.bluetooth_mode = ESP_BT_MODE_BLE;
 #else
   bt_cfg.mode = ESP_BT_MODE_BLE;
 #endif
-  ret = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
-  if (ret) {
-    return 0;
-  }
-  if ((ret = esp_bt_controller_init(&bt_cfg)) != ESP_OK) {
-    return 0;
-  }
-  if ((ret = esp_bt_controller_enable(ESP_BT_MODE_BLE)) != ESP_OK) {
-    return 0;
-  }
-  xTaskCreatePinnedToCore(&bleTask, "bleTask", 2048, NULL, 5, NULL, 0);
+
+  esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
+  esp_bt_controller_init(&bt_cfg);
+  esp_bt_controller_enable(ESP_BT_MODE_BLE);
+  xTaskCreatePinnedToCore(&bleTask, "bleTask", 2048, NULL, 5, &bleHandle, 0);
   return 1;
 }
 
@@ -105,7 +94,9 @@ void HCIVirtualTransportClass::end()
 {
   vStreamBufferDelete(rec_buffer);
   vStreamBufferDelete(send_buffer);
+  esp_bt_controller_disable();
   esp_bt_controller_deinit();
+  vTaskDelete(bleHandle);
 }
 
 void HCIVirtualTransportClass::wait(unsigned long timeout)
