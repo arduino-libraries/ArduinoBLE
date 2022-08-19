@@ -11,9 +11,9 @@ jobs:
       matrix:
         fqbn:
           - esp32:esp32:esp32
-          #- esp32:esp32:esp32-c2
-          #- esp32:esp32:esp32-c3_dev_module? board? who knows
-          #- esp32:esp32:esp32-S3
+          #- esp32:esp32:esp32c2
+          - esp32:esp32:esp32c3
+          - esp32:esp32:esp32s3
 
     steps:
       - uses: actions/checkout@v3
