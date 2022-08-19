@@ -77,10 +77,10 @@ int HCIVirtualTransportClass::begin()
   }
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
   
-#if CONFIG_IDF_TARGET_ESP32C3
-  bt_cfg.bluetooth_mode = ESP_BT_MODE_BLE;
+#if CONFIG_IDF_TARGET_ESP32
+  bt_cfg.mode = ESP_BT_MODE_BLE; //original esp32 chip
 #else
-  bt_cfg.mode = ESP_BT_MODE_BLE;
+  bt_cfg.bluetooth_mode = ESP_BT_MODE_BLE; //different api for newer models
 #endif
 
   esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
