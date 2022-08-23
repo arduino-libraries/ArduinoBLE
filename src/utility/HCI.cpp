@@ -460,14 +460,14 @@ int HCIClass::leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxIn
 
   return sendCommand(OGF_LE_CTL << 10 | OCF_LE_CONN_UPDATE, sizeof(leConnUpdateData), &leConnUpdateData);
 }
-int HCIClass::saveNewAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* localIrk){
+void HCIClass::saveNewAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* localIrk){
   if(_storeIRK!=0){
     _storeIRK(address, peerIrk);
   }
   // Again... this should work 
   // leAddResolvingAddress(addressType, address, peerIrk, localIrk);
 }
-int HCIClass::leAddResolvingAddress(uint8_t addressType, uint8_t* peerAddress, uint8_t* peerIrk, uint8_t* localIrk){
+void HCIClass::leAddResolvingAddress(uint8_t addressType, uint8_t* peerAddress, uint8_t* peerIrk, uint8_t* localIrk){
   leStopResolvingAddresses();
 
   struct __attribute__ ((packed)) AddDevice {
@@ -527,7 +527,7 @@ int HCIClass::leReadPeerResolvableAddress(uint8_t peerAddressType, uint8_t* peer
   return res;
 }
 
-int HCIClass::writeLK(uint8_t peerAddress[], uint8_t LK[]){
+void HCIClass::writeLK(uint8_t peerAddress[], uint8_t LK[]){
   struct __attribute__ ((packed)) StoreLK {
     uint8_t nKeys;
     uint8_t BD_ADDR[6];
@@ -538,7 +538,7 @@ int HCIClass::writeLK(uint8_t peerAddress[], uint8_t LK[]){
   for(int i=0; i<16; i++) storeLK.LTK[15-i] = LK[i];
   HCI.sendCommand(OGF_HOST_CTL << 10 | 0x11, sizeof(storeLK), &storeLK);
 }
-int HCIClass::readStoredLKs(){
+void HCIClass::readStoredLKs(){
   uint8_t BD_ADDR[6];
   readStoredLK(BD_ADDR, 1);
 }

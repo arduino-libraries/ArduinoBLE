@@ -1272,7 +1272,7 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
       }
       return;
     }
-    // Check permssion
+    // Check permission
     if((characteristic->permissions() &( BLEPermission::BLEEncryption >> 8)) > 0 && 
        (getPeerEncryption(connectionHandle) & PEER_ENCRYPTION::ENCRYPTED_AES) == 0){
       holdResponse = true;
