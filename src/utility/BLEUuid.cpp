@@ -30,6 +30,11 @@ BLEUuid::BLEUuid(const char * str) :
   memset(_data, 0x00, sizeof(_data));
 
   _length = 0;
+
+  if (str == NULL) {
+    return;
+  }
+
   for (int i = strlen(str) - 1; i >= 0 && _length < BLE_UUID_MAX_LENGTH; i -= 2) {
     if (str[i] == '-') {
       i++;
