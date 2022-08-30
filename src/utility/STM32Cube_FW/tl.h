@@ -184,6 +184,7 @@ typedef struct
   uint8_t *p_ThreadOtCmdRspBuffer;
   uint8_t *p_ThreadCliRspBuffer;
   uint8_t *p_ThreadNotAckBuffer;
+  uint8_t *p_ThreadCliNotBuffer;
 } TL_TH_Config_t;
 
 typedef struct
@@ -197,6 +198,19 @@ typedef struct
   uint8_t *p_BleLldCmdRspBuffer;
   uint8_t *p_BleLldM0CmdBuffer;
 } TL_BLE_LLD_Config_t;
+
+typedef struct
+{
+  uint8_t *p_Mac_802_15_4_CmdRspBuffer;
+  uint8_t *p_Mac_802_15_4_NotAckBuffer;
+} TL_MAC_802_15_4_Config_t;
+
+typedef struct
+{
+  uint8_t *p_ZigbeeOtCmdRspBuffer;
+  uint8_t *p_ZigbeeNotAckBuffer;
+  uint8_t *p_ZigbeeNotifRequestBuffer;
+} TL_ZIGBEE_Config_t;
 
 /**
  * @brief Contain the BLE HCI Init Configuration
@@ -290,6 +304,26 @@ void TL_MM_EvtDone( TL_EvtPacket_t * hcievt );
  ******************************************************************************/
 void TL_TRACES_Init( void );
 void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt );
+
+/******************************************************************************
+ * MAC 802.15.4
+ ******************************************************************************/
+void TL_MAC_802_15_4_Init( TL_MAC_802_15_4_Config_t *p_Config );
+void TL_MAC_802_15_4_SendCmd( void );
+void TL_MAC_802_15_4_CmdEvtReceived( TL_EvtPacket_t * Otbuffer );
+void TL_MAC_802_15_4_NotReceived( TL_EvtPacket_t * Notbuffer );
+void TL_MAC_802_15_4_SendAck ( void );
+
+/******************************************************************************
+ * ZIGBEE
+ ******************************************************************************/
+void TL_ZIGBEE_Init( TL_ZIGBEE_Config_t *p_Config );
+void TL_ZIGBEE_SendM4RequestToM0( void );
+void TL_ZIGBEE_SendM4AckToM0Notify ( void );
+void TL_ZIGBEE_NotReceived( TL_EvtPacket_t * Notbuffer );
+void TL_ZIGBEE_CmdEvtReceived( TL_EvtPacket_t * Otbuffer );
+void TL_ZIGBEE_M0RequestReceived(TL_EvtPacket_t * Otbuffer );
+void TL_ZIGBEE_SendM4AckToM0Request(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -16,7 +16,6 @@
  ******************************************************************************
  */
 
-#if defined(STM32WBxx)
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 #include "hw.h"
@@ -24,6 +23,7 @@
 #include "stm_list.h"
 #include "tl.h"
 #include "mbox_def.h"
+#include "tl_dbg_conf.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum
@@ -51,13 +51,15 @@ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_BleLldTable_t TL_BleLldTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_SysTable_t TL_SysTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_MemManagerTable_t TL_MemManagerTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_TracesTable_t TL_TracesTable;
+PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_Mac_802_15_4_t TL_Mac_802_15_4_Table;
+PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_ZigbeeTable_t TL_Zigbee_Table;
 
 /**< tables */
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  FreeBufQueue;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  TracesEvtQueue;
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t    CsBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + sizeof(TL_CsEvt_t)];
-PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static tListNode  EvtQueue;
-PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static tListNode  SystemEvtQueue;
+PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  EvtQueue;
+PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  SystemEvtQueue;
 
 
 static tListNode  LocalFreeBufQueue;
@@ -95,6 +97,8 @@ void TL_Init( void )
   TL_RefTable.p_sys_table = &TL_SysTable;
   TL_RefTable.p_mem_manager_table = &TL_MemManagerTable;
   TL_RefTable.p_traces_table = &TL_TracesTable;
+  TL_RefTable.p_mac_802_15_4_table = &TL_Mac_802_15_4_Table;
+  TL_RefTable.p_zigbee_table = &TL_Zigbee_Table;
   HW_IPCC_Init();
 
   return;
@@ -256,6 +260,7 @@ void TL_THREAD_Init( TL_TH_Config_t *p_Config )
   p_thread_table->clicmdrsp_buffer = p_Config->p_ThreadCliRspBuffer;
   p_thread_table->otcmdrsp_buffer = p_Config->p_ThreadOtCmdRspBuffer;
   p_thread_table->notack_buffer = p_Config->p_ThreadNotAckBuffer;
+  p_thread_table->clinot_buffer = p_Config->p_ThreadCliNotBuffer;
 
   HW_IPCC_THREAD_Init();
 
@@ -314,7 +319,7 @@ void HW_IPCC_THREAD_EvtNot( void )
 
 void HW_IPCC_THREAD_CliEvtNot( void )
 {
-  TL_THREAD_CliNotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_thread_table->clicmdrsp_buffer) );
+  TL_THREAD_CliNotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_thread_table->clinot_buffer) );
 
   return;
 }
@@ -447,6 +452,139 @@ void TL_BLE_LLD_SendRspAck( void )
 }
 #endif /* BLE_LLD_WB */
 
+#ifdef MAC_802_15_4_WB
+/******************************************************************************
+ * MAC 802.15.4
+ ******************************************************************************/
+void TL_MAC_802_15_4_Init( TL_MAC_802_15_4_Config_t *p_Config )
+{
+  MB_Mac_802_15_4_t  * p_mac_802_15_4_table;
+
+  p_mac_802_15_4_table = TL_RefTable.p_mac_802_15_4_table;
+
+  p_mac_802_15_4_table->p_cmdrsp_buffer = p_Config->p_Mac_802_15_4_CmdRspBuffer;
+  p_mac_802_15_4_table->p_notack_buffer = p_Config->p_Mac_802_15_4_NotAckBuffer;
+
+  HW_IPCC_MAC_802_15_4_Init();
+
+  return;
+}
+
+void TL_MAC_802_15_4_SendCmd( void )
+{
+  ((TL_CmdPacket_t *)(TL_RefTable.p_mac_802_15_4_table->p_cmdrsp_buffer))->cmdserial.type = TL_OTCMD_PKT_TYPE;
+
+  HW_IPCC_MAC_802_15_4_SendCmd();
+
+  return;
+}
+
+void TL_MAC_802_15_4_SendAck ( void )
+{
+  ((TL_CmdPacket_t *)(TL_RefTable.p_mac_802_15_4_table->p_notack_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
+
+  HW_IPCC_MAC_802_15_4_SendAck();
+
+  return;
+}
+
+void HW_IPCC_MAC_802_15_4_CmdEvtNot(void)
+{
+  TL_MAC_802_15_4_CmdEvtReceived( (TL_EvtPacket_t*)(TL_RefTable.p_mac_802_15_4_table->p_cmdrsp_buffer) );
+
+  return;
+}
+
+void HW_IPCC_MAC_802_15_4_EvtNot( void )
+{
+  TL_MAC_802_15_4_NotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_mac_802_15_4_table->p_notack_buffer) );
+
+  return;
+}
+
+__WEAK void TL_MAC_802_15_4_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
+__WEAK void TL_MAC_802_15_4_NotReceived( TL_EvtPacket_t * Notbuffer ){};
+#endif
+
+#ifdef ZIGBEE_WB
+/******************************************************************************
+ * ZIGBEE
+ ******************************************************************************/
+void TL_ZIGBEE_Init( TL_ZIGBEE_Config_t *p_Config )
+{
+  MB_ZigbeeTable_t  * p_zigbee_table;
+
+  p_zigbee_table = TL_RefTable.p_zigbee_table;
+  p_zigbee_table->appliCmdM4toM0_buffer = p_Config->p_ZigbeeOtCmdRspBuffer;
+  p_zigbee_table->notifM0toM4_buffer = p_Config->p_ZigbeeNotAckBuffer;
+  p_zigbee_table->requestM0toM4_buffer = p_Config->p_ZigbeeNotifRequestBuffer;
+
+  HW_IPCC_ZIGBEE_Init();
+
+  return;
+}
+
+/* Zigbee M4 to M0 Request */
+void TL_ZIGBEE_SendM4RequestToM0( void )
+{
+  ((TL_CmdPacket_t *)(TL_RefTable.p_zigbee_table->appliCmdM4toM0_buffer))->cmdserial.type = TL_OTCMD_PKT_TYPE;
+
+  HW_IPCC_ZIGBEE_SendM4RequestToM0();
+
+  return;
+}
+
+/* Used to receive an ACK from the M0 */
+void HW_IPCC_ZIGBEE_RecvAppliAckFromM0(void)
+{
+  TL_ZIGBEE_CmdEvtReceived( (TL_EvtPacket_t*)(TL_RefTable.p_zigbee_table->appliCmdM4toM0_buffer) );
+
+  return;
+}
+
+/* Zigbee notification from M0 to M4 */
+void HW_IPCC_ZIGBEE_RecvM0NotifyToM4( void )
+{
+  TL_ZIGBEE_NotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_zigbee_table->notifM0toM4_buffer) );
+
+  return;
+}
+
+/* Send an ACK to the M0 for a Notification */
+void TL_ZIGBEE_SendM4AckToM0Notify ( void )
+{
+  ((TL_CmdPacket_t *)(TL_RefTable.p_zigbee_table->notifM0toM4_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
+
+  HW_IPCC_ZIGBEE_SendM4AckToM0Notify();
+
+  return;
+}
+
+/* Zigbee M0 to M4 Request */
+void HW_IPCC_ZIGBEE_RecvM0RequestToM4( void )
+{
+  TL_ZIGBEE_M0RequestReceived( (TL_EvtPacket_t*)(TL_RefTable.p_zigbee_table->requestM0toM4_buffer) );
+
+  return;
+}
+
+/* Send an ACK to the M0 for a Request */
+void TL_ZIGBEE_SendM4AckToM0Request(void)
+{
+  ((TL_CmdPacket_t *)(TL_RefTable.p_zigbee_table->requestM0toM4_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
+
+  HW_IPCC_ZIGBEE_SendM4AckToM0Request();
+
+  return;
+}
+
+
+__WEAK void TL_ZIGBEE_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
+__WEAK void TL_ZIGBEE_NotReceived( TL_EvtPacket_t * Notbuffer ){};
+#endif
+
+
+
 /******************************************************************************
  * MEMORY MANAGER
  ******************************************************************************/
@@ -531,11 +669,181 @@ __WEAK void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt )
  ******************************************************************************/
 static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
 {
-  /* Function stubbed */
-  UNUSED(packet_type);
-  UNUSED(buffer);
+  TL_EvtPacket_t *p_evt_packet;
+  TL_CmdPacket_t *p_cmd_packet;
+
+  switch(packet_type)
+  {
+    case TL_MB_MM_RELEASE_BUFFER:
+      p_evt_packet = (TL_EvtPacket_t*)buffer;
+      switch(p_evt_packet->evtserial.evt.evtcode)
+      {
+        case TL_BLEEVT_CS_OPCODE:
+          TL_MM_DBG_MSG("mm evt released: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_MM_DBG_MSG(" cmd opcode: 0x%04X", ((TL_CsEvt_t*)(p_evt_packet->evtserial.evt.payload))->cmdcode);
+          TL_MM_DBG_MSG(" buffer addr: 0x%08X", p_evt_packet);
+          break;
+
+        case TL_BLEEVT_CC_OPCODE:
+          TL_MM_DBG_MSG("mm evt released: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_MM_DBG_MSG(" cmd opcode: 0x%04X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->cmdcode);
+          TL_MM_DBG_MSG(" buffer addr: 0x%08X", p_evt_packet);
+          break;
+
+        case TL_BLEEVT_VS_OPCODE:
+          TL_MM_DBG_MSG("mm evt released: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_MM_DBG_MSG(" subevtcode: 0x%04X", ((TL_AsynchEvt_t*)(p_evt_packet->evtserial.evt.payload))->subevtcode);
+          TL_MM_DBG_MSG(" buffer addr: 0x%08X", p_evt_packet);
+          break;
+
+        default:
+          TL_MM_DBG_MSG("mm evt released: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_MM_DBG_MSG(" buffer addr: 0x%08X", p_evt_packet);
+          break;
+      }
+
+      TL_MM_DBG_MSG("\r\n");
+      break;
+
+    case TL_MB_BLE_CMD:
+      p_cmd_packet = (TL_CmdPacket_t*)buffer;
+      TL_HCI_CMD_DBG_MSG("ble cmd: 0x%04X", p_cmd_packet->cmdserial.cmd.cmdcode);
+      if(p_cmd_packet->cmdserial.cmd.plen != 0)
+      {
+        TL_HCI_CMD_DBG_MSG(" payload:");
+        TL_HCI_CMD_DBG_BUF(p_cmd_packet->cmdserial.cmd.payload, p_cmd_packet->cmdserial.cmd.plen, "");
+      }
+      TL_HCI_CMD_DBG_MSG("\r\n");
+
+      TL_HCI_CMD_DBG_RAW(&p_cmd_packet->cmdserial, p_cmd_packet->cmdserial.cmd.plen+TL_CMD_HDR_SIZE);
+      break;
+
+    case TL_MB_BLE_CMD_RSP:
+      p_evt_packet = (TL_EvtPacket_t*)buffer;
+      switch(p_evt_packet->evtserial.evt.evtcode)
+      {
+        case TL_BLEEVT_CS_OPCODE:
+          TL_HCI_CMD_DBG_MSG("ble rsp: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_HCI_CMD_DBG_MSG(" cmd opcode: 0x%04X", ((TL_CsEvt_t*)(p_evt_packet->evtserial.evt.payload))->cmdcode);
+          TL_HCI_CMD_DBG_MSG(" numhci: 0x%02X", ((TL_CsEvt_t*)(p_evt_packet->evtserial.evt.payload))->numcmd);
+          TL_HCI_CMD_DBG_MSG(" status: 0x%02X", ((TL_CsEvt_t*)(p_evt_packet->evtserial.evt.payload))->status);
+          break;
+
+        case TL_BLEEVT_CC_OPCODE:
+          TL_HCI_CMD_DBG_MSG("ble rsp: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_HCI_CMD_DBG_MSG(" cmd opcode: 0x%04X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->cmdcode);
+          TL_HCI_CMD_DBG_MSG(" numhci: 0x%02X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->numcmd);
+          TL_HCI_CMD_DBG_MSG(" status: 0x%02X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload[0]);
+          if((p_evt_packet->evtserial.evt.plen-4) != 0)
+          {
+            TL_HCI_CMD_DBG_MSG(" payload:");
+            TL_HCI_CMD_DBG_BUF(&((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload[1], p_evt_packet->evtserial.evt.plen-4, "");
+          }
+          break;
+
+        default:
+          TL_HCI_CMD_DBG_MSG("unknown ble rsp received: %02X", p_evt_packet->evtserial.evt.evtcode);
+          break;
+      }
+
+      TL_HCI_CMD_DBG_MSG("\r\n");
+
+      TL_HCI_CMD_DBG_RAW(&p_evt_packet->evtserial, p_evt_packet->evtserial.evt.plen+TL_EVT_HDR_SIZE);
+      break;
+
+    case TL_MB_BLE_ASYNCH_EVT:
+      p_evt_packet = (TL_EvtPacket_t*)buffer;
+      if(p_evt_packet->evtserial.evt.evtcode != TL_BLEEVT_VS_OPCODE)
+      {
+        TL_HCI_EVT_DBG_MSG("ble evt: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+        if((p_evt_packet->evtserial.evt.plen) != 0)
+        {
+          TL_HCI_EVT_DBG_MSG(" payload:");
+          TL_HCI_EVT_DBG_BUF(p_evt_packet->evtserial.evt.payload, p_evt_packet->evtserial.evt.plen, "");
+        }
+      }
+      else
+      {
+        TL_HCI_EVT_DBG_MSG("ble evt: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+        TL_HCI_EVT_DBG_MSG(" subevtcode: 0x%04X", ((TL_AsynchEvt_t*)(p_evt_packet->evtserial.evt.payload))->subevtcode);
+        if((p_evt_packet->evtserial.evt.plen-2) != 0)
+        {
+          TL_HCI_EVT_DBG_MSG(" payload:");
+          TL_HCI_EVT_DBG_BUF(((TL_AsynchEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload, p_evt_packet->evtserial.evt.plen-2, "");
+        }
+      }
+
+      TL_HCI_EVT_DBG_MSG("\r\n");
+
+      TL_HCI_EVT_DBG_RAW(&p_evt_packet->evtserial, p_evt_packet->evtserial.evt.plen+TL_EVT_HDR_SIZE);
+      break;
+
+    case TL_MB_SYS_CMD:
+      p_cmd_packet = (TL_CmdPacket_t*)buffer;
+
+      TL_SHCI_CMD_DBG_MSG("sys cmd: 0x%04X", p_cmd_packet->cmdserial.cmd.cmdcode);
+
+      if(p_cmd_packet->cmdserial.cmd.plen != 0)
+      {
+        TL_SHCI_CMD_DBG_MSG(" payload:");
+        TL_SHCI_CMD_DBG_BUF(p_cmd_packet->cmdserial.cmd.payload, p_cmd_packet->cmdserial.cmd.plen, "");
+      }
+      TL_SHCI_CMD_DBG_MSG("\r\n");
+
+      TL_SHCI_CMD_DBG_RAW(&p_cmd_packet->cmdserial, p_cmd_packet->cmdserial.cmd.plen+TL_CMD_HDR_SIZE);
+      break;
+
+    case TL_MB_SYS_CMD_RSP:
+      p_evt_packet = (TL_EvtPacket_t*)buffer;
+      switch(p_evt_packet->evtserial.evt.evtcode)
+      {
+        case TL_BLEEVT_CC_OPCODE:
+          TL_SHCI_CMD_DBG_MSG("sys rsp: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_SHCI_CMD_DBG_MSG(" cmd opcode: 0x%02X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->cmdcode);
+          TL_SHCI_CMD_DBG_MSG(" status: 0x%02X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload[0]);
+          if((p_evt_packet->evtserial.evt.plen-4) != 0)
+          {
+            TL_SHCI_CMD_DBG_MSG(" payload:");
+            TL_SHCI_CMD_DBG_BUF(&((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload[1], p_evt_packet->evtserial.evt.plen-4, "");
+          }
+          break;
+
+        default:
+          TL_SHCI_CMD_DBG_MSG("unknown sys rsp received: %02X", p_evt_packet->evtserial.evt.evtcode);
+          break;
+      }
+
+      TL_SHCI_CMD_DBG_MSG("\r\n");
+
+      TL_SHCI_CMD_DBG_RAW(&p_evt_packet->evtserial, p_evt_packet->evtserial.evt.plen+TL_EVT_HDR_SIZE);
+      break;
+
+    case  TL_MB_SYS_ASYNCH_EVT:
+      p_evt_packet = (TL_EvtPacket_t*)buffer;
+      if(p_evt_packet->evtserial.evt.evtcode != TL_BLEEVT_VS_OPCODE)
+      {
+        TL_SHCI_EVT_DBG_MSG("unknown sys evt received: %02X", p_evt_packet->evtserial.evt.evtcode);
+      }
+      else
+      {
+        TL_SHCI_EVT_DBG_MSG("sys evt: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
+        TL_SHCI_EVT_DBG_MSG(" subevtcode: 0x%04X", ((TL_AsynchEvt_t*)(p_evt_packet->evtserial.evt.payload))->subevtcode);
+        if((p_evt_packet->evtserial.evt.plen-2) != 0)
+        {
+          TL_SHCI_EVT_DBG_MSG(" payload:");
+          TL_SHCI_EVT_DBG_BUF(((TL_AsynchEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload, p_evt_packet->evtserial.evt.plen-2, "");
+        }
+      }
+
+      TL_SHCI_EVT_DBG_MSG("\r\n");
+
+      TL_SHCI_EVT_DBG_RAW(&p_evt_packet->evtserial, p_evt_packet->evtserial.evt.plen+TL_EVT_HDR_SIZE);
+      break;
+
+    default:
+      break;
+  }
 
   return;
 }
 
-#endif /* STM32WBxx */
