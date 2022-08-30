@@ -5,14 +5,23 @@
   address, local name, advertised service UUID's.
 
   The circuit:
-  - STEVAL-MKSBOX1V1, B-L475E-IOT01A1, B_L4S5I_IOT01A, or a Nucleo board plus the X-NUCLEO-IDB05A2 or the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
+  - STEVAL-MKBOXPRO, STEVAL-MKSBOX1V1, B-L475E-IOT01A1, B_L4S5I_IOT01A, or a Nucleo board plus the X-NUCLEO-IDB05A2 or the X-NUCLEO-IDB05A1 or the X-NUCLEO-BNRG2A1
 
   This example code is in the public domain.
 */
 
 #include <STM32duinoBLE.h>
 
-#if defined(ARDUINO_STEVAL_MKSBOX1V1)
+#if defined(ARDUINO_STEVAL_MKBOXPRO)
+/* STEVAL-MKBOXPRO */
+SPIClass SpiHCI(PA7, PA6, PA5);
+HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_LP, PA2, PB11, PD4, 1000000, SPI_MODE3);
+#if !defined(FAKE_BLELOCALDEVICE)
+BLELocalDevice BLEObj(&HCISpiTransport);
+BLELocalDevice& BLE = BLEObj;
+#endif
+const int buttonPin = PC13; // set buttonPin to digital pin PC13
+#elif defined(ARDUINO_STEVAL_MKSBOX1V1)
 /* STEVAL-MKSBOX1V1 */
 SPIClass SpiHCI(PC3, PD3, PD1);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_1S, PD0, PD4, PA8, 1000000, SPI_MODE1);
