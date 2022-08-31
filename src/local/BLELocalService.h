@@ -36,6 +36,7 @@ public:
   virtual enum BLEAttributeType type() const;
 
   void addCharacteristic(BLECharacteristic& characteristic);
+  void clear();
 
 protected:
   friend class ATTClass;

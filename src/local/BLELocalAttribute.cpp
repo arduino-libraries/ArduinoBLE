@@ -56,6 +56,11 @@ int BLELocalAttribute::retain()
   return _refCount;
 }
 
+bool BLELocalAttribute::active()
+{
+  return _refCount > 0;
+}
+
 int BLELocalAttribute::release()
 {
   _refCount--;

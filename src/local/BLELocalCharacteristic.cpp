@@ -46,6 +46,7 @@ BLELocalCharacteristic::BLELocalCharacteristic(const char* uuid, uint16_t permis
   if (permissions & (BLENotify | BLEIndicate)) {
     BLELocalDescriptor* cccd = new BLELocalDescriptor("2902", (uint8_t*)&_cccdValue, sizeof(_cccdValue));
   
+    cccd->retain();
     _descriptors.add(cccd);
   }
 

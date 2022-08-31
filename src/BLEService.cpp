@@ -63,6 +63,13 @@ BLEService::BLEService(const BLEService& other)
   }
 }
 
+void BLEService::clear()
+{
+  if (_local) {
+    _local->clear();
+  }
+}
+
 BLEService::~BLEService()
 {
   if (_local && _local->release() == 0) {
