@@ -1116,6 +1116,10 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
           uint8_t eirData[31];
         } *leAdvertisingReport = (EvtLeAdvertisingReport*)&pdata[sizeof(HCIEventHdr) + sizeof(LeMetaEventHeader)];
 
+        if(leAdvertisingReport->eirLength > sizeof(leAdvertisingReport->eirData)){
+          return ;
+        }
+
         if (leAdvertisingReport->status == 0x01) {
           // last byte is RSSI
           int8_t rssi = leAdvertisingReport->eirData[leAdvertisingReport->eirLength];
