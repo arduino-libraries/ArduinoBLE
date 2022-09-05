@@ -44,6 +44,7 @@ public:
 
   int retain();
   int release();
+  bool active();
 
 protected:
   friend class ATTClass;

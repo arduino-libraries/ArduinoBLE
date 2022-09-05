@@ -59,6 +59,7 @@ private:
 
 private:
   BLELinkedList<BLELocalAttribute*> _attributes;
+  BLELinkedList<BLELocalService*>   _services;
 
   BLELocalService*              _genericAccessService;
   BLELocalCharacteristic*       _deviceNameCharacteristic;

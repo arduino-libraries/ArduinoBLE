@@ -149,6 +149,7 @@ void GATTClass::addService(BLELocalService* service)
 {
   service->retain();
   _attributes.add(service);
+  _services.add(service);
 
   uint16_t startHandle = attributeCount();
 
@@ -160,6 +161,7 @@ void GATTClass::addService(BLELocalService* service)
     characteristic->setHandle(attributeCount());
     
     // add the characteristic again to make space of the characteristic value handle
+    characteristic->retain();
     _attributes.add(characteristic);
 
     for (unsigned int j = 0; j < characteristic->descriptorCount(); j++) {
@@ -183,8 +185,13 @@ void GATTClass::clearAttributes()
       delete a;
     }
   }
-
   _attributes.clear();
+
+  for (unsigned int i = 0; i < _services.size(); i++) {
+    _services.get(i)->clear();
+  }
+  _services.clear();
+
 }
 
 #if !defined(FAKE_GATT)
