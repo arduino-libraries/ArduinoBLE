@@ -222,7 +222,6 @@ void GAPClass::handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint
 
   if (discoveredDevice == NULL) {
     if (_discoveredDevices.size() >= GAP_MAX_DISCOVERED_QUEUE_SIZE) {
-      // delete data in first list posistion
       BLEDevice* device_first = _discoveredDevices.remove(0);
       if (device_first != NULL) {
         delete device_first;
