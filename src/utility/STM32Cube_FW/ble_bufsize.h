@@ -98,14 +98,16 @@
 */
 #if (BEACON_ONLY != 0)
 #define BLE_FIXED_BUFFER_SIZE_BYTES  4076   /* Beacon only */
+#elif (LL_ONLY_BASIC != 0)
+#define BLE_FIXED_BUFFER_SIZE_BYTES  5692   /* LL only Basic*/
 #elif (LL_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  5936   /* LL only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  5940   /* LL only Full */
 #elif (SLAVE_ONLY != 0)
 #define BLE_FIXED_BUFFER_SIZE_BYTES  6204   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)
 #define BLE_FIXED_BUFFER_SIZE_BYTES  6532   /* Basic Features */
 #else
-#define BLE_FIXED_BUFFER_SIZE_BYTES  7052   /* Full stack */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  7056   /* Full stack */
 #endif
 
 /*
@@ -113,8 +115,10 @@
  */
 #if (BEACON_ONLY != 0)
 #define BLE_PER_LINK_SIZE_BYTES       128   /* Beacon only */
+#elif (LL_ONLY_BASIC != 0)
+#define BLE_PER_LINK_SIZE_BYTES       260   /* LL only Basic */
 #elif (LL_ONLY != 0)
-#define BLE_PER_LINK_SIZE_BYTES       260   /* LL only */
+#define BLE_PER_LINK_SIZE_BYTES       260   /* LL only Full */
 #elif (SLAVE_ONLY != 0)
 #define BLE_PER_LINK_SIZE_BYTES       392   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)

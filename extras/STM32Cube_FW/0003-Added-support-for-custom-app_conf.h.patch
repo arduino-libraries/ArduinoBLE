@@ -1,14 +1,15 @@
-From a771c9e9a12d085fc240a45f68ca5aafb8b42006 Mon Sep 17 00:00:00 2001
+From d3ae98b9073e5f1e48efb32b1ef4d318814228fe Mon Sep 17 00:00:00 2001
 From: Alexandre Bourdiol <alexandre.bourdiol@st.com>
-Date: Mon, 6 Dec 2021 18:59:38 +0100
-Subject: [PATCH 3/4] Added support for custom app_conf.h (#35)
+Date: Tue, 30 Aug 2022 13:31:31 +0200
+Subject: [PATCH 3/3] Added support for custom app_conf.h
 
+Signed-off-by: Alexandre Bourdiol <alexandre.bourdiol@st.com>
 ---
- src/utility/STM32Cube_FW/app_conf_default.h | 75 ++++++++++++++-------
- 1 file changed, 49 insertions(+), 26 deletions(-)
+ src/utility/STM32Cube_FW/app_conf_default.h | 71 ++++++++++++++-------
+ 1 file changed, 47 insertions(+), 24 deletions(-)
 
 diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
-index 4f300e0..9f8e085 100644
+index 54f824a..91672ac 100644
 --- a/src/utility/STM32Cube_FW/app_conf_default.h
 +++ b/src/utility/STM32Cube_FW/app_conf_default.h
 @@ -1,8 +1,8 @@
@@ -47,34 +48,29 @@ index 4f300e0..9f8e085 100644
  
  /******************************************************************************
   * BLE Stack
-@@ -53,32 +52,41 @@
+@@ -53,13 +52,17 @@
   * Maximum number of simultaneous connections that the device will support.
   * Valid values are from 1 to 8
   */
--#define CFG_BLE_NUM_LINK            2
+-#define CFG_BLE_NUM_LINK            8
 +#ifndef CFG_BLE_NUM_LINK
-+  #define CFG_BLE_NUM_LINK 2
++  #define CFG_BLE_NUM_LINK            8
 +#endif
  
  /**
   * Maximum number of Services that can be stored in the GATT database.
-- * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
-+ * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user
-+ * services
+  * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
   */
+-#define CFG_BLE_NUM_GATT_SERVICES   8
 +#ifndef CFG_BLE_NUM_GATT_SERVICES
- #define CFG_BLE_NUM_GATT_SERVICES   8
++  #define CFG_BLE_NUM_GATT_SERVICES   8
 +#endif
  
  /**
   * Maximum number of Attributes
-- * (i.e. the number of characteristic + the number of characteristic values + the number of descriptors, excluding the services)
-- * that can be stored in the GATT database.
-- * Note that certain characteristics and relative descriptors are added automatically during device initialization
-- * so this parameters should be 9 plus the number of user Attributes
-+ * (i.e. the number of characteristic + the number of characteristic values + the number of descriptors, excluding the
-+ * services) that can be stored in the GATT database. Note that certain characteristics and relative descriptors are
-+ * added automatically during device initialization so this parameters should be 9 plus the number of user Attributes
+@@ -68,13 +71,17 @@
+  * Note that certain characteristics and relative descriptors are added automatically during device initialization
+  * so this parameters should be 9 plus the number of user Attributes
   */
 -#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
 +#ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
@@ -83,7 +79,7 @@ index 4f300e0..9f8e085 100644
  
  /**
   * Maximum supported ATT_MTU size
-  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS is set to 1"
+  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
   */
 -#define CFG_BLE_MAX_ATT_MTU             (156)
 +#ifndef CFG_BLE_MAX_ATT_MTU
@@ -92,23 +88,18 @@ index 4f300e0..9f8e085 100644
  
  /**
   * Size of the storage area for Attribute values
-- *  This value depends on the number of attributes used by application. In particular the sum of the following quantities (in octets) should be made for each attribute:
-+ *  This value depends on the number of attributes used by application. In particular the sum of the following
-+ *  quantities (in octets) should be made for each attribute:
-  *  - attribute value length
-  *  - 5, if UUID is 16 bit; 19, if UUID is 128 bit
-  *  - 2, if server configuration descriptor is used
-@@ -87,14 +95,18 @@
+@@ -87,14 +94,18 @@
   *  The total amount of memory needed is the sum of the above quantities for each attribute.
-  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS is set to 1"
+  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
   */
+-#define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
 +#ifndef CFG_BLE_ATT_VALUE_ARRAY_SIZE
- #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
++  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
 +#endif
  
  /**
   * Prepare Write List size in terms of number of packet
-  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS is set to 1"
+  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
   */
  // #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
 -#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
@@ -118,7 +109,7 @@ index 4f300e0..9f8e085 100644
  
  /**
   * Number of allocated memory blocks
-@@ -106,12 +118,16 @@
+@@ -106,12 +117,16 @@
  /**
   * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
   */
@@ -137,7 +128,7 @@ index 4f300e0..9f8e085 100644
  
  /**
   * Sleep clock accuracy in Master mode
-@@ -124,24 +140,32 @@
+@@ -124,7 +139,9 @@
   * 6 : 21 ppm to 30 ppm
   * 7 : 0 ppm to 20 ppm
   */
@@ -147,14 +138,22 @@ index 4f300e0..9f8e085 100644
 +#endif
  
  /**
-  *  Source for the low speed clock for RF wake-up
-  *  1 : external high speed crystal HSE/32/32
-  *  0 : external low speed crystal ( no calibration )
+  * LsSource
+@@ -132,21 +149,27 @@
+  * - bit 0:   1: Calibration for the RF system wakeup clock source   0: No calibration for the RF system wakeup clock source
+  * - bit 1:   1: STM32W5M Module device                              0: Other devices as STM32WBxx SOC, STM32WB1M module
   */
--#define CFG_BLE_LSE_SOURCE  0
+-#if defined(STM32WB5Mxx)
+-  #define CFG_BLE_LSE_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LSE_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LSE_MOD5MM_DEV)
+-#else
+-  #define CFG_BLE_LSE_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LSE_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LSE_OTHER_DEV)
 +#ifndef CFG_BLE_LSE_SOURCE
-+  #define CFG_BLE_LSE_SOURCE 0
-+#endif
++  #if defined(STM32WB5Mxx)
++    #define CFG_BLE_LSE_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LSE_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LSE_MOD5MM_DEV)
++  #else
++    #define CFG_BLE_LSE_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LSE_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LSE_OTHER_DEV)
++  #endif
+ #endif
  
  /**
   * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
@@ -174,13 +173,13 @@ index 4f300e0..9f8e085 100644
  
  /**
   * Viterbi Mode
-@@ -199,5 +223,4 @@
+@@ -234,5 +257,5 @@
  
- #define CFG_BLE_RX_MODEL_CONFIG         SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY
+ #define CFG_BLE_RX_PATH_COMPENS    (0)
  
--
 -#endif /*APP_CONF_H */
 +#endif /* APP_CONF_DEFAULT_H */
+ 
 -- 
-2.31.1.windows.1
+2.33.0.windows.1
 

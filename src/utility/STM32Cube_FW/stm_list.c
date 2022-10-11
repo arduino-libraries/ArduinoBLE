@@ -25,7 +25,7 @@
 #include "stm32_wpan_common.h"
 
 /******************************************************************************
- * Function Definitions 
+ * Function Definitions
  ******************************************************************************/
 void LST_init_head (tListNode * listHead)
 {
@@ -204,5 +204,4 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
 
   __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
 }
-
-#endif /* STM32WBxx */
+#endif /* STM32WBxx */

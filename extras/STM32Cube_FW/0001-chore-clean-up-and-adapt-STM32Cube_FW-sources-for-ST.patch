@@ -1,29 +1,28 @@
-From 6fcfc029ba21a3674456a12032720bff6ecfe27d Mon Sep 17 00:00:00 2001
+From 1c3ca9f22842e3ae283d3e979a5f38a195d8d4ee Mon Sep 17 00:00:00 2001
 From: Alexandre Bourdiol <alexandre.bourdiol@st.com>
-Date: Mon, 6 Dec 2021 11:08:32 +0100
-Subject: [PATCH 1/4] chore: clean up and adapt STM32Cube_FW sources for
+Date: Tue, 30 Aug 2022 11:28:41 +0200
+Subject: [PATCH 1/3] chore: clean up and adapt STM32Cube_FW sources for
  STM32duino
 
-Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 Signed-off-by: Alexandre Bourdiol <alexandre.bourdiol@st.com>
 ---
- src/utility/STM32Cube_FW/app_conf_default.h  | 422 +------------------
+ src/utility/STM32Cube_FW/app_conf_default.h  | 428 +------------------
  src/utility/STM32Cube_FW/ble_bufsize.h       |  13 +-
  src/utility/STM32Cube_FW/hw.h                |  28 +-
  src/utility/STM32Cube_FW/hw_ipcc.c           | 184 +-------
  src/utility/STM32Cube_FW/mbox_def.h          |  34 --
  src/utility/STM32Cube_FW/shci.c              |  40 +-
- src/utility/STM32Cube_FW/shci.h              |  47 +--
+ src/utility/STM32Cube_FW/shci.h              |  47 +-
  src/utility/STM32Cube_FW/shci_tl.c           |  19 +-
  src/utility/STM32Cube_FW/stm32_wpan_common.h |  39 +-
  src/utility/STM32Cube_FW/stm_list.c          |  11 +-
  src/utility/STM32Cube_FW/stm_list.h          |   4 +-
  src/utility/STM32Cube_FW/tl.h                |  33 --
  src/utility/STM32Cube_FW/tl_mbox.c           | 144 +------
- 13 files changed, 94 insertions(+), 924 deletions(-)
+ 13 files changed, 91 insertions(+), 933 deletions(-)
 
 diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
-index 7ebc65a..4f300e0 100644
+index c63c66e..54f824a 100644
 --- a/src/utility/STM32Cube_FW/app_conf_default.h
 +++ b/src/utility/STM32Cube_FW/app_conf_default.h
 @@ -1,4 +1,3 @@
@@ -53,21 +52,21 @@ index 7ebc65a..4f300e0 100644
 -/**
 - * Define Secure Connections Support
 - */
--#define CFG_SECURE_NOT_SUPPORTED       (0x00)
--#define CFG_SECURE_OPTIONAL            (0x01)
--#define CFG_SECURE_MANDATORY           (0x02)
+-#define CFG_SECURE_NOT_SUPPORTED              (0x00)
+-#define CFG_SECURE_OPTIONAL                   (0x01)
+-#define CFG_SECURE_MANDATORY                  (0x02)
 -
--#define CFG_SC_SUPPORT                 CFG_SECURE_OPTIONAL
+-#define CFG_SC_SUPPORT                        CFG_SECURE_OPTIONAL
 -
 -/**
 - * Define Keypress Notification Support
 - */
--#define CFG_KEYPRESS_NOT_SUPPORTED      (0x00)
--#define CFG_KEYPRESS_SUPPORTED          (0x01)
+-#define CFG_KEYPRESS_NOT_SUPPORTED            (0x00)
+-#define CFG_KEYPRESS_SUPPORTED                (0x01)
 +/**< generic parameters ******************************************************/
 +/* HCI related defines */
  
--#define CFG_KEYPRESS_NOTIFICATION_SUPPORT             CFG_KEYPRESS_NOT_SUPPORTED
+-#define CFG_KEYPRESS_NOTIFICATION_SUPPORT     CFG_KEYPRESS_NOT_SUPPORTED
 +#define ACI_HAL_SET_TX_POWER_LEVEL 0xFC0F
 +#define ACI_WRITE_CONFIG_DATA_OPCODE 0xFC0C
 +#define ACI_READ_CONFIG_DATA_OPCODE 0xFC0D
@@ -141,7 +140,7 @@ index 7ebc65a..4f300e0 100644
   * BLE Stack
 @@ -152,13 +93,15 @@
   * Prepare Write List size in terms of number of packet
-  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS is set to 1"
+  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
   */
 -#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
 +// #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
@@ -149,7 +148,7 @@ index 7ebc65a..4f300e0 100644
  
  /**
   * Number of allocated memory blocks
-  * This parameter is overwritten by the CPU2 with an hardcoded optimal value when the parameter when CFG_BLE_OPTIONS is set to 1
+  * This parameter is overwritten by the CPU2 with an hardcoded optimal value when the parameter CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
   */
 -#define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
 +// #define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
@@ -157,18 +156,18 @@ index 7ebc65a..4f300e0 100644
  
  /**
   * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
-@@ -236,7 +179,7 @@
+@@ -241,7 +184,7 @@
   *          0: LE Power Class 2-3
   * other bits: reserved (shall be set to 0)
   */
--#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
+-#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
 +#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY)
  
  #define CFG_BLE_MAX_COC_INITIATOR_NBR   (32)
  
-@@ -256,334 +199,5 @@
+@@ -291,340 +234,5 @@
  
- #define CFG_BLE_RX_MODEL_CONFIG         SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY
+ #define CFG_BLE_RX_PATH_COMPENS    (0)
  
 -/******************************************************************************
 - * Transport Layer
@@ -206,7 +205,7 @@ index 7ebc65a..4f300e0 100644
 -/**
 - * Select UART interfaces
 - */
--#define CFG_UART_GUI          hw_uart1
+-#define CFG_UART_GUI            hw_uart1
 -#define CFG_DEBUG_TRACE_UART    0
 -/******************************************************************************
 - * USB interface
@@ -276,10 +275,10 @@ index 7ebc65a..4f300e0 100644
 - * It divides the RTC CLK by 16
 - */
 -
--#define CFG_RTCCLK_DIV  (16)
--#define CFG_RTC_WUCKSEL_DIVIDER (0)
--#define CFG_RTC_ASYNCH_PRESCALER (0x0F)
--#define CFG_RTC_SYNCH_PRESCALER (0x7FFF)
+-#define CFG_RTCCLK_DIV            (16)
+-#define CFG_RTC_WUCKSEL_DIVIDER   (0)
+-#define CFG_RTC_ASYNCH_PRESCALER  (0x0F)
+-#define CFG_RTC_SYNCH_PRESCALER   (0x7FFF)
 -
 -#else
 -
@@ -370,7 +369,7 @@ index 7ebc65a..4f300e0 100644
 -#if (CFG_DEBUG_TRACE != 0)
 -#undef CFG_LPM_SUPPORTED
 -#undef CFG_DEBUGGER_SUPPORTED
--#define CFG_LPM_SUPPORTED         0
+-#define CFG_LPM_SUPPORTED           0
 -#define CFG_DEBUGGER_SUPPORTED      1
 -#endif
 -
@@ -408,7 +407,7 @@ index 7ebc65a..4f300e0 100644
 - * Only Used if DBG_TRACE_USE_CIRCULAR_QUEUE is defined
 - */
 -#define DBG_TRACE_MSG_QUEUE_SIZE 4096
--#define MAX_DBG_TRACE_MSG_SIZE 1024
+-#define MAX_DBG_TRACE_MSG_SIZE   1024
 -
 -/* USER CODE BEGIN Defines */
 -#define CFG_LED_SUPPORTED         1
@@ -433,31 +432,31 @@ index 7ebc65a..4f300e0 100644
 -/**< Add in that list all tasks that may send a ACI/HCI command */
 -typedef enum
 -{
--    CFG_TASK_BLE_HCI_CMD_ID,
--    CFG_TASK_SYS_HCI_CMD_ID,
--    CFG_TASK_HCI_ACL_DATA_ID,
--    CFG_TASK_SYS_LOCAL_CMD_ID,
--    CFG_TASK_TX_TO_HOST_ID,
--    /* USER CODE BEGIN CFG_Task_Id_With_HCI_Cmd_t */
--    CFG_TASK_SW1_BUTTON_PUSHED_ID,
--    CFG_TASK_SW2_BUTTON_PUSHED_ID,
--    CFG_TASK_SW3_BUTTON_PUSHED_ID,
--    /* USER CODE END CFG_Task_Id_With_HCI_Cmd_t */
--    CFG_LAST_TASK_ID_WITH_HCICMD,                                               /**< Shall be LAST in the list */
+-  CFG_TASK_BLE_HCI_CMD_ID,
+-  CFG_TASK_SYS_HCI_CMD_ID,
+-  CFG_TASK_HCI_ACL_DATA_ID,
+-  CFG_TASK_SYS_LOCAL_CMD_ID,
+-  CFG_TASK_TX_TO_HOST_ID,
+-  /* USER CODE BEGIN CFG_Task_Id_With_HCI_Cmd_t */
+-  CFG_TASK_SW1_BUTTON_PUSHED_ID,
+-  CFG_TASK_SW2_BUTTON_PUSHED_ID,
+-  CFG_TASK_SW3_BUTTON_PUSHED_ID,
+-  /* USER CODE END CFG_Task_Id_With_HCI_Cmd_t */
+-  CFG_LAST_TASK_ID_WITH_HCICMD,                                               /**< Shall be LAST in the list */
 -} CFG_Task_Id_With_HCI_Cmd_t;
 -
 -/**< Add in that list all tasks that never send a ACI/HCI command */
 -typedef enum
 -{
--    CFG_FIRST_TASK_ID_WITH_NO_HCICMD = CFG_LAST_TASK_ID_WITH_HCICMD - 1,        /**< Shall be FIRST in the list */
--    CFG_TASK_SYSTEM_HCI_ASYNCH_EVT_ID,
--    /* USER CODE BEGIN CFG_Task_Id_With_NO_HCI_Cmd_t */
+-  CFG_FIRST_TASK_ID_WITH_NO_HCICMD = CFG_LAST_TASK_ID_WITH_HCICMD - 1,        /**< Shall be FIRST in the list */
+-  CFG_TASK_SYSTEM_HCI_ASYNCH_EVT_ID,
+-  /* USER CODE BEGIN CFG_Task_Id_With_NO_HCI_Cmd_t */
 -
--    /* USER CODE END CFG_Task_Id_With_NO_HCI_Cmd_t */
--    CFG_LAST_TASK_ID_WITHO_NO_HCICMD                                            /**< Shall be LAST in the list */
+-  /* USER CODE END CFG_Task_Id_With_NO_HCI_Cmd_t */
+-  CFG_LAST_TASK_ID_WITH_NO_HCICMD                                            /**< Shall be LAST in the list */
 -} CFG_Task_Id_With_NO_HCI_Cmd_t;
 -
--#define CFG_TASK_NBR    CFG_LAST_TASK_ID_WITHO_NO_HCICMD
+-#define CFG_TASK_NBR    CFG_LAST_TASK_ID_WITH_NO_HCICMD
 -
 -/**
 - * This is the list of priority required by the application
@@ -465,8 +464,10 @@ index 7ebc65a..4f300e0 100644
 - */
 -typedef enum
 -{
--    CFG_SCH_PRIO_0,
--    CFG_PRIO_NBR,
+-  CFG_SCH_PRIO_0,
+-  /* USER CODE BEGIN CFG_SCH_Prio_Id_t */
+-
+-  /* USER CODE END CFG_SCH_Prio_Id_t */
 -} CFG_SCH_Prio_Id_t;
 -
 -/**
@@ -474,7 +475,10 @@ index 7ebc65a..4f300e0 100644
 - */
 -typedef enum
 -{
--    CFG_IDLEEVT_SYSTEM_HCI_CMD_EVT_RSP_ID,
+-  CFG_IDLEEVT_SYSTEM_HCI_CMD_EVT_RSP_ID,
+-  /* USER CODE BEGIN CFG_IdleEvt_Id_t */
+-
+-  /* USER CODE END CFG_IdleEvt_Id_t */
 -} CFG_IdleEvt_Id_t;
 -
 -/******************************************************************************
@@ -486,11 +490,11 @@ index 7ebc65a..4f300e0 100644
 - */
 -typedef enum
 -{
--    CFG_LPM_APP,
--    CFG_LPM_APP_BLE,
--    /* USER CODE BEGIN CFG_LPM_Id_t */
+-  CFG_LPM_APP,
+-  CFG_LPM_APP_BLE,
+-  /* USER CODE BEGIN CFG_LPM_Id_t */
 -
--    /* USER CODE END CFG_LPM_Id_t */
+-  /* USER CODE END CFG_LPM_Id_t */
 -} CFG_LPM_Id_t;
 -
 -/******************************************************************************
@@ -499,10 +503,11 @@ index 7ebc65a..4f300e0 100644
 -#define CFG_OTP_BASE_ADDRESS    OTP_AREA_BASE
 -
 -#define CFG_OTP_END_ADRESS      OTP_AREA_END_ADDR
- 
+-
  #endif /*APP_CONF_H */
+ 
 diff --git a/src/utility/STM32Cube_FW/ble_bufsize.h b/src/utility/STM32Cube_FW/ble_bufsize.h
-index ba9c4d3..73b7887 100644
+index 0f0f419..247573b 100644
 --- a/src/utility/STM32Cube_FW/ble_bufsize.h
 +++ b/src/utility/STM32Cube_FW/ble_bufsize.h
 @@ -75,17 +75,24 @@
@@ -586,7 +591,7 @@ index 503fa2c..fcf0451 100644
  }
  #endif
 diff --git a/src/utility/STM32Cube_FW/hw_ipcc.c b/src/utility/STM32Cube_FW/hw_ipcc.c
-index c5a941d..2f4f6cc 100644
+index fd620b8..7b9be81 100644
 --- a/src/utility/STM32Cube_FW/hw_ipcc.c
 +++ b/src/utility/STM32Cube_FW/hw_ipcc.c
 @@ -18,8 +18,9 @@
@@ -701,7 +706,7 @@ index c5a941d..2f4f6cc 100644
  /******************************************************************************
   * GENERAL
   ******************************************************************************/
-@@ -263,8 +222,8 @@ static void HW_IPCC_BLE_AclDataEvtHandler( void )
+@@ -264,8 +223,8 @@ static void HW_IPCC_BLE_AclDataEvtHandler( void )
    return;
  }
  
@@ -712,7 +717,7 @@ index c5a941d..2f4f6cc 100644
  
  /******************************************************************************
   * SYSTEM
-@@ -302,56 +261,8 @@ static void HW_IPCC_SYS_EvtHandler( void )
+@@ -303,56 +262,8 @@ static void HW_IPCC_SYS_EvtHandler( void )
    return;
  }
  
@@ -771,7 +776,7 @@ index c5a941d..2f4f6cc 100644
  
  /******************************************************************************
   * THREAD
-@@ -423,9 +334,9 @@ static void HW_IPCC_THREAD_CliNotEvtHandler( void )
+@@ -424,9 +335,9 @@ static void HW_IPCC_THREAD_CliNotEvtHandler( void )
    return;
  }
  
@@ -784,7 +789,7 @@ index c5a941d..2f4f6cc 100644
  
  #endif /* THREAD_WB */
  
-@@ -547,74 +458,6 @@ void HW_IPCC_LLD_BLE_SendRspAck( void )
+@@ -548,74 +459,6 @@ void HW_IPCC_LLD_BLE_SendRspAck( void )
  
  #endif /* LLD_BLE_WB */
  
@@ -859,7 +864,7 @@ index c5a941d..2f4f6cc 100644
  /******************************************************************************
   * MEMORY MANAGER
   ******************************************************************************/
-@@ -665,4 +508,5 @@ static void HW_IPCC_TRACES_EvtHandler( void )
+@@ -666,4 +509,5 @@ static void HW_IPCC_TRACES_EvtHandler( void )
    return;
  }
  
@@ -867,10 +872,10 @@ index c5a941d..2f4f6cc 100644
 +__WEAK void HW_IPCC_TRACES_EvtNot( void ){};
 +#endif /* STM32WBxx */
 diff --git a/src/utility/STM32Cube_FW/mbox_def.h b/src/utility/STM32Cube_FW/mbox_def.h
-index 06536d3..c898e52 100644
+index 68b71f9..0c974f8 100644
 --- a/src/utility/STM32Cube_FW/mbox_def.h
 +++ b/src/utility/STM32Cube_FW/mbox_def.h
-@@ -105,12 +105,6 @@ extern "C" {
+@@ -106,12 +106,6 @@ extern "C" {
      uint8_t   *m0cmd_buffer;
    } MB_BleLldTable_t;
  
@@ -883,7 +888,7 @@ index 06536d3..c898e52 100644
    /**
     * msg
     * [0:7]   = cmd/evt
-@@ -138,13 +132,6 @@ extern "C" {
+@@ -139,13 +133,6 @@ extern "C" {
      uint8_t   *traces_queue;
    } MB_TracesTable_t;
  
@@ -897,7 +902,7 @@ index 06536d3..c898e52 100644
    typedef struct
    {
      MB_DeviceInfoTable_t    *p_device_info_table;
-@@ -153,8 +140,6 @@ extern "C" {
+@@ -154,8 +141,6 @@ extern "C" {
      MB_SysTable_t           *p_sys_table;
      MB_MemManagerTable_t    *p_mem_manager_table;
      MB_TracesTable_t        *p_traces_table;
@@ -906,7 +911,7 @@ index 06536d3..c898e52 100644
      MB_LldTestsTable_t      *p_lld_tests_table;
      MB_BleLldTable_t        *p_ble_lld_table;
  } MB_RefTable_t;
-@@ -198,15 +183,6 @@ typedef struct
+@@ -199,15 +184,6 @@ typedef struct
   *   |                                                 |
   *   |<---HW_IPCC_SYSTEM_EVENT_CHANNEL-----------------|
   *   |                                                 |
@@ -922,7 +927,7 @@ index 06536d3..c898e52 100644
   *   |             (THREAD)                            |
   *   |----HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL----------->|
   *   |                                                 |
-@@ -230,11 +206,6 @@ typedef struct
+@@ -231,11 +207,6 @@ typedef struct
   *   |                                                 |
   *   |<---HW_IPCC_BLE_LLD_M0_CMD_CHANNEL---------------|
   *   |                                                 |
@@ -934,7 +939,7 @@ index 06536d3..c898e52 100644
   *   |             (BUFFER)                            |
   *   |----HW_IPCC_MM_RELEASE_BUFFER_CHANNE------------>|
   *   |                                                 |
-@@ -252,8 +223,6 @@ typedef struct
+@@ -253,8 +224,6 @@ typedef struct
  #define HW_IPCC_BLE_CMD_CHANNEL                         LL_IPCC_CHANNEL_1
  #define HW_IPCC_SYSTEM_CMD_RSP_CHANNEL                  LL_IPCC_CHANNEL_2
  #define HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL               LL_IPCC_CHANNEL_3
@@ -943,7 +948,7 @@ index 06536d3..c898e52 100644
  #define HW_IPCC_MM_RELEASE_BUFFER_CHANNEL               LL_IPCC_CHANNEL_4
  #define HW_IPCC_THREAD_CLI_CMD_CHANNEL                  LL_IPCC_CHANNEL_5
  #define HW_IPCC_LLDTESTS_CLI_CMD_CHANNEL                LL_IPCC_CHANNEL_5
-@@ -265,8 +234,6 @@ typedef struct
+@@ -266,8 +235,6 @@ typedef struct
  #define HW_IPCC_BLE_EVENT_CHANNEL                       LL_IPCC_CHANNEL_1
  #define HW_IPCC_SYSTEM_EVENT_CHANNEL                    LL_IPCC_CHANNEL_2
  #define HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL         LL_IPCC_CHANNEL_3
@@ -952,7 +957,7 @@ index 06536d3..c898e52 100644
  #define HW_IPCC_LLDTESTS_M0_CMD_CHANNEL                 LL_IPCC_CHANNEL_3
  #define HW_IPCC_BLE_LLD_M0_CMD_CHANNEL                  LL_IPCC_CHANNEL_3
  #define HW_IPCC_TRACES_CHANNEL                          LL_IPCC_CHANNEL_4
-@@ -274,6 +241,5 @@ typedef struct
+@@ -275,6 +242,5 @@ typedef struct
  #define HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL                LL_IPCC_CHANNEL_5
  #define HW_IPCC_BLE_LLD_CLI_RSP_CHANNEL                 LL_IPCC_CHANNEL_5
  #define HW_IPCC_BLE_LLD_RSP_CHANNEL                     LL_IPCC_CHANNEL_5
@@ -960,7 +965,7 @@ index 06536d3..c898e52 100644
  #endif /*__MBOX_H */
  
 diff --git a/src/utility/STM32Cube_FW/shci.c b/src/utility/STM32Cube_FW/shci.c
-index 301db76..bd7bb3a 100644
+index 472a108..a847522 100644
 --- a/src/utility/STM32Cube_FW/shci.c
 +++ b/src/utility/STM32Cube_FW/shci.c
 @@ -16,7 +16,7 @@
@@ -1022,14 +1027,14 @@ index 301db76..bd7bb3a 100644
  SHCI_CmdStatus_t SHCI_C2_Reinit( void )
  {
    /**
-@@ -739,3 +703,5 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
+@@ -739,4 +703,4 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
  
    return (SHCI_Success);
  }
+-
 +#endif /* STM32WBxx */
-+
 diff --git a/src/utility/STM32Cube_FW/shci.h b/src/utility/STM32Cube_FW/shci.h
-index c08f056..9449c22 100644
+index 102089e..6b6ffd1 100644
 --- a/src/utility/STM32Cube_FW/shci.h
 +++ b/src/utility/STM32Cube_FW/shci.h
 @@ -49,7 +49,6 @@ extern "C" {
@@ -1049,7 +1054,7 @@ index c08f056..9449c22 100644
     * section could be written in Flash/NVM
     * StartAddress : Start address of the section that has been modified
     * Size : Size (in bytes) of the section that has been modified
-@@ -214,9 +213,7 @@ extern "C" {
+@@ -216,9 +215,7 @@ extern "C" {
      SHCI_OCF_C2_FLASH_STORE_DATA,
      SHCI_OCF_C2_FLASH_ERASE_DATA,
      SHCI_OCF_C2_RADIO_ALLOW_LOW_POWER,
@@ -1059,7 +1064,7 @@ index c08f056..9449c22 100644
      SHCI_OCF_C2_LLD_TESTS_INIT,
      SHCI_OCF_C2_EXTPA_CONFIG,
      SHCI_OCF_C2_SET_FLASH_ACTIVITY_CONTROL,
-@@ -614,8 +611,6 @@ extern "C" {
+@@ -648,8 +645,6 @@ extern "C" {
      {
        uint8_t thread_config;
        uint8_t ble_config;
@@ -1068,7 +1073,7 @@ index c08f056..9449c22 100644
      } SHCI_C2_DEBUG_TracesConfig_t;
  
      typedef PACKED_STRUCT
-@@ -674,8 +669,6 @@ extern "C" {
+@@ -713,8 +708,6 @@ extern "C" {
      {
        BLE_ENABLE,
        THREAD_ENABLE,
@@ -1077,7 +1082,7 @@ index c08f056..9449c22 100644
      } SHCI_C2_CONCURRENT_Mode_Param_t;
        /** No response parameters*/
  
-@@ -698,18 +691,13 @@ extern "C" {
+@@ -737,18 +730,13 @@ extern "C" {
      {
        BLE_IP,
        THREAD_IP,
@@ -1096,7 +1101,7 @@ index c08f056..9449c22 100644
  #define SHCI_OPCODE_C2_LLD_TESTS_INIT           (( SHCI_OGF << 10) + SHCI_OCF_C2_LLD_TESTS_INIT)
  
  #define SHCI_OPCODE_C2_BLE_LLD_INIT             (( SHCI_OGF << 10) + SHCI_OCF_C2_BLE_LLD_INIT)
-@@ -817,7 +805,7 @@ extern "C" {
+@@ -856,7 +844,7 @@ extern "C" {
  #define FUS_DEVICE_INFO_TABLE_VALIDITY_KEYWORD    (0xA94656B9)
  
  /*
@@ -1105,8 +1110,8 @@ index c08f056..9449c22 100644
    *   MB_WirelessFwInfoTable_t.This structure contains 4 fields (Version,MemorySize, Stack_info and a reserved part)
    *   each of those coded on 32 bits as shown on the table below:
    *
-@@ -870,9 +858,6 @@ extern "C" {
- #define INFO_STACK_TYPE_BLE_BEACON                  0x04
+@@ -912,9 +900,6 @@ extern "C" {
+ #define INFO_STACK_TYPE_BLE_HCI_EXT_ADV             0x07
  #define INFO_STACK_TYPE_THREAD_FTD                  0x10
  #define INFO_STACK_TYPE_THREAD_MTD                  0x11
 -#define INFO_STACK_TYPE_ZIGBEE_FFD                  0x30
@@ -1115,7 +1120,7 @@ index c08f056..9449c22 100644
  #define INFO_STACK_TYPE_BLE_THREAD_FTD_STATIC       0x50
  #define INFO_STACK_TYPE_BLE_THREAD_FTD_DYAMIC       0x51
  #define INFO_STACK_TYPE_802154_LLD_TESTS            0x60
-@@ -881,12 +866,7 @@ extern "C" {
+@@ -923,12 +908,7 @@ extern "C" {
  #define INFO_STACK_TYPE_BLE_LLD_TESTS               0x63
  #define INFO_STACK_TYPE_BLE_RLV                     0x64
  #define INFO_STACK_TYPE_802154_RLV                  0x65
@@ -1128,7 +1133,7 @@ index c08f056..9449c22 100644
  
  typedef struct {
  /**
-@@ -1060,7 +1040,7 @@ typedef struct {
+@@ -1102,7 +1082,7 @@ typedef struct {
    * @brief Starts the LLD tests CLI
    *
    * @param  param_size : Nb of bytes
@@ -1137,7 +1142,7 @@ index c08f056..9449c22 100644
    * @retval Status
    */
    SHCI_CmdStatus_t SHCI_C2_LLDTESTS_Init( uint8_t param_size, uint8_t * p_param );
-@@ -1070,19 +1050,10 @@ typedef struct {
+@@ -1112,19 +1092,10 @@ typedef struct {
    * @brief Starts the LLD tests BLE
    *
    * @param  param_size : Nb of bytes
@@ -1146,7 +1151,7 @@ index c08f056..9449c22 100644
    * @retval Status
    */
    SHCI_CmdStatus_t SHCI_C2_BLE_LLD_Init( uint8_t param_size, uint8_t * p_param );
--
+-  
 -    /**
 -  * SHCI_C2_ZIGBEE_Init
 -  * @brief Starts the Zigbee Stack
@@ -1155,10 +1160,10 @@ index c08f056..9449c22 100644
 -  * @retval Status
 -  */
 -  SHCI_CmdStatus_t SHCI_C2_ZIGBEE_Init( void );
-   
+ 
    /**
    * SHCI_C2_DEBUG_Init
-@@ -1158,16 +1129,6 @@ typedef struct {
+@@ -1200,16 +1171,6 @@ typedef struct {
    */
    SHCI_CmdStatus_t SHCI_C2_RADIO_AllowLowPower( SHCI_C2_FLASH_Ip_t Ip,uint8_t  FlagRadioLowPowerOn);
  
@@ -1176,7 +1181,7 @@ index c08f056..9449c22 100644
     * SHCI_GetWirelessFwInfo
     * @brief This function read back the informations relative to the wireless binary loaded.
 diff --git a/src/utility/STM32Cube_FW/shci_tl.c b/src/utility/STM32Cube_FW/shci_tl.c
-index 449b8b1..ef403aa 100644
+index ddb3a02..d1a448d 100644
 --- a/src/utility/STM32Cube_FW/shci_tl.c
 +++ b/src/utility/STM32Cube_FW/shci_tl.c
 @@ -16,12 +16,13 @@
@@ -1215,12 +1220,12 @@ index 449b8b1..ef403aa 100644
  /* Private functions ---------------------------------------------------------*/
  static void TlInit( TL_CmdPacket_t * p_cmdbuffer )
  {
-@@ -252,3 +267,5 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
+@@ -252,4 +267,4 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
    return;
  }
  
+-
 +#endif /* STM32WBxx */
-+
 diff --git a/src/utility/STM32Cube_FW/stm32_wpan_common.h b/src/utility/STM32Cube_FW/stm32_wpan_common.h
 index b47b804..5a2b2a5 100644
 --- a/src/utility/STM32Cube_FW/stm32_wpan_common.h
@@ -1280,7 +1285,7 @@ index b47b804..5a2b2a5 100644
  #ifdef __cplusplus
  }
 diff --git a/src/utility/STM32Cube_FW/stm_list.c b/src/utility/STM32Cube_FW/stm_list.c
-index 69c8c06..3dea751 100644
+index 4c92864..77dec64 100644
 --- a/src/utility/STM32Cube_FW/stm_list.c
 +++ b/src/utility/STM32Cube_FW/stm_list.c
 @@ -16,13 +16,13 @@
@@ -1299,7 +1304,7 @@ index 69c8c06..3dea751 100644
 +#include "stm32_wpan_common.h"
  
  /******************************************************************************
-  * Function Definitions 
+  * Function Definitions
 @@ -33,10 +33,10 @@ void LST_init_head (tListNode * listHead)
    listHead->prev = listHead;
  }
@@ -1313,12 +1318,11 @@ index 69c8c06..3dea751 100644
  
    primask_bit = __get_PRIMASK();  /**< backup PRIMASK bit */
    __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
-@@ -205,3 +205,4 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
+@@ -204,3 +204,4 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
+ 
    __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
  }
- 
 +#endif /* STM32WBxx */
-\ No newline at end of file
 diff --git a/src/utility/STM32Cube_FW/stm_list.h b/src/utility/STM32Cube_FW/stm_list.h
 index b7c3254..769c211 100644
 --- a/src/utility/STM32Cube_FW/stm_list.h
@@ -1342,10 +1346,10 @@ index b7c3254..769c211 100644
  void LST_insert_head (tListNode * listHead, tListNode * node);
  
 diff --git a/src/utility/STM32Cube_FW/tl.h b/src/utility/STM32Cube_FW/tl.h
-index cb27246..16de7f1 100644
+index 2124d26..678769c 100644
 --- a/src/utility/STM32Cube_FW/tl.h
 +++ b/src/utility/STM32Cube_FW/tl.h
-@@ -198,19 +198,6 @@ typedef struct
+@@ -199,19 +199,6 @@ typedef struct
    uint8_t *p_BleLldM0CmdBuffer;
  } TL_BLE_LLD_Config_t;
  
@@ -1365,7 +1369,7 @@ index cb27246..16de7f1 100644
  /**
   * @brief Contain the BLE HCI Init Configuration
   * @{
-@@ -304,26 +291,6 @@ void TL_MM_EvtDone( TL_EvtPacket_t * hcievt );
+@@ -305,26 +292,6 @@ void TL_MM_EvtDone( TL_EvtPacket_t * hcievt );
  void TL_TRACES_Init( void );
  void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt );
  
@@ -1393,7 +1397,7 @@ index cb27246..16de7f1 100644
  } /* extern "C" */
  #endif
 diff --git a/src/utility/STM32Cube_FW/tl_mbox.c b/src/utility/STM32Cube_FW/tl_mbox.c
-index 148bcb1..709f5d2 100644
+index 4112429..a9abb18 100644
 --- a/src/utility/STM32Cube_FW/tl_mbox.c
 +++ b/src/utility/STM32Cube_FW/tl_mbox.c
 @@ -16,6 +16,7 @@
@@ -1431,7 +1435,7 @@ index 148bcb1..709f5d2 100644
    HW_IPCC_Init();
  
    return;
-@@ -451,139 +448,6 @@ void TL_BLE_LLD_SendRspAck( void )
+@@ -452,139 +449,6 @@ void TL_BLE_LLD_SendRspAck( void )
  }
  #endif /* BLE_LLD_WB */
  
@@ -1571,12 +1575,12 @@ index 148bcb1..709f5d2 100644
  /******************************************************************************
   * MEMORY MANAGER
   ******************************************************************************/
-@@ -845,3 +709,5 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
+@@ -846,4 +710,4 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
  
    return;
  }
-+
+-
 +#endif /* STM32WBxx */
 -- 
-2.31.1.windows.1
+2.33.0.windows.1
 

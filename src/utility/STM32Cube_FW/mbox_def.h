@@ -91,6 +91,7 @@ extern "C" {
     uint8_t   *notack_buffer;
     uint8_t   *clicmdrsp_buffer;
     uint8_t   *otcmdrsp_buffer;
+    uint8_t   *clinot_buffer;
   } MB_ThreadTable_t;
 
   typedef struct

@@ -271,4 +271,3 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
 }
 
 #endif /* STM32WBxx */
-

@@ -184,6 +184,7 @@ typedef struct
   uint8_t *p_ThreadOtCmdRspBuffer;
   uint8_t *p_ThreadCliRspBuffer;
   uint8_t *p_ThreadNotAckBuffer;
+  uint8_t *p_ThreadCliNotBuffer;
 } TL_TH_Config_t;
 
 typedef struct
