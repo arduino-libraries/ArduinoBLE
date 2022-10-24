@@ -68,6 +68,7 @@
 #define OCF_LE_CREATE_CONN                0x000d
 #define OCF_LE_CANCEL_CONN                0x000e
 #define OCF_LE_CONN_UPDATE                0x0013
+#define OCF_LE_RAND                       0x0018
 
 #define HCI_OE_USER_ENDED_CONNECTION 0x13
 
@@ -390,6 +391,17 @@ int HCIClass::leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxIn
   leConnUpdateData.maxCeLength = 0x0006;
 
   return sendCommand(OGF_LE_CTL << 10 | OCF_LE_CONN_UPDATE, sizeof(leConnUpdateData), &leConnUpdateData);
+}
+
+int HCIClass::leRand(uint8_t randomNumber[8])
+{
+  int result = sendCommand(OGF_LE_CTL << 10 | OCF_LE_RAND);
+
+  if (result == 0) {
+    memcpy(randomNumber, _cmdResponse, 8);
+  }
+
+  return result;
 }
 
 int HCIClass::sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data)

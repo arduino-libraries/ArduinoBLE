@@ -51,6 +51,18 @@ int BLELocalDevice::begin()
     return 0;
   }
 
+  uint8_t randomNumber[8];
+  if (HCI.leRand(randomNumber) != 0) {
+    end();
+    return 0;
+  }
+
+  randomNumber[5] |= 0xC0; // Force both MSB bit to b00 in order to define Random Address
+  if (HCI.leSetRandomAddress((uint8_t*)randomNumber) != 0) {
+    end();
+    return 0;
+  }
+
   uint8_t hciVer;
   uint16_t hciRev;
   uint8_t lmpVer;
