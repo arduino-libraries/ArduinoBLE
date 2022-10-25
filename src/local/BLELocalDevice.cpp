@@ -56,8 +56,10 @@ int BLELocalDevice::begin()
     end();
     return 0;
   }
-
-  randomNumber[5] |= 0xC0; // Force both MSB bit to b00 in order to define Random Address
+  /* Random address only requires 6 bytes (48 bits)
+   * Force both MSB bits to b00 in order to define Static Random Address
+   */
+  randomNumber[5] |= 0xC0;
   if (HCI.leSetRandomAddress((uint8_t*)randomNumber) != 0) {
     end();
     return 0;
