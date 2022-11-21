@@ -529,7 +529,7 @@ extern "C" {
    * - bit 2:   1: device name Read-Only            0: device name R/W
    * - bit 3:   1: extended advertizing supported   0: extended advertizing not supported
    * - bit 4:   1: CS Algo #2 supported             0: CS Algo #2 not supported
-   * - bit 7:   1: LE Power Class 1                 0: LE Power Classe 2-3
+   * - bit 7:   1: LE Power Class 1                 0: LE Power Classes 2-3
    * - other bits: reserved ( shall be set to 0)
    */
   uint8_t Options;
@@ -1173,7 +1173,7 @@ typedef struct {
 
   /**
    * SHCI_GetWirelessFwInfo
-   * @brief This function read back the informations relative to the wireless binary loaded.
+   * @brief This function read back the information relative to the wireless binary loaded.
    *         Refer yourself to MB_WirelessFwInfoTable_t structure to get the significance
    *         of the different parameters returned.
    * @param  pWirelessInfo : Pointer to WirelessFwInfo_t.

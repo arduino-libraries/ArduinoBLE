@@ -63,6 +63,7 @@ public:
   virtual int leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxInterval, 
                   uint16_t latency, uint16_t supervisionTimeout);
   virtual int leCancelConn();
+  virtual int leRand(uint8_t randomNumber[8]);
 
 
   virtual int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
