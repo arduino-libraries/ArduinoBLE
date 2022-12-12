@@ -48,7 +48,9 @@
 /**
  * Define Tx Power
  */
-#define CFG_TX_POWER                      (0x18) /* -0.15dBm */
+#ifndef CFG_TX_POWER
+  #define CFG_TX_POWER                      (0x18) /* -0.15dBm */
+#endif
 
 #if 0
 /**
@@ -132,13 +134,25 @@
  * Maximum number of simultaneous connections that the device will support.
  * Valid values are from 1 to 8
  */
-#define CFG_BLE_NUM_LINK            8
+#ifndef CFG_BLE_NUM_LINK
+#ifdef STM32WB15xx
+  #define CFG_BLE_NUM_LINK            3
+#else
+  #define CFG_BLE_NUM_LINK            8
+#endif
+#endif
 
 /**
  * Maximum number of Services that can be stored in the GATT database.
  * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
  */
-#define CFG_BLE_NUM_GATT_SERVICES   8
+#ifndef CFG_BLE_NUM_GATT_SERVICES
+#ifdef STM32WB15xx
+  #define CFG_BLE_NUM_GATT_SERVICES   4
+#else
+  #define CFG_BLE_NUM_GATT_SERVICES   8
+#endif
+#endif
 
 /**
  * Maximum number of Attributes
@@ -147,13 +161,21 @@
  * Note that certain characteristics and relative descriptors are added automatically during device initialization
  * so this parameters should be 9 plus the number of user Attributes
  */
-#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
+#ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
+#ifdef STM32WB15xx
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES   30
+#else
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES   68
+#endif
+#endif
 
 /**
  * Maximum supported ATT_MTU size
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-#define CFG_BLE_MAX_ATT_MTU             (156)
+#ifndef CFG_BLE_MAX_ATT_MTU
+  #define CFG_BLE_MAX_ATT_MTU             (156)
+#endif
 
 /**
  * Size of the storage area for Attribute values
@@ -166,14 +188,22 @@
  *  The total amount of memory needed is the sum of the above quantities for each attribute.
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-#define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
+#ifndef CFG_BLE_ATT_VALUE_ARRAY_SIZE
+#ifdef STM32WB15xx
+  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1290)
+#else
+  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
+#endif
+#endif
 
 /**
  * Prepare Write List size in terms of number of packet
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
 // #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
-#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
+#ifndef CFG_BLE_PREPARE_WRITE_LIST_SIZE
+  #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
+#endif
 
 /**
  * Number of allocated memory blocks
@@ -185,12 +215,16 @@
 /**
  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
  */
-#define CFG_BLE_DATA_LENGTH_EXTENSION   1
+#ifndef CFG_BLE_DATA_LENGTH_EXTENSION
+  #define CFG_BLE_DATA_LENGTH_EXTENSION   1
+#endif
 
 /**
  * Sleep clock accuracy in Slave mode (ppm value)
  */
-#define CFG_BLE_SLAVE_SCA   500
+#ifndef CFG_BLE_SLAVE_SCA
+  #define CFG_BLE_SLAVE_SCA   500
+#endif
 
 /**
  * Sleep clock accuracy in Master mode
@@ -203,7 +237,9 @@
  * 6 : 21 ppm to 30 ppm
  * 7 : 0 ppm to 20 ppm
  */
-#define CFG_BLE_MASTER_SCA   0
+#ifndef CFG_BLE_MASTER_SCA
+  #define CFG_BLE_MASTER_SCA   0
+#endif
 
 /**
  * LsSource
@@ -212,21 +248,27 @@
  * - bit 1:   1: STM32WB5M Module device                             0: Other devices as STM32WBxx SOC, STM32WB1M module
  * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
  */
-#if defined(STM32WB5Mxx)
-  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
-#else
-  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
+#ifndef CFG_BLE_LS_SOURCE
+  #if defined(STM32WB5Mxx)
+    #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
+  #else
+    #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
+  #endif
 #endif
 
 /**
  * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
  */
-#define CFG_BLE_HSE_STARTUP_TIME  0x148
+#ifndef CFG_BLE_HSE_STARTUP_TIME
+  #define CFG_BLE_HSE_STARTUP_TIME  0x148
+#endif
 
 /**
  * Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
  */
-#define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
+#ifndef CFG_BLE_MAX_CONN_EVENT_LENGTH
+  #define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
+#endif
 
 /**
  * Viterbi Mode
@@ -314,7 +356,11 @@
  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
  */
 
-#define CFG_BLE_MAX_ADV_SET_NBR     (8)
+#if defined(STM32WB15xx)
+  #define CFG_BLE_MAX_ADV_SET_NBR     (3)
+#else
+  #define CFG_BLE_MAX_ADV_SET_NBR     (8)
+#endif
 
  /* Maximum advertising data length (in bytes)
  * Range: 31 .. 1650 with limitation:
@@ -323,7 +369,11 @@
  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
  */
 
-#define CFG_BLE_MAX_ADV_DATA_LEN    (207)
+#if defined(STM32WB15xx)
+  #define CFG_BLE_MAX_ADV_DATA_LEN    (414)
+#else
+  #define CFG_BLE_MAX_ADV_DATA_LEN    (207)
+#endif
 
  /* RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
   * Range: -1280 .. 1280
