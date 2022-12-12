@@ -16,6 +16,7 @@
  ******************************************************************************
  */
 
+#if defined(STM32WBxx)
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 #include "hw.h"
@@ -51,15 +52,13 @@ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_BleLldTable_t TL_BleLldTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_SysTable_t TL_SysTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_MemManagerTable_t TL_MemManagerTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_TracesTable_t TL_TracesTable;
-PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_Mac_802_15_4_t TL_Mac_802_15_4_Table;
-PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_ZigbeeTable_t TL_Zigbee_Table;
 
 /**< tables */
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  FreeBufQueue;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  TracesEvtQueue;
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t    CsBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + sizeof(TL_CsEvt_t)];
-PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  EvtQueue;
-PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  SystemEvtQueue;
+PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static tListNode  EvtQueue;
+PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static tListNode  SystemEvtQueue;
 
 
 static tListNode  LocalFreeBufQueue;
@@ -97,8 +96,6 @@ void TL_Init( void )
   TL_RefTable.p_sys_table = &TL_SysTable;
   TL_RefTable.p_mem_manager_table = &TL_MemManagerTable;
   TL_RefTable.p_traces_table = &TL_TracesTable;
-  TL_RefTable.p_mac_802_15_4_table = &TL_Mac_802_15_4_Table;
-  TL_RefTable.p_zigbee_table = &TL_Zigbee_Table;
   HW_IPCC_Init();
 
   return;
@@ -452,139 +449,6 @@ void TL_BLE_LLD_SendRspAck( void )
 }
 #endif /* BLE_LLD_WB */
 
-#ifdef MAC_802_15_4_WB
-/******************************************************************************
- * MAC 802.15.4
- ******************************************************************************/
-void TL_MAC_802_15_4_Init( TL_MAC_802_15_4_Config_t *p_Config )
-{
-  MB_Mac_802_15_4_t  * p_mac_802_15_4_table;
-
-  p_mac_802_15_4_table = TL_RefTable.p_mac_802_15_4_table;
-
-  p_mac_802_15_4_table->p_cmdrsp_buffer = p_Config->p_Mac_802_15_4_CmdRspBuffer;
-  p_mac_802_15_4_table->p_notack_buffer = p_Config->p_Mac_802_15_4_NotAckBuffer;
-
-  HW_IPCC_MAC_802_15_4_Init();
-
-  return;
-}
-
-void TL_MAC_802_15_4_SendCmd( void )
-{
-  ((TL_CmdPacket_t *)(TL_RefTable.p_mac_802_15_4_table->p_cmdrsp_buffer))->cmdserial.type = TL_OTCMD_PKT_TYPE;
-
-  HW_IPCC_MAC_802_15_4_SendCmd();
-
-  return;
-}
-
-void TL_MAC_802_15_4_SendAck ( void )
-{
-  ((TL_CmdPacket_t *)(TL_RefTable.p_mac_802_15_4_table->p_notack_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
-
-  HW_IPCC_MAC_802_15_4_SendAck();
-
-  return;
-}
-
-void HW_IPCC_MAC_802_15_4_CmdEvtNot(void)
-{
-  TL_MAC_802_15_4_CmdEvtReceived( (TL_EvtPacket_t*)(TL_RefTable.p_mac_802_15_4_table->p_cmdrsp_buffer) );
-
-  return;
-}
-
-void HW_IPCC_MAC_802_15_4_EvtNot( void )
-{
-  TL_MAC_802_15_4_NotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_mac_802_15_4_table->p_notack_buffer) );
-
-  return;
-}
-
-__WEAK void TL_MAC_802_15_4_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
-__WEAK void TL_MAC_802_15_4_NotReceived( TL_EvtPacket_t * Notbuffer ){};
-#endif
-
-#ifdef ZIGBEE_WB
-/******************************************************************************
- * ZIGBEE
- ******************************************************************************/
-void TL_ZIGBEE_Init( TL_ZIGBEE_Config_t *p_Config )
-{
-  MB_ZigbeeTable_t  * p_zigbee_table;
-
-  p_zigbee_table = TL_RefTable.p_zigbee_table;
-  p_zigbee_table->appliCmdM4toM0_buffer = p_Config->p_ZigbeeOtCmdRspBuffer;
-  p_zigbee_table->notifM0toM4_buffer = p_Config->p_ZigbeeNotAckBuffer;
-  p_zigbee_table->requestM0toM4_buffer = p_Config->p_ZigbeeNotifRequestBuffer;
-
-  HW_IPCC_ZIGBEE_Init();
-
-  return;
-}
-
-/* Zigbee M4 to M0 Request */
-void TL_ZIGBEE_SendM4RequestToM0( void )
-{
-  ((TL_CmdPacket_t *)(TL_RefTable.p_zigbee_table->appliCmdM4toM0_buffer))->cmdserial.type = TL_OTCMD_PKT_TYPE;
-
-  HW_IPCC_ZIGBEE_SendM4RequestToM0();
-
-  return;
-}
-
-/* Used to receive an ACK from the M0 */
-void HW_IPCC_ZIGBEE_RecvAppliAckFromM0(void)
-{
-  TL_ZIGBEE_CmdEvtReceived( (TL_EvtPacket_t*)(TL_RefTable.p_zigbee_table->appliCmdM4toM0_buffer) );
-
-  return;
-}
-
-/* Zigbee notification from M0 to M4 */
-void HW_IPCC_ZIGBEE_RecvM0NotifyToM4( void )
-{
-  TL_ZIGBEE_NotReceived( (TL_EvtPacket_t*)(TL_RefTable.p_zigbee_table->notifM0toM4_buffer) );
-
-  return;
-}
-
-/* Send an ACK to the M0 for a Notification */
-void TL_ZIGBEE_SendM4AckToM0Notify ( void )
-{
-  ((TL_CmdPacket_t *)(TL_RefTable.p_zigbee_table->notifM0toM4_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
-
-  HW_IPCC_ZIGBEE_SendM4AckToM0Notify();
-
-  return;
-}
-
-/* Zigbee M0 to M4 Request */
-void HW_IPCC_ZIGBEE_RecvM0RequestToM4( void )
-{
-  TL_ZIGBEE_M0RequestReceived( (TL_EvtPacket_t*)(TL_RefTable.p_zigbee_table->requestM0toM4_buffer) );
-
-  return;
-}
-
-/* Send an ACK to the M0 for a Request */
-void TL_ZIGBEE_SendM4AckToM0Request(void)
-{
-  ((TL_CmdPacket_t *)(TL_RefTable.p_zigbee_table->requestM0toM4_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
-
-  HW_IPCC_ZIGBEE_SendM4AckToM0Request();
-
-  return;
-}
-
-
-__WEAK void TL_ZIGBEE_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
-__WEAK void TL_ZIGBEE_NotReceived( TL_EvtPacket_t * Notbuffer ){};
-#endif
-
-
-
 /******************************************************************************
  * MEMORY MANAGER
  ******************************************************************************/
@@ -846,3 +710,4 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
 
   return;
 }
+#endif /* STM32WBxx */

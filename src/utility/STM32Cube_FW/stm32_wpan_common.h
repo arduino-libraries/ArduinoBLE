@@ -25,19 +25,9 @@
 extern "C" {
 #endif
 
-#if   defined ( __CC_ARM )||defined (__ARMCC_VERSION)
- #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
- #define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
- #define __STATIC_INLINE  static __inline
-#elif defined ( __ICCARM__ )
- #define __ASM            __asm                                      /*!< asm keyword for IAR Compiler          */
- #define __INLINE         inline                                     /*!< inline keyword for IAR Compiler. Only available in High optimization mode! */
- #define __STATIC_INLINE  static inline
-#elif defined ( __GNUC__ )
- #define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
- #define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
- #define __STATIC_INLINE  static inline
-#endif
+#define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
+#define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
+#define __STATIC_INLINE  static inline
 
 #include <stdint.h>
 #include <string.h>
@@ -140,29 +130,8 @@ extern "C" {
 /* ----------------------------------- *
  *  Packed usage (compiler dependent)  *
  * ----------------------------------- */
-#undef PACKED__
 #undef PACKED_STRUCT
-
-#if defined ( __CC_ARM )
-  #if defined ( __GNUC__ )
-    /* GNU extension */
-    #define PACKED__ __attribute__((packed))
-    #define PACKED_STRUCT struct PACKED__
-  #elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050U)
-    #define PACKED__ __attribute__((packed))
-    #define PACKED_STRUCT struct PACKED__
-  #else
-    #define PACKED__(TYPE) __packed TYPE
-    #define PACKED_STRUCT PACKED__(struct)
-  #endif
-#elif defined   ( __GNUC__ )
-  #define PACKED__ __attribute__((packed))
-  #define PACKED_STRUCT struct PACKED__
-#elif defined (__ICCARM__)
-  #define PACKED_STRUCT __packed struct
-#else
-  #define PACKED_STRUCT __packed struct
-#endif
+#define PACKED_STRUCT struct __packed
 
 #ifdef __cplusplus
 }
