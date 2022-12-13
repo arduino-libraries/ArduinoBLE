@@ -1,27 +1,26 @@
-From 979f153a4e6d5d616ddea616bcd732e32cb1773c Mon Sep 17 00:00:00 2001
-From: Alexandre Bourdiol <alexandre.bourdiol@st.com>
-Date: Tue, 30 Aug 2022 13:19:36 +0200
+From e12c9c97eec7eacb648720fc65adc2a3897ec257 Mon Sep 17 00:00:00 2001
+From: Frederic Pillon <frederic.pillon@st.com>
+Date: Mon, 12 Dec 2022 17:17:48 +0100
 Subject: [PATCH 2/3] fix: include a timeout when waiting for the cmd_resp
 
-Signed-off-by: Alexandre Bourdiol <alexandre.bourdiol@st.com>
+Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/shci_tl.c | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+ src/utility/STM32Cube_FW/shci_tl.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
 diff --git a/src/utility/STM32Cube_FW/shci_tl.c b/src/utility/STM32Cube_FW/shci_tl.c
-index d1a448d..678de84 100644
+index b3cee00..1abd1be 100644
 --- a/src/utility/STM32Cube_FW/shci_tl.c
 +++ b/src/utility/STM32Cube_FW/shci_tl.c
-@@ -20,6 +20,8 @@
- /* Includes ------------------------------------------------------------------*/
- #include "stm32_wpan_common.h"
- 
-+#include <Arduino.h>
-+
+@@ -23,6 +23,7 @@
  #include "stm_list.h"
  #include "shci_tl.h"
  #include "stm32_def.h"
-@@ -250,11 +252,12 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
++#include "wiring_time.h"
+ 
+ /* Private typedef -----------------------------------------------------------*/
+ typedef enum
+@@ -234,10 +235,12 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
  /* Weak implementation ----------------------------------------------------------------*/
  __WEAK void shci_cmd_resp_wait(uint32_t timeout)
  {
@@ -29,15 +28,14 @@ index d1a448d..678de84 100644
 -
    CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
 -  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
--
 +  for (unsigned long start = millis(); (millis() - start) < timeout;) {
 +    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
 +      break;
 +    }
 +  }
-   return;
  }
  
+ __WEAK void shci_cmd_resp_release(uint32_t flag)
 -- 
-2.33.0.windows.1
+2.38.0.windows.1
 

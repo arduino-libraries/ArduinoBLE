@@ -1,54 +1,66 @@
-From 1c3ca9f22842e3ae283d3e979a5f38a195d8d4ee Mon Sep 17 00:00:00 2001
-From: Alexandre Bourdiol <alexandre.bourdiol@st.com>
-Date: Tue, 30 Aug 2022 11:28:41 +0200
+From f72f61b2a895a9f02a338c600af1de239939b357 Mon Sep 17 00:00:00 2001
+From: Frederic Pillon <frederic.pillon@st.com>
+Date: Mon, 12 Dec 2022 17:15:26 +0100
 Subject: [PATCH 1/3] chore: clean up and adapt STM32Cube_FW sources for
  STM32duino
 
-Signed-off-by: Alexandre Bourdiol <alexandre.bourdiol@st.com>
+Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/app_conf_default.h  | 428 +------------------
- src/utility/STM32Cube_FW/ble_bufsize.h       |  13 +-
+ src/utility/STM32Cube_FW/app_conf_default.h  | 914 ++++++-------------
+ src/utility/STM32Cube_FW/ble_bufsize.h       |   7 +
  src/utility/STM32Cube_FW/hw.h                |  28 +-
- src/utility/STM32Cube_FW/hw_ipcc.c           | 184 +-------
- src/utility/STM32Cube_FW/mbox_def.h          |  34 --
- src/utility/STM32Cube_FW/shci.c              |  40 +-
- src/utility/STM32Cube_FW/shci.h              |  47 +-
- src/utility/STM32Cube_FW/shci_tl.c           |  19 +-
+ src/utility/STM32Cube_FW/hw_ipcc.c           | 218 +----
+ src/utility/STM32Cube_FW/mbox_def.h          |  34 -
+ src/utility/STM32Cube_FW/shci.c              |  39 +-
+ src/utility/STM32Cube_FW/shci.h              |  51 +-
+ src/utility/STM32Cube_FW/shci_tl.c           |  37 +-
  src/utility/STM32Cube_FW/stm32_wpan_common.h |  39 +-
- src/utility/STM32Cube_FW/stm_list.c          |  11 +-
+ src/utility/STM32Cube_FW/stm_list.c          |  15 +-
  src/utility/STM32Cube_FW/stm_list.h          |   4 +-
- src/utility/STM32Cube_FW/tl.h                |  33 --
- src/utility/STM32Cube_FW/tl_mbox.c           | 144 +------
- 13 files changed, 91 insertions(+), 933 deletions(-)
+ src/utility/STM32Cube_FW/tl.h                |  33 -
+ src/utility/STM32Cube_FW/tl_mbox.c           | 143 +--
+ 13 files changed, 323 insertions(+), 1239 deletions(-)
+ rewrite src/utility/STM32Cube_FW/app_conf_default.h (63%)
 
 diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
-index c63c66e..54f824a 100644
+dissimilarity index 63%
+index 2606a05..cc8c3e8 100644
 --- a/src/utility/STM32Cube_FW/app_conf_default.h
 +++ b/src/utility/STM32Cube_FW/app_conf_default.h
-@@ -1,4 +1,3 @@
+@@ -1,655 +1,259 @@
 -/* USER CODE BEGIN Header */
- /**
-   ******************************************************************************
-   * @file    app_conf.h
-@@ -16,94 +15,36 @@
-   *
-   ******************************************************************************
-   */
+-/**
+-  ******************************************************************************
+-  * @file    app_conf.h
+-  * @author  MCD Application Team
+-  * @brief   Application configuration file for STM32WPAN Middleware.
+-  ******************************************************************************
+-  * @attention
+-  *
+-  * Copyright (c) 2020-2021 STMicroelectronics.
+-  * All rights reserved.
+-  *
+-  * This software is licensed under terms that can be found in the LICENSE file
+-  * in the root directory of this software component.
+-  * If no LICENSE file comes with this software, it is provided AS-IS.
+-  *
+-  ******************************************************************************
+-  */
 -/* USER CODE END Header */
- 
- /* Define to prevent recursive inclusion -------------------------------------*/
- #ifndef APP_CONF_H
- #define APP_CONF_H
- 
- #include "hw.h"
+-
+-/* Define to prevent recursive inclusion -------------------------------------*/
+-#ifndef APP_CONF_H
+-#define APP_CONF_H
+-
+-#include "hw.h"
 -#include "hw_conf.h"
 -#include "hw_if.h"
- #include "ble_bufsize.h"
- 
- /******************************************************************************
-  * Application Config
-  ******************************************************************************/
- 
+-#include "ble_bufsize.h"
+-
+-/******************************************************************************
+- * Application Config
+- ******************************************************************************/
+-
 -/**
 - * Define Secure Connections Support
 - */
@@ -63,16 +75,9 @@ index c63c66e..54f824a 100644
 - */
 -#define CFG_KEYPRESS_NOT_SUPPORTED            (0x00)
 -#define CFG_KEYPRESS_SUPPORTED                (0x01)
-+/**< generic parameters ******************************************************/
-+/* HCI related defines */
- 
+-
 -#define CFG_KEYPRESS_NOTIFICATION_SUPPORT     CFG_KEYPRESS_NOT_SUPPORTED
-+#define ACI_HAL_SET_TX_POWER_LEVEL 0xFC0F
-+#define ACI_WRITE_CONFIG_DATA_OPCODE 0xFC0C
-+#define ACI_READ_CONFIG_DATA_OPCODE 0xFC0D
-+#define MAX_HCI_ACL_PACKET_SIZE (sizeof(TL_PacketHeader_t) + 5 + 251)
-+#define HCI_RESET 0x0C03
- 
+-
 -/**
 - * Numeric Comparison Answers
 - */
@@ -94,17 +99,12 @@ index c63c66e..54f824a 100644
 -* Encryption root key used to derive LTK and CSRK
 -*/
 -#define CFG_BLE_ERK     {0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21, 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21}
-+#ifndef BLE_SHARED_MEM_BYTE_ORDER
-+  #define BLE_SHARED_MEM_BYTE_ORDER  MSBFIRST
-+#endif
-+#define BLE_MODULE_SHARED_MEM_BUFFER_SIZE 128
- 
- /**
+-
+-/**
 - * SMPS supply
 - * SMPS not used when Set to 0
 - * SMPS used when Set to 1
-+ * Define Tx Power
-  */
+- */
 -#define CFG_USE_SMPS    0
 -
 -/* USER CODE BEGIN Generic_Parameters */
@@ -134,41 +134,218 @@ index c63c66e..54f824a 100644
 -#define CFG_FW_SUBVERSION         (1)
 -#define CFG_FW_BRANCH             (0)
 -#define CFG_FW_BUILD              (0)
-+#define CFG_TX_POWER                      (0x18) /* -0.15dBm */
- 
- /******************************************************************************
-  * BLE Stack
-@@ -152,13 +93,15 @@
-  * Prepare Write List size in terms of number of packet
-  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
-  */
+-
+-/******************************************************************************
+- * BLE Stack
+- ******************************************************************************/
+-/**
+- * Maximum number of simultaneous connections that the device will support.
+- * Valid values are from 1 to 8
+- */
+-#define CFG_BLE_NUM_LINK            8
+-
+-/**
+- * Maximum number of Services that can be stored in the GATT database.
+- * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
+- */
+-#define CFG_BLE_NUM_GATT_SERVICES   8
+-
+-/**
+- * Maximum number of Attributes
+- * (i.e. the number of characteristic + the number of characteristic values + the number of descriptors, excluding the services)
+- * that can be stored in the GATT database.
+- * Note that certain characteristics and relative descriptors are added automatically during device initialization
+- * so this parameters should be 9 plus the number of user Attributes
+- */
+-#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
+-
+-/**
+- * Maximum supported ATT_MTU size
+- * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
+- */
+-#define CFG_BLE_MAX_ATT_MTU             (156)
+-
+-/**
+- * Size of the storage area for Attribute values
+- *  This value depends on the number of attributes used by application. In particular the sum of the following quantities (in octets) should be made for each attribute:
+- *  - attribute value length
+- *  - 5, if UUID is 16 bit; 19, if UUID is 128 bit
+- *  - 2, if server configuration descriptor is used
+- *  - 2*DTM_NUM_LINK, if client configuration descriptor is used
+- *  - 2, if extended properties is used
+- *  The total amount of memory needed is the sum of the above quantities for each attribute.
+- * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
+- */
+-#define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
+-
+-/**
+- * Prepare Write List size in terms of number of packet
+- * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
+- */
 -#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
-+// #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
-+#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
- 
- /**
-  * Number of allocated memory blocks
-  * This parameter is overwritten by the CPU2 with an hardcoded optimal value when the parameter CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
-  */
+-
+-/**
+- * Number of allocated memory blocks
+- * This parameter is overwritten by the CPU2 with an hardcoded optimal value when the parameter CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
+- */
 -#define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
-+// #define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
-+#define CFG_BLE_MBLOCK_COUNT              (0x79)
- 
- /**
-  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
-@@ -241,7 +184,7 @@
-  *          0: LE Power Class 2-3
-  * other bits: reserved (shall be set to 0)
-  */
--#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
-+#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY)
- 
- #define CFG_BLE_MAX_COC_INITIATOR_NBR   (32)
- 
-@@ -291,340 +234,5 @@
- 
- #define CFG_BLE_RX_PATH_COMPENS    (0)
- 
+-
+-/**
+- * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
+- */
+-#define CFG_BLE_DATA_LENGTH_EXTENSION   1
+-
+-/**
+- * Sleep clock accuracy in Slave mode (ppm value)
+- */
+-#define CFG_BLE_SLAVE_SCA   500
+-
+-/**
+- * Sleep clock accuracy in Master mode
+- * 0 : 251 ppm to 500 ppm
+- * 1 : 151 ppm to 250 ppm
+- * 2 : 101 ppm to 150 ppm
+- * 3 : 76 ppm to 100 ppm
+- * 4 : 51 ppm to 75 ppm
+- * 5 : 31 ppm to 50 ppm
+- * 6 : 21 ppm to 30 ppm
+- * 7 : 0 ppm to 20 ppm
+- */
+-#define CFG_BLE_MASTER_SCA   0
+-
+-/**
+- * LsSource
+- * Some information for Low speed clock mapped in bits field
+- * - bit 0:   1: Calibration for the RF system wakeup clock source   0: No calibration for the RF system wakeup clock source
+- * - bit 1:   1: STM32WB5M Module device                             0: Other devices as STM32WBxx SOC, STM32WB1M module
+- * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
+- */
+-#if defined(STM32WB5Mxx)
+-  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
+-#else
+-  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
+-#endif
+-
+-/**
+- * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
+- */
+-#define CFG_BLE_HSE_STARTUP_TIME  0x148
+-
+-/**
+- * Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
+- */
+-#define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
+-
+-/**
+- * Viterbi Mode
+- * 1 : enabled
+- * 0 : disabled
+- */
+-#define CFG_BLE_VITERBI_MODE  1
+-
+-/**
+- * BLE stack Options flags to be configured with:
+- * - SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY
+- * - SHCI_C2_BLE_INIT_OPTIONS_LL_HOST
+- * - SHCI_C2_BLE_INIT_OPTIONS_NO_SVC_CHANGE_DESC
+- * - SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC
+- * - SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO
+- * - SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW
+- * - SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV
+- * - SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV
+- * - SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2
+- * - SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2
+- * - SHCI_C2_BLE_INIT_OPTIONS_REDUC_GATTDB_NVM
+- * - SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM
+- * - SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_USED
+- * - SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED
+- * - SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_1
+- * - SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3
+- * - SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_WRITABLE
+- * - SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY
+- * - SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_SUPPORTED
+- * - SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED
+- * which are used to set following configuration bits:
+- * (bit 0): 1: LL only
+- *          0: LL + host
+- * (bit 1): 1: no service change desc.
+- *          0: with service change desc.
+- * (bit 2): 1: device name Read-Only
+- *          0: device name R/W
+- * (bit 3): 1: extended advertizing supported
+- *          0: extended advertizing not supported
+- * (bit 4): 1: CS Algo #2 supported
+- *          0: CS Algo #2 not supported
+- * (bit 5): 1: Reduced GATT database in NVM
+- *          0: Full GATT database in NVM
+- * (bit 6): 1: GATT caching is used
+- *          0: GATT caching is not used
+- * (bit 7): 1: LE Power Class 1
+- *          0: LE Power Class 2-3
+- * (bit 8): 1: appearance Writable
+- *          0: appearance Read-Only
+- * (bit 9): 1: Enhanced ATT supported
+- *          0: Enhanced ATT not supported
+- * other bits: reserved (shall be set to 0)
+- */
+-#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 | SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY | SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED)
+-
+-#define CFG_BLE_MAX_COC_INITIATOR_NBR   (32)
+-
+-#define CFG_BLE_MIN_TX_POWER            (-40)
+-
+-#define CFG_BLE_MAX_TX_POWER            (6)
+-
+-/**
+- * BLE Rx model configuration flags to be configured with:
+- * - SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY
+- * - SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_BLOCKER
+- * which are used to set following configuration bits:
+- * (bit 0): 1: agc_rssi model improved vs RF blockers
+- *          0: Legacy agc_rssi model
+- * other bits: reserved (shall be set to 0)
+- */
+-
+-#define CFG_BLE_RX_MODEL_CONFIG         (SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY)
+-
+-/* Maximum number of advertising sets.
+- * Range: 1 .. 8 with limitation:
+- * This parameter is linked to CFG_BLE_MAX_ADV_DATA_LEN such as both compliant with allocated Total memory computed with BLE_EXT_ADV_BUFFER_SIZE based
+- * on Max Extended advertising configuration supported.
+- * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
+- */
+-
+-#define CFG_BLE_MAX_ADV_SET_NBR     (8)
+-
+- /* Maximum advertising data length (in bytes)
+- * Range: 31 .. 1650 with limitation:
+- * This parameter is linked to CFG_BLE_MAX_ADV_SET_NBR such as both compliant with allocated Total memory computed with BLE_EXT_ADV_BUFFER_SIZE based
+- * on Max Extended advertising configuration supported.
+- * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
+- */
+-
+-#define CFG_BLE_MAX_ADV_DATA_LEN    (207)
+-
+- /* RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+-  * Range: -1280 .. 1280
+-  */
+-
+-#define CFG_BLE_TX_PATH_COMPENS    (0)
+-
+- /* RF RX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+-  * Range: -1280 .. 1280
+-  */
+-
+-#define CFG_BLE_RX_PATH_COMPENS    (0)
+-
+-  /* BLE core version (16-bit signed integer).
+-   * - SHCI_C2_BLE_INIT_BLE_CORE_5_2
+-   * - SHCI_C2_BLE_INIT_BLE_CORE_5_3
+-   * which are used to set: 11(5.2), 12(5.3).
+-   */
+-
+-#define CFG_BLE_CORE_VERSION   (SHCI_C2_BLE_INIT_BLE_CORE_5_3)
+-
 -/******************************************************************************
 - * Transport Layer
 - ******************************************************************************/
@@ -504,13 +681,272 @@ index c63c66e..54f824a 100644
 -
 -#define CFG_OTP_END_ADRESS      OTP_AREA_END_ADDR
 -
- #endif /*APP_CONF_H */
- 
+-#endif /*APP_CONF_H */
+-
++/**
++  ******************************************************************************
++  * @file    app_conf_default.h
++  * @author  MCD Application Team
++  * @brief   Default application configuration file for STM32WPAN Middleware.
++  ******************************************************************************
++  * @attention
++  *
++  * Copyright (c) 2020-2021 STMicroelectronics.
++  * All rights reserved.
++  *
++  * This software is licensed under terms that can be found in the LICENSE file
++  * in the root directory of this software component.
++  * If no LICENSE file comes with this software, it is provided AS-IS.
++  *
++  ******************************************************************************
++  */
++
++/* Define to prevent recursive inclusion -------------------------------------*/
++#ifndef APP_CONF_DEFAULT_H
++#define APP_CONF_DEFAULT_H
++
++/******************************************************************************
++ * Application Config
++ ******************************************************************************/
++
++/**< generic parameters ******************************************************/
++/* HCI related defines */
++
++#define ACI_HAL_SET_TX_POWER_LEVEL 0xFC0F
++#define ACI_WRITE_CONFIG_DATA_OPCODE 0xFC0C
++#define ACI_READ_CONFIG_DATA_OPCODE 0xFC0D
++#define MAX_HCI_ACL_PACKET_SIZE (sizeof(TL_PacketHeader_t) + 5 + 251)
++#define HCI_RESET 0x0C03
++
++#ifndef BLE_SHARED_MEM_BYTE_ORDER
++  #define BLE_SHARED_MEM_BYTE_ORDER  MSBFIRST
++#endif
++#define BLE_MODULE_SHARED_MEM_BUFFER_SIZE 128
++
++/**
++ * Define Tx Power
++ */
++#define CFG_TX_POWER                      (0x18) /* -0.15dBm */
++
++/******************************************************************************
++ * BLE Stack
++ ******************************************************************************/
++/**
++ * Maximum number of simultaneous connections that the device will support.
++ * Valid values are from 1 to 8
++ */
++#define CFG_BLE_NUM_LINK            8
++
++/**
++ * Maximum number of Services that can be stored in the GATT database.
++ * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
++ */
++#define CFG_BLE_NUM_GATT_SERVICES   8
++
++/**
++ * Maximum number of Attributes
++ * (i.e. the number of characteristic + the number of characteristic values + the number of descriptors, excluding the services)
++ * that can be stored in the GATT database.
++ * Note that certain characteristics and relative descriptors are added automatically during device initialization
++ * so this parameters should be 9 plus the number of user Attributes
++ */
++#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
++
++/**
++ * Maximum supported ATT_MTU size
++ * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
++ */
++#define CFG_BLE_MAX_ATT_MTU             (156)
++
++/**
++ * Size of the storage area for Attribute values
++ *  This value depends on the number of attributes used by application. In particular the sum of the following quantities (in octets) should be made for each attribute:
++ *  - attribute value length
++ *  - 5, if UUID is 16 bit; 19, if UUID is 128 bit
++ *  - 2, if server configuration descriptor is used
++ *  - 2*DTM_NUM_LINK, if client configuration descriptor is used
++ *  - 2, if extended properties is used
++ *  The total amount of memory needed is the sum of the above quantities for each attribute.
++ * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
++ */
++#define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
++
++/**
++ * Prepare Write List size in terms of number of packet
++ * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
++ */
++// #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
++#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
++
++/**
++ * Number of allocated memory blocks
++ * This parameter is overwritten by the CPU2 with an hardcoded optimal value when the parameter CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
++ */
++// #define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
++#define CFG_BLE_MBLOCK_COUNT              (0x79)
++
++/**
++ * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
++ */
++#define CFG_BLE_DATA_LENGTH_EXTENSION   1
++
++/**
++ * Sleep clock accuracy in Slave mode (ppm value)
++ */
++#define CFG_BLE_SLAVE_SCA   500
++
++/**
++ * Sleep clock accuracy in Master mode
++ * 0 : 251 ppm to 500 ppm
++ * 1 : 151 ppm to 250 ppm
++ * 2 : 101 ppm to 150 ppm
++ * 3 : 76 ppm to 100 ppm
++ * 4 : 51 ppm to 75 ppm
++ * 5 : 31 ppm to 50 ppm
++ * 6 : 21 ppm to 30 ppm
++ * 7 : 0 ppm to 20 ppm
++ */
++#define CFG_BLE_MASTER_SCA   0
++
++/**
++ * LsSource
++ * Some information for Low speed clock mapped in bits field
++ * - bit 0:   1: Calibration for the RF system wakeup clock source   0: No calibration for the RF system wakeup clock source
++ * - bit 1:   1: STM32WB5M Module device                             0: Other devices as STM32WBxx SOC, STM32WB1M module
++ * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
++ */
++#if defined(STM32WB5Mxx)
++  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
++#else
++  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
++#endif
++
++/**
++ * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
++ */
++#define CFG_BLE_HSE_STARTUP_TIME  0x148
++
++/**
++ * Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
++ */
++#define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
++
++/**
++ * Viterbi Mode
++ * 1 : enabled
++ * 0 : disabled
++ */
++#define CFG_BLE_VITERBI_MODE  1
++
++/**
++ * BLE stack Options flags to be configured with:
++ * - SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY
++ * - SHCI_C2_BLE_INIT_OPTIONS_LL_HOST
++ * - SHCI_C2_BLE_INIT_OPTIONS_NO_SVC_CHANGE_DESC
++ * - SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC
++ * - SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO
++ * - SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW
++ * - SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV
++ * - SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV
++ * - SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2
++ * - SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2
++ * - SHCI_C2_BLE_INIT_OPTIONS_REDUC_GATTDB_NVM
++ * - SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM
++ * - SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_USED
++ * - SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED
++ * - SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_1
++ * - SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3
++ * - SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_WRITABLE
++ * - SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY
++ * - SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_SUPPORTED
++ * - SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED
++ * which are used to set following configuration bits:
++ * (bit 0): 1: LL only
++ *          0: LL + host
++ * (bit 1): 1: no service change desc.
++ *          0: with service change desc.
++ * (bit 2): 1: device name Read-Only
++ *          0: device name R/W
++ * (bit 3): 1: extended advertizing supported
++ *          0: extended advertizing not supported
++ * (bit 4): 1: CS Algo #2 supported
++ *          0: CS Algo #2 not supported
++ * (bit 5): 1: Reduced GATT database in NVM
++ *          0: Full GATT database in NVM
++ * (bit 6): 1: GATT caching is used
++ *          0: GATT caching is not used
++ * (bit 7): 1: LE Power Class 1
++ *          0: LE Power Class 2-3
++ * (bit 8): 1: appearance Writable
++ *          0: appearance Read-Only
++ * (bit 9): 1: Enhanced ATT supported
++ *          0: Enhanced ATT not supported
++ * other bits: reserved (shall be set to 0)
++ */
++#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY)
++
++#define CFG_BLE_MAX_COC_INITIATOR_NBR   (32)
++
++#define CFG_BLE_MIN_TX_POWER            (-40)
++
++#define CFG_BLE_MAX_TX_POWER            (6)
++
++/**
++ * BLE Rx model configuration flags to be configured with:
++ * - SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY
++ * - SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_BLOCKER
++ * which are used to set following configuration bits:
++ * (bit 0): 1: agc_rssi model improved vs RF blockers
++ *          0: Legacy agc_rssi model
++ * other bits: reserved (shall be set to 0)
++ */
++
++#define CFG_BLE_RX_MODEL_CONFIG         (SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY)
++
++/* Maximum number of advertising sets.
++ * Range: 1 .. 8 with limitation:
++ * This parameter is linked to CFG_BLE_MAX_ADV_DATA_LEN such as both compliant with allocated Total memory computed with BLE_EXT_ADV_BUFFER_SIZE based
++ * on Max Extended advertising configuration supported.
++ * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
++ */
++
++#define CFG_BLE_MAX_ADV_SET_NBR     (8)
++
++ /* Maximum advertising data length (in bytes)
++ * Range: 31 .. 1650 with limitation:
++ * This parameter is linked to CFG_BLE_MAX_ADV_SET_NBR such as both compliant with allocated Total memory computed with BLE_EXT_ADV_BUFFER_SIZE based
++ * on Max Extended advertising configuration supported.
++ * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
++ */
++
++#define CFG_BLE_MAX_ADV_DATA_LEN    (207)
++
++ /* RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
++  * Range: -1280 .. 1280
++  */
++
++#define CFG_BLE_TX_PATH_COMPENS    (0)
++
++ /* RF RX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
++  * Range: -1280 .. 1280
++  */
++
++#define CFG_BLE_RX_PATH_COMPENS    (0)
++
++  /* BLE core version (16-bit signed integer).
++   * - SHCI_C2_BLE_INIT_BLE_CORE_5_2
++   * - SHCI_C2_BLE_INIT_BLE_CORE_5_3
++   * which are used to set: 11(5.2), 12(5.3).
++   */
++
++#define CFG_BLE_CORE_VERSION   (SHCI_C2_BLE_INIT_BLE_CORE_5_3)
++
++#endif /* APP_CONF_DEFAULT_H */
 diff --git a/src/utility/STM32Cube_FW/ble_bufsize.h b/src/utility/STM32Cube_FW/ble_bufsize.h
-index 0f0f419..247573b 100644
+index 4269fa4..cea5da8 100644
 --- a/src/utility/STM32Cube_FW/ble_bufsize.h
 +++ b/src/utility/STM32Cube_FW/ble_bufsize.h
-@@ -75,17 +75,24 @@
+@@ -75,6 +75,13 @@
            ((pw) + MAX(BLE_MEM_BLOCK_X_MTU(mtu, n_link), \
                        BLE_MBLOCKS_SECURE_CONNECTIONS))
  
@@ -523,21 +959,7 @@ index 0f0f419..247573b 100644
 +
  /*
   * BLE_FIXED_BUFFER_SIZE_BYTES:
-- * A part of the RAM, is dinamically allocated by initilizing all the pointers
-+ * A part of the RAM, is dynamically allocated by initializing all the pointers 
-  * defined in a global context variable "mem_alloc_ctx_p".
-  * This initialization is made in the Dynamic_allocator functions, which 
-- * assing a portion of RAM given by the external application to the above
-+ * assign a portion of RAM given by the external application to the above
-  * mentioned "global pointers".
-  *
-  * The size of this Dynamic RAM is made of 2 main components: 
-  * - a part that is parameters-dependent (num of links, GATT buffers, ...),
-- *   and which value is explicited by the following macro;
-+ *   and which value is defined by the following macro;
-  * - a part, that may be considered "fixed", i.e. independent from the above
-  *   mentioned parameters.
- */
+  * A part of the RAM, is dynamically allocated by initializing all the pointers
 diff --git a/src/utility/STM32Cube_FW/hw.h b/src/utility/STM32Cube_FW/hw.h
 index 503fa2c..fcf0451 100644
 --- a/src/utility/STM32Cube_FW/hw.h
@@ -591,12 +1013,19 @@ index 503fa2c..fcf0451 100644
  }
  #endif
 diff --git a/src/utility/STM32Cube_FW/hw_ipcc.c b/src/utility/STM32Cube_FW/hw_ipcc.c
-index fd620b8..7b9be81 100644
+index fd620b8..0c1868f 100644
 --- a/src/utility/STM32Cube_FW/hw_ipcc.c
 +++ b/src/utility/STM32Cube_FW/hw_ipcc.c
-@@ -18,8 +18,9 @@
+@@ -1,4 +1,3 @@
+-/* USER CODE BEGIN Header */
+ /**
+   ******************************************************************************
+   * @file    hw_ipcc.c
+@@ -16,10 +15,10 @@
+   *
+   ******************************************************************************
    */
- /* USER CODE END Header */
+-/* USER CODE END Header */
  
 +#if defined(STM32WBxx)
  /* Includes ------------------------------------------------------------------*/
@@ -605,7 +1034,7 @@ index fd620b8..7b9be81 100644
  #include "mbox_def.h"
  
  /* Global variables ---------------------------------------------------------*/
-@@ -56,34 +57,17 @@ static void HW_IPCC_LLD_BLE_ReceiveRspHandler( void );
+@@ -56,34 +55,17 @@ static void HW_IPCC_LLD_BLE_ReceiveRspHandler( void );
  static void HW_IPCC_LLD_BLE_ReceiveM0CmdHandler( void );
  #endif
  
@@ -626,7 +1055,7 @@ index fd620b8..7b9be81 100644
   * INTERRUPT HANDLER
   ******************************************************************************/
 -void HW_IPCC_Rx_Handler( void )
-+void IPCC_C1_RX_IRQHandler(void)
++void IPCC_C1_RX_IRQHandler( void )
  {
    if (HW_IPCC_RX_PENDING( HW_IPCC_SYSTEM_EVENT_CHANNEL ))
    {
@@ -641,7 +1070,7 @@ index fd620b8..7b9be81 100644
  #ifdef THREAD_WB
    else if (HW_IPCC_RX_PENDING( HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL ))
    {
-@@ -114,16 +98,6 @@ void HW_IPCC_Rx_Handler( void )
+@@ -114,16 +96,6 @@ void HW_IPCC_Rx_Handler( void )
      HW_IPCC_LLD_BLE_ReceiveM0CmdHandler();
    }
  #endif /* LLD_TESTS_WB */
@@ -658,7 +1087,7 @@ index fd620b8..7b9be81 100644
    else if (HW_IPCC_RX_PENDING( HW_IPCC_BLE_EVENT_CHANNEL ))
    {
      HW_IPCC_BLE_EvtHandler();
-@@ -132,22 +106,14 @@ void HW_IPCC_Rx_Handler( void )
+@@ -132,22 +104,14 @@ void HW_IPCC_Rx_Handler( void )
    {
      HW_IPCC_TRACES_EvtHandler();
    }
@@ -667,7 +1096,7 @@ index fd620b8..7b9be81 100644
  }
  
 -void HW_IPCC_Tx_Handler( void )
-+void IPCC_C1_TX_IRQHandler(void)
++void IPCC_C1_TX_IRQHandler( void )
  {
    if (HW_IPCC_TX_PENDING( HW_IPCC_SYSTEM_CMD_RSP_CHANNEL ))
    {
@@ -682,7 +1111,7 @@ index fd620b8..7b9be81 100644
  #ifdef THREAD_WB
    else if (HW_IPCC_TX_PENDING( HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL ))
    {
-@@ -157,12 +123,6 @@ void HW_IPCC_Tx_Handler( void )
+@@ -157,12 +121,6 @@ void HW_IPCC_Tx_Handler( void )
  #ifdef LLD_TESTS_WB
  // No TX handler for LLD tests
  #endif /* LLD_TESTS_WB */
@@ -695,35 +1124,112 @@ index fd620b8..7b9be81 100644
    else if (HW_IPCC_TX_PENDING( HW_IPCC_MM_RELEASE_BUFFER_CHANNEL ))
    {
      HW_IPCC_MM_FreeBufHandler();
-@@ -171,9 +131,8 @@ void HW_IPCC_Tx_Handler( void )
+@@ -171,8 +129,6 @@ void HW_IPCC_Tx_Handler( void )
    {
      HW_IPCC_BLE_AclDataEvtHandler();
    }
 -
 -  return;
  }
-+
  /******************************************************************************
   * GENERAL
-  ******************************************************************************/
-@@ -264,8 +223,8 @@ static void HW_IPCC_BLE_AclDataEvtHandler( void )
-   return;
+@@ -204,8 +160,6 @@ void HW_IPCC_Enable( void )
+   __SEV( );       /* Set the internal event flag and send an event to the CPU2 */
+   __WFE( );       /* Clear the internal event flag */
+   LL_PWR_EnableBootC2( );
+-
+-  return;
  }
  
--__weak void HW_IPCC_BLE_AclDataAckNot( void ){};
--__weak void HW_IPCC_BLE_RxEvtNot( void ){};
-+__WEAK void HW_IPCC_BLE_AclDataAckNot( void ){};
-+__WEAK void HW_IPCC_BLE_RxEvtNot( void ){};
+ void HW_IPCC_Init( void )
+@@ -217,8 +171,6 @@ void HW_IPCC_Init( void )
+ 
+   HAL_NVIC_EnableIRQ(IPCC_C1_RX_IRQn);
+   HAL_NVIC_EnableIRQ(IPCC_C1_TX_IRQn);
+-
+-  return;
+ }
  
  /******************************************************************************
-  * SYSTEM
-@@ -303,56 +262,8 @@ static void HW_IPCC_SYS_EvtHandler( void )
-   return;
+@@ -227,15 +179,11 @@ void HW_IPCC_Init( void )
+ void HW_IPCC_BLE_Init( void )
+ {
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_BLE_EVENT_CHANNEL );
+-
+-  return;
  }
  
--__weak void HW_IPCC_SYS_CmdEvtNot( void ){};
--__weak void HW_IPCC_SYS_EvtNot( void ){};
+ void HW_IPCC_BLE_SendCmd( void )
+ {
+   LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_BLE_CMD_CHANNEL );
 -
+-  return;
+ }
+ 
+ static void HW_IPCC_BLE_EvtHandler( void )
+@@ -243,16 +191,12 @@ static void HW_IPCC_BLE_EvtHandler( void )
+   HW_IPCC_BLE_RxEvtNot();
+ 
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_BLE_EVENT_CHANNEL );
+-
+-  return;
+ }
+ 
+ void HW_IPCC_BLE_SendAclData( void )
+ {
+   LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL );
+   LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL );
+-
+-  return;
+ }
+ 
+ static void HW_IPCC_BLE_AclDataEvtHandler( void )
+@@ -260,8 +204,6 @@ static void HW_IPCC_BLE_AclDataEvtHandler( void )
+   LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_HCI_ACL_DATA_CHANNEL );
+ 
+   HW_IPCC_BLE_AclDataAckNot();
+-
+-  return;
+ }
+ 
+ __weak void HW_IPCC_BLE_AclDataAckNot( void ){};
+@@ -273,16 +215,12 @@ __weak void HW_IPCC_BLE_RxEvtNot( void ){};
+ void HW_IPCC_SYS_Init( void )
+ {
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL );
+-
+-  return;
+ }
+ 
+ void HW_IPCC_SYS_SendCmd( void )
+ {
+   LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL );
+   LL_C1_IPCC_EnableTransmitChannel( IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL );
+-
+-  return;
+ }
+ 
+ static void HW_IPCC_SYS_CmdEvtHandler( void )
+@@ -290,8 +228,6 @@ static void HW_IPCC_SYS_CmdEvtHandler( void )
+   LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL );
+ 
+   HW_IPCC_SYS_CmdEvtNot();
+-
+-  return;
+ }
+ 
+ static void HW_IPCC_SYS_EvtHandler( void )
+@@ -299,61 +235,11 @@ static void HW_IPCC_SYS_EvtHandler( void )
+   HW_IPCC_SYS_EvtNot();
+ 
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL );
+-
+-  return;
+ }
+ 
+ __weak void HW_IPCC_SYS_CmdEvtNot( void ){};
+ __weak void HW_IPCC_SYS_EvtNot( void ){};
+ 
 -/******************************************************************************
 - * MAC 802.15.4
 - ******************************************************************************/
@@ -771,25 +1277,139 @@ index fd620b8..7b9be81 100644
 -__weak void HW_IPCC_MAC_802_15_4_CmdEvtNot( void ){};
 -__weak void HW_IPCC_MAC_802_15_4_EvtNot( void ){};
 -#endif
-+__WEAK void HW_IPCC_SYS_CmdEvtNot( void ){};
-+__WEAK void HW_IPCC_SYS_EvtNot( void ){};
- 
+-
  /******************************************************************************
   * THREAD
-@@ -424,9 +335,9 @@ static void HW_IPCC_THREAD_CliNotEvtHandler( void )
-   return;
+  ******************************************************************************/
+@@ -393,8 +279,6 @@ void HW_IPCC_THREAD_CliSendAck( void )
+ {
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL );
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL );
+-
+-  return;
  }
  
--__weak void HW_IPCC_OT_CmdEvtNot( void ){};
--__weak void HW_IPCC_CLI_CmdEvtNot( void ){};
--__weak void HW_IPCC_THREAD_EvtNot( void ){};
-+__WEAK void HW_IPCC_OT_CmdEvtNot( void ){};
-+__WEAK void HW_IPCC_CLI_CmdEvtNot( void ){};
-+__WEAK void HW_IPCC_THREAD_EvtNot( void ){};
+ static void HW_IPCC_OT_CmdEvtHandler( void )
+@@ -402,8 +286,6 @@ static void HW_IPCC_OT_CmdEvtHandler( void )
+   LL_C1_IPCC_DisableTransmitChannel( IPCC, HW_IPCC_THREAD_OT_CMD_RSP_CHANNEL );
  
- #endif /* THREAD_WB */
+   HW_IPCC_OT_CmdEvtNot();
+-
+-  return;
+ }
  
-@@ -548,74 +459,6 @@ void HW_IPCC_LLD_BLE_SendRspAck( void )
+ static void HW_IPCC_THREAD_NotEvtHandler( void )
+@@ -411,8 +293,6 @@ static void HW_IPCC_THREAD_NotEvtHandler( void )
+   LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_THREAD_NOTIFICATION_ACK_CHANNEL );
+ 
+   HW_IPCC_THREAD_EvtNot();
+-
+-  return;
+ }
+ 
+ static void HW_IPCC_THREAD_CliNotEvtHandler( void )
+@@ -420,8 +300,6 @@ static void HW_IPCC_THREAD_CliNotEvtHandler( void )
+   LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_THREAD_CLI_NOTIFICATION_ACK_CHANNEL );
+ 
+   HW_IPCC_THREAD_CliEvtNot();
+-
+-  return;
+ }
+ 
+ __weak void HW_IPCC_OT_CmdEvtNot( void ){};
+@@ -438,7 +316,6 @@ void HW_IPCC_LLDTESTS_Init( void )
+ {
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL );
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL );
+-  return;
+ }
+ 
+ void HW_IPCC_LLDTESTS_SendCliCmd( void )
+@@ -451,28 +328,24 @@ static void HW_IPCC_LLDTESTS_ReceiveCliRspHandler( void )
+ {
+   LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL );
+   HW_IPCC_LLDTESTS_ReceiveCliRsp();
+-  return;
+ }
+ 
+ void HW_IPCC_LLDTESTS_SendCliRspAck( void )
+ {
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL );
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLDTESTS_CLI_RSP_CHANNEL );
+-  return;
+ }
+ 
+ static void HW_IPCC_LLDTESTS_ReceiveM0CmdHandler( void )
+ {
+   LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL );
+   HW_IPCC_LLDTESTS_ReceiveM0Cmd();
+-  return;
+ }
+ 
+ void HW_IPCC_LLDTESTS_SendM0CmdAck( void )
+ {
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL );
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLDTESTS_M0_CMD_CHANNEL );
+-  return;
+ }
+ __weak void HW_IPCC_LLDTESTS_ReceiveCliRsp( void ){};
+ __weak void HW_IPCC_LLDTESTS_ReceiveM0Cmd( void ){};
+@@ -486,13 +359,11 @@ void HW_IPCC_LLD_BLE_Init( void )
+ {
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL );
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL );
+-  return;
+ }
+ 
+ void HW_IPCC_LLD_BLE_SendCliCmd( void )
+ {
+   LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_LLD_BLE_CLI_CMD_CHANNEL );
+-  return;
+ }
+ 
+ /*static void HW_IPCC_LLD_BLE_ReceiveCliRspHandler( void )
+@@ -506,21 +377,18 @@ void HW_IPCC_LLD_BLE_SendCliRspAck( void )
+ {
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_LLD_BLE_CLI_RSP_CHANNEL );
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_CLI_RSP_CHANNEL );
+-  return;
+ }
+ 
+ static void HW_IPCC_LLD_BLE_ReceiveM0CmdHandler( void )
+ {
+   //LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL );
+   HW_IPCC_LLD_BLE_ReceiveM0Cmd();
+-  return;
+ }
+ 
+ void HW_IPCC_LLD_BLE_SendM0CmdAck( void )
+ {
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL );
+   //LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_M0_CMD_CHANNEL );
+-  return;
+ }
+ __weak void HW_IPCC_LLD_BLE_ReceiveCliRsp( void ){};
+ __weak void HW_IPCC_LLD_BLE_ReceiveM0Cmd( void ){};
+@@ -529,93 +397,22 @@ __weak void HW_IPCC_LLD_BLE_ReceiveM0Cmd( void ){};
+ void HW_IPCC_LLD_BLE_SendCmd( void )
+ {
+   LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_LLD_BLE_CMD_CHANNEL );
+-  return;
+ }
+ 
+ static void HW_IPCC_LLD_BLE_ReceiveRspHandler( void )
+ {
+   LL_C1_IPCC_DisableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL );
+   HW_IPCC_LLD_BLE_ReceiveRsp();
+-  return;
+ }
+ 
+ void HW_IPCC_LLD_BLE_SendRspAck( void )
+ {
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL );
+   LL_C1_IPCC_EnableReceiveChannel( IPCC, HW_IPCC_LLD_BLE_RSP_CHANNEL );
+-  return;
+ }
  
  #endif /* LLD_BLE_WB */
  
@@ -864,12 +1484,33 @@ index fd620b8..7b9be81 100644
  /******************************************************************************
   * MEMORY MANAGER
   ******************************************************************************/
-@@ -666,4 +509,5 @@ static void HW_IPCC_TRACES_EvtHandler( void )
-   return;
+@@ -632,8 +429,6 @@ void HW_IPCC_MM_SendFreeBuf( void (*cb)( void ) )
+ 
+     LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL );
+   }
+-
+-  return;
  }
  
--__weak void HW_IPCC_TRACES_EvtNot( void ){};
-+__WEAK void HW_IPCC_TRACES_EvtNot( void ){};
+ static void HW_IPCC_MM_FreeBufHandler( void )
+@@ -643,8 +438,6 @@ static void HW_IPCC_MM_FreeBufHandler( void )
+   FreeBufCb();
+ 
+   LL_C1_IPCC_SetFlag_CHx( IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL );
+-
+-  return;
+ }
+ 
+ /******************************************************************************
+@@ -662,8 +455,7 @@ static void HW_IPCC_TRACES_EvtHandler( void )
+   HW_IPCC_TRACES_EvtNot();
+ 
+   LL_C1_IPCC_ClearFlag_CHx( IPCC, HW_IPCC_TRACES_CHANNEL );
+-
+-  return;
+ }
+ 
+ __weak void HW_IPCC_TRACES_EvtNot( void ){};
 +#endif /* STM32WBxx */
 diff --git a/src/utility/STM32Cube_FW/mbox_def.h b/src/utility/STM32Cube_FW/mbox_def.h
 index 68b71f9..0c974f8 100644
@@ -965,7 +1606,7 @@ index 68b71f9..0c974f8 100644
  #endif /*__MBOX_H */
  
 diff --git a/src/utility/STM32Cube_FW/shci.c b/src/utility/STM32Cube_FW/shci.c
-index 472a108..a847522 100644
+index 301db76..a847522 100644
 --- a/src/utility/STM32Cube_FW/shci.c
 +++ b/src/utility/STM32Cube_FW/shci.c
 @@ -16,7 +16,7 @@
@@ -1027,14 +1668,13 @@ index 472a108..a847522 100644
  SHCI_CmdStatus_t SHCI_C2_Reinit( void )
  {
    /**
-@@ -739,4 +703,4 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
+@@ -739,3 +703,4 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
  
    return (SHCI_Success);
  }
--
 +#endif /* STM32WBxx */
 diff --git a/src/utility/STM32Cube_FW/shci.h b/src/utility/STM32Cube_FW/shci.h
-index 102089e..6b6ffd1 100644
+index 7ca9021..a0f1e4d 100644
 --- a/src/utility/STM32Cube_FW/shci.h
 +++ b/src/utility/STM32Cube_FW/shci.h
 @@ -49,7 +49,6 @@ extern "C" {
@@ -1045,15 +1685,6 @@ index 102089e..6b6ffd1 100644
     } SCHI_SystemErrCode_t;
  
  #define SHCI_EVTCODE                    ( 0xFF )
-@@ -102,7 +101,7 @@ extern "C" {
- 
-   /**
-    * SHCI_SUB_EVT_THREAD_NVM_RAM_UPDATE
--   * This notifies the CPU1 which part of the OT NVM RAM has been updated so that only the modified
-+   * This notifies the CPU1 which part of the 'OT NVM RAM' has been updated so that only the modified
-    * section could be written in Flash/NVM
-    * StartAddress : Start address of the section that has been modified
-    * Size : Size (in bytes) of the section that has been modified
 @@ -216,9 +215,7 @@ extern "C" {
      SHCI_OCF_C2_FLASH_STORE_DATA,
      SHCI_OCF_C2_FLASH_ERASE_DATA,
@@ -1064,7 +1695,34 @@ index 102089e..6b6ffd1 100644
      SHCI_OCF_C2_LLD_TESTS_INIT,
      SHCI_OCF_C2_EXTPA_CONFIG,
      SHCI_OCF_C2_SET_FLASH_ACTIVITY_CONTROL,
-@@ -648,8 +645,6 @@ extern "C" {
+@@ -436,7 +433,7 @@ extern "C" {
+    * PrWriteListSize
+    * NOTE: This parameter is ignored by the CPU2 when the parameter "Options" is set to "LL_only" ( see Options description in that structure )
+    *
+-   * Maximum number of supported “prepare write request”
++   * Maximum number of supported "prepare write request"
+    *    - Min value: given by the macro DEFAULT_PREP_WRITE_LIST_SIZE
+    *    - Max value: a value higher than the minimum required can be specified, but it is not recommended
+    */
+@@ -503,7 +500,7 @@ extern "C" {
+    * MaxConnEventLength
+    * This parameter determines the maximum duration of a slave connection event. When this duration is reached the slave closes
+    * the current connections event (whatever is the CE_length parameter specified by the master in HCI_CREATE_CONNECTION HCI command),
+-   * expressed in units of 625/256 µs (~2.44 µs)
++   * expressed in units of 625/256 Âµs (~2.44 Âµs)
+    *    - Min value: 0 (if 0 is specified, the master and slave perform only a single TX-RX exchange per connection event)
+    *    - Max value: 1638400 (4000 ms). A higher value can be specified (max 0xFFFFFFFF) but results in a maximum connection time
+    *      of 4000 ms as specified. In this case the parameter is not applied, and the predicted CE length calculated on slave is not shortened
+@@ -512,7 +509,7 @@ extern "C" {
+ 
+   /**
+    * HsStartupTime
+-   * Startup time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 µs (~2.44 µs).
++   * Startup time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 Âµs (~2.44 Âµs).
+    *    - Min value: 0
+    *    - Max value:  820 (~2 ms). A higher value can be specified, but the value that implemented in stack is forced to ~2 ms
+    */
+@@ -678,8 +675,6 @@ extern "C" {
      {
        uint8_t thread_config;
        uint8_t ble_config;
@@ -1073,7 +1731,7 @@ index 102089e..6b6ffd1 100644
      } SHCI_C2_DEBUG_TracesConfig_t;
  
      typedef PACKED_STRUCT
-@@ -713,8 +708,6 @@ extern "C" {
+@@ -743,8 +738,6 @@ extern "C" {
      {
        BLE_ENABLE,
        THREAD_ENABLE,
@@ -1082,7 +1740,7 @@ index 102089e..6b6ffd1 100644
      } SHCI_C2_CONCURRENT_Mode_Param_t;
        /** No response parameters*/
  
-@@ -737,18 +730,13 @@ extern "C" {
+@@ -767,18 +760,13 @@ extern "C" {
      {
        BLE_IP,
        THREAD_IP,
@@ -1101,7 +1759,7 @@ index 102089e..6b6ffd1 100644
  #define SHCI_OPCODE_C2_LLD_TESTS_INIT           (( SHCI_OGF << 10) + SHCI_OCF_C2_LLD_TESTS_INIT)
  
  #define SHCI_OPCODE_C2_BLE_LLD_INIT             (( SHCI_OGF << 10) + SHCI_OCF_C2_BLE_LLD_INIT)
-@@ -856,7 +844,7 @@ extern "C" {
+@@ -893,7 +881,7 @@ extern "C" {
  #define FUS_DEVICE_INFO_TABLE_VALIDITY_KEYWORD    (0xA94656B9)
  
  /*
@@ -1110,7 +1768,7 @@ index 102089e..6b6ffd1 100644
    *   MB_WirelessFwInfoTable_t.This structure contains 4 fields (Version,MemorySize, Stack_info and a reserved part)
    *   each of those coded on 32 bits as shown on the table below:
    *
-@@ -912,9 +900,6 @@ extern "C" {
+@@ -949,9 +937,6 @@ extern "C" {
  #define INFO_STACK_TYPE_BLE_HCI_EXT_ADV             0x07
  #define INFO_STACK_TYPE_THREAD_FTD                  0x10
  #define INFO_STACK_TYPE_THREAD_MTD                  0x11
@@ -1120,7 +1778,7 @@ index 102089e..6b6ffd1 100644
  #define INFO_STACK_TYPE_BLE_THREAD_FTD_STATIC       0x50
  #define INFO_STACK_TYPE_BLE_THREAD_FTD_DYAMIC       0x51
  #define INFO_STACK_TYPE_802154_LLD_TESTS            0x60
-@@ -923,12 +908,7 @@ extern "C" {
+@@ -960,12 +945,7 @@ extern "C" {
  #define INFO_STACK_TYPE_BLE_LLD_TESTS               0x63
  #define INFO_STACK_TYPE_BLE_RLV                     0x64
  #define INFO_STACK_TYPE_802154_RLV                  0x65
@@ -1133,7 +1791,7 @@ index 102089e..6b6ffd1 100644
  
  typedef struct {
  /**
-@@ -1102,7 +1082,7 @@ typedef struct {
+@@ -1139,7 +1119,7 @@ typedef struct {
    * @brief Starts the LLD tests CLI
    *
    * @param  param_size : Nb of bytes
@@ -1142,7 +1800,7 @@ index 102089e..6b6ffd1 100644
    * @retval Status
    */
    SHCI_CmdStatus_t SHCI_C2_LLDTESTS_Init( uint8_t param_size, uint8_t * p_param );
-@@ -1112,19 +1092,10 @@ typedef struct {
+@@ -1149,20 +1129,11 @@ typedef struct {
    * @brief Starts the LLD tests BLE
    *
    * @param  param_size : Nb of bytes
@@ -1151,7 +1809,7 @@ index 102089e..6b6ffd1 100644
    * @retval Status
    */
    SHCI_CmdStatus_t SHCI_C2_BLE_LLD_Init( uint8_t param_size, uint8_t * p_param );
--  
+ 
 -    /**
 -  * SHCI_C2_ZIGBEE_Init
 -  * @brief Starts the Zigbee Stack
@@ -1160,10 +1818,11 @@ index 102089e..6b6ffd1 100644
 -  * @retval Status
 -  */
 -  SHCI_CmdStatus_t SHCI_C2_ZIGBEE_Init( void );
- 
+-
    /**
    * SHCI_C2_DEBUG_Init
-@@ -1200,16 +1171,6 @@ typedef struct {
+   * @brief Starts the Traces
+@@ -1237,16 +1208,6 @@ typedef struct {
    */
    SHCI_CmdStatus_t SHCI_C2_RADIO_AllowLowPower( SHCI_C2_FLASH_Ip_t Ip,uint8_t  FlagRadioLowPowerOn);
  
@@ -1181,7 +1840,7 @@ index 102089e..6b6ffd1 100644
     * SHCI_GetWirelessFwInfo
     * @brief This function read back the informations relative to the wireless binary loaded.
 diff --git a/src/utility/STM32Cube_FW/shci_tl.c b/src/utility/STM32Cube_FW/shci_tl.c
-index ddb3a02..d1a448d 100644
+index 449b8b1..b3cee00 100644
 --- a/src/utility/STM32Cube_FW/shci_tl.c
 +++ b/src/utility/STM32Cube_FW/shci_tl.c
 @@ -16,12 +16,13 @@
@@ -1199,42 +1858,116 @@ index ddb3a02..d1a448d 100644
  
  /* Private typedef -----------------------------------------------------------*/
  typedef enum
-@@ -168,6 +169,20 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
-   return;
+@@ -70,8 +71,6 @@ void shci_init(void(* UserEvtRx)(void* pData), void* pConf)
+   shci_register_io_bus (&shciContext.io);
+ 
+   TlInit((TL_CmdPacket_t *)(((SHCI_TL_HciInitConf_t *)pConf)->p_cmdbuffer));
+-
+-  return;
  }
  
+ void shci_user_evt_proc(void)
+@@ -127,8 +126,6 @@ void shci_user_evt_proc(void)
+     shci_notify_asynch_evt((void*) &SHciAsynchEventQueue);
+   }
+ 
+-
+-  return;
+ }
+ 
+ void shci_resume_flow( void )
+@@ -140,8 +137,6 @@ void shci_resume_flow( void )
+    * be called
+    */
+   shci_notify_asynch_evt((void*) &SHciAsynchEventQueue);
+-
+-  return;
+ }
+ 
+ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payload, TL_EvtPacket_t * p_rsp )
+@@ -164,8 +159,20 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
+   memcpy( &(p_rsp->evtserial), pCmdBuffer, ((TL_EvtSerial_t*)pCmdBuffer)->evt.plen + TL_EVT_HDR_SIZE );
+ 
+   Cmd_SetStatus(SHCI_TL_CmdAvailable);
++}
++
 +void shci_notify_asynch_evt(void *pdata)
 +{
 +  UNUSED(pdata);
 +  /* Need to parse data in future version */
 +  shci_user_evt_proc();
 +}
-+
+ 
+-  return;
 +void shci_register_io_bus(tSHciIO *fops)
 +{
 +  /* Register IO bus services */
 +  fops->Init    = TL_SYS_Init;
 +  fops->Send    = TL_SYS_SendCmd;
-+}
-+
- /* Private functions ---------------------------------------------------------*/
- static void TlInit( TL_CmdPacket_t * p_cmdbuffer )
- {
-@@ -252,4 +267,4 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
-   return;
  }
  
+ /* Private functions ---------------------------------------------------------*/
+@@ -190,8 +197,6 @@ static void TlInit( TL_CmdPacket_t * p_cmdbuffer )
+     Conf.IoBusCallBackUserEvt = TlUserEvtReceived;
+     shciContext.io.Init(&Conf);
+   }
+-
+-  return;
+ }
+ 
+ static void Cmd_SetStatus(SHCI_TL_CmdStatus_t shcicmdstatus)
+@@ -212,24 +217,18 @@ static void Cmd_SetStatus(SHCI_TL_CmdStatus_t shcicmdstatus)
+       StatusNotCallBackFunction( SHCI_TL_CmdAvailable );
+     }
+   }
+-
+-  return;
+ }
+ 
+ static void TlCmdEvtReceived(TL_EvtPacket_t *shcievt)
+ {
+   (void)(shcievt);
+   shci_cmd_resp_release(0); /**< Notify the application the Cmd response has been received */
+-
+-  return;
+ }
+ 
+ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
+ {
+   LST_insert_tail(&SHciAsynchEventQueue, (tListNode *)shcievt);
+   shci_notify_asynch_evt((void*) &SHciAsynchEventQueue); /**< Notify the application a full HCI event has been received */
+-
+-  return;
+ }
+ 
+ /* Weak implementation ----------------------------------------------------------------*/
+@@ -239,8 +238,6 @@ __WEAK void shci_cmd_resp_wait(uint32_t timeout)
+ 
+   CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
+   while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
+-
+-  return;
+ }
+ 
+ __WEAK void shci_cmd_resp_release(uint32_t flag)
+@@ -248,7 +245,5 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
+   (void)flag;
+ 
+   CmdRspStatusFlag = SHCI_TL_CMD_RESP_RELEASE;
+-
+-  return;
+ }
 -
 +#endif /* STM32WBxx */
 diff --git a/src/utility/STM32Cube_FW/stm32_wpan_common.h b/src/utility/STM32Cube_FW/stm32_wpan_common.h
-index b47b804..5a2b2a5 100644
+index f407bb9..5a2b2a5 100644
 --- a/src/utility/STM32Cube_FW/stm32_wpan_common.h
 +++ b/src/utility/STM32Cube_FW/stm32_wpan_common.h
 @@ -25,19 +25,9 @@
  extern "C" {
  #endif
  
--#if   defined ( __CC_ARM )
+-#if   defined ( __CC_ARM )||defined (__ARMCC_VERSION)
 - #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
 - #define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
 - #define __STATIC_INLINE  static __inline
@@ -1285,7 +2018,7 @@ index b47b804..5a2b2a5 100644
  #ifdef __cplusplus
  }
 diff --git a/src/utility/STM32Cube_FW/stm_list.c b/src/utility/STM32Cube_FW/stm_list.c
-index 4c92864..77dec64 100644
+index 4c92864..9892441 100644
 --- a/src/utility/STM32Cube_FW/stm_list.c
 +++ b/src/utility/STM32Cube_FW/stm_list.c
 @@ -16,13 +16,13 @@
@@ -1305,7 +2038,7 @@ index 4c92864..77dec64 100644
  
  /******************************************************************************
   * Function Definitions
-@@ -33,10 +33,10 @@ void LST_init_head (tListNode * listHead)
+@@ -33,20 +33,20 @@ void LST_init_head (tListNode * listHead)
    listHead->prev = listHead;
  }
  
@@ -1318,6 +2051,18 @@ index 4c92864..77dec64 100644
  
    primask_bit = __get_PRIMASK();  /**< backup PRIMASK bit */
    __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+   if(listHead->next == listHead)
+   {
+-    return_value = TRUE;
++    return_value = true;
+   }
+   else
+   {
+-    return_value = FALSE;
++    return_value = false;
+   }
+   __set_PRIMASK(primask_bit);     /**< Restore PRIMASK bit*/
+ 
 @@ -204,3 +204,4 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
  
    __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
@@ -1346,10 +2091,10 @@ index b7c3254..769c211 100644
  void LST_insert_head (tListNode * listHead, tListNode * node);
  
 diff --git a/src/utility/STM32Cube_FW/tl.h b/src/utility/STM32Cube_FW/tl.h
-index 2124d26..678769c 100644
+index c199bb2..982bb58 100644
 --- a/src/utility/STM32Cube_FW/tl.h
 +++ b/src/utility/STM32Cube_FW/tl.h
-@@ -199,19 +199,6 @@ typedef struct
+@@ -202,19 +202,6 @@ typedef struct
    uint8_t *p_BleLldM0CmdBuffer;
  } TL_BLE_LLD_Config_t;
  
@@ -1369,7 +2114,7 @@ index 2124d26..678769c 100644
  /**
   * @brief Contain the BLE HCI Init Configuration
   * @{
-@@ -305,26 +292,6 @@ void TL_MM_EvtDone( TL_EvtPacket_t * hcievt );
+@@ -308,26 +295,6 @@ void TL_MM_EvtDone( TL_EvtPacket_t * hcievt );
  void TL_TRACES_Init( void );
  void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt );
  
@@ -1397,7 +2142,7 @@ index 2124d26..678769c 100644
  } /* extern "C" */
  #endif
 diff --git a/src/utility/STM32Cube_FW/tl_mbox.c b/src/utility/STM32Cube_FW/tl_mbox.c
-index 4112429..a9abb18 100644
+index fcd7766..a9abb18 100644
 --- a/src/utility/STM32Cube_FW/tl_mbox.c
 +++ b/src/utility/STM32Cube_FW/tl_mbox.c
 @@ -16,6 +16,7 @@
@@ -1575,12 +2320,11 @@ index 4112429..a9abb18 100644
  /******************************************************************************
   * MEMORY MANAGER
   ******************************************************************************/
-@@ -846,4 +710,4 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
+@@ -846,3 +710,4 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
  
    return;
  }
--
 +#endif /* STM32WBxx */
 -- 
-2.33.0.windows.1
+2.38.0.windows.1
 
