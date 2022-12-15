@@ -84,29 +84,32 @@ typedef PACKED_STRUCT
 } TL_CsEvt_t;
 
 /**
- * This the payload of TL_Evt_t for a command complete event
+ * This the payload of TL_Evt_t for a command complete event, only used a pointer
  */
 typedef PACKED_STRUCT
 {
   uint8_t   numcmd;
   uint16_t  cmdcode;
-  uint8_t   payload[1];
+  uint8_t   payload[255];
 } TL_CcEvt_t;
 
 /**
- * This the payload of TL_Evt_t for an asynchronous event
+ * This the payload of TL_Evt_t for an asynchronous event, only used a pointer
  */
 typedef PACKED_STRUCT
 {
   uint16_t  subevtcode;
-  uint8_t   payload[1];
+  uint8_t   payload[255];
 } TL_AsynchEvt_t;
 
+/**
+ * This the payload of TL_Evt_t, only used a pointer
+ */
 typedef PACKED_STRUCT
 {
   uint8_t   evtcode;
   uint8_t   plen;
-  uint8_t   payload[1];
+  uint8_t   payload[255];
 } TL_Evt_t;
 
 typedef PACKED_STRUCT

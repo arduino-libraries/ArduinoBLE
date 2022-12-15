@@ -101,7 +101,7 @@ extern "C" {
 
   /**
    * SHCI_SUB_EVT_THREAD_NVM_RAM_UPDATE
-   * This notifies the CPU1 which part of the 'OT NVM RAM' has been updated so that only the modified
+   * This notifies the CPU1 which part of the OT NVM RAM has been updated so that only the modified
    * section could be written in Flash/NVM
    * StartAddress : Start address of the section that has been modified
    * Size : Size (in bytes) of the section that has been modified
@@ -433,7 +433,7 @@ extern "C" {
    * PrWriteListSize
    * NOTE: This parameter is ignored by the CPU2 when the parameter "Options" is set to "LL_only" ( see Options description in that structure )
    *
-   * Maximum number of supported “prepare write request”
+   * Maximum number of supported "prepare write request"
    *    - Min value: given by the macro DEFAULT_PREP_WRITE_LIST_SIZE
    *    - Max value: a value higher than the minimum required can be specified, but it is not recommended
    */
@@ -492,6 +492,7 @@ extern "C" {
    * Some information for Low speed clock mapped in bits field
    * - bit 0:   1: Calibration for the RF system wakeup clock source   0: No calibration for the RF system wakeup clock source
    * - bit 1:   1: STM32W5M Module device                              0: Other devices as STM32WBxx SOC, STM32WB1M module
+   * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
    */
   uint8_t LsSource;
 
@@ -499,7 +500,7 @@ extern "C" {
    * MaxConnEventLength
    * This parameter determines the maximum duration of a slave connection event. When this duration is reached the slave closes
    * the current connections event (whatever is the CE_length parameter specified by the master in HCI_CREATE_CONNECTION HCI command),
-   * expressed in units of 625/256 µs (~2.44 µs)
+   * expressed in units of 625/256 Âµs (~2.44 Âµs)
    *    - Min value: 0 (if 0 is specified, the master and slave perform only a single TX-RX exchange per connection event)
    *    - Max value: 1638400 (4000 ms). A higher value can be specified (max 0xFFFFFFFF) but results in a maximum connection time
    *      of 4000 ms as specified. In this case the parameter is not applied, and the predicted CE length calculated on slave is not shortened
@@ -508,7 +509,7 @@ extern "C" {
 
   /**
    * HsStartupTime
-   * Startup time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 µs (~2.44 µs).
+   * Startup time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 Âµs (~2.44 Âµs).
    *    - Min value: 0
    *    - Max value:  820 (~2 ms). A higher value can be specified, but the value that implemented in stack is forced to ~2 ms
    */
@@ -529,7 +530,11 @@ extern "C" {
    * - bit 2:   1: device name Read-Only            0: device name R/W
    * - bit 3:   1: extended advertizing supported   0: extended advertizing not supported
    * - bit 4:   1: CS Algo #2 supported             0: CS Algo #2 not supported
-   * - bit 7:   1: LE Power Class 1                 0: LE Power Classes 2-3
+   * - bit 5:   1: Reduced GATT database in NVM     0: Full GATT database in NVM
+   * - bit 6:   1: GATT caching is used             0: GATT caching is not used
+   * - bit 7:   1: LE Power Class 1                 0: LE Power Classe 2-3
+   * - bit 8:   1: appearance Writable              0: appearance Read-Only
+   * - bit 9:   1: Enhanced ATT supported           0: Enhanced ATT not supported
    * - other bits: reserved ( shall be set to 0)
    */
   uint8_t Options;
@@ -591,6 +596,11 @@ extern "C" {
    */
   int16_t rx_path_compens;
 
+  /* BLE core specification version (8-bit unsigned integer).
+   * values as: 11(5.2), 12(5.3)
+   */
+  uint8_t ble_core_version;
+
       } SHCI_C2_Ble_Init_Cmd_Param_t;
 
   typedef PACKED_STRUCT{
@@ -618,8 +628,20 @@ extern "C" {
 #define SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2                             (1<<4)
 #define SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2                          (0<<4)
 
+#define SHCI_C2_BLE_INIT_OPTIONS_REDUC_GATTDB_NVM                     (1<<5)
+#define SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM                      (0<<5)
+
+#define SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_USED                    (1<<6)
+#define SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED                 (0<<6)
+
 #define SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_1                        (1<<7)
 #define SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3                      (0<<7)
+
+#define SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_WRITABLE                  (1<<8)
+#define SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY                  (0<<8)
+
+#define SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_SUPPORTED               (1<<9)
+#define SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED            (0<<9)
 
     /**
    * RX models configuration
@@ -627,13 +649,21 @@ extern "C" {
 #define SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY                     (0<<0)
 #define SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_BLOCKER                    (1<<0)
 
+  /**
+   * BLE core version
+   */
+#define SHCI_C2_BLE_INIT_BLE_CORE_5_2               11
+#define SHCI_C2_BLE_INIT_BLE_CORE_5_3               12
+
    /**
    * LsSource information
    */
-#define SHCI_C2_BLE_INIT_CFG_BLE_LSE_NOCALIB                     (0<<0)
-#define SHCI_C2_BLE_INIT_CFG_BLE_LSE_CALIB                       (1<<0)
-#define SHCI_C2_BLE_INIT_CFG_BLE_LSE_OTHER_DEV                   (0<<1)
-#define SHCI_C2_BLE_INIT_CFG_BLE_LSE_MOD5MM_DEV                  (1<<1)
+#define SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB                     (0<<0)
+#define SHCI_C2_BLE_INIT_CFG_BLE_LS_CALIB                       (1<<0)
+#define SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV                   (0<<1)
+#define SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV                  (1<<1)
+#define SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE                     (0<<2)
+#define SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024                (1<<2)
 
 #define SHCI_OPCODE_C2_THREAD_INIT              (( SHCI_OGF << 10) + SHCI_OCF_C2_THREAD_INIT)
 /** No command parameters */
@@ -784,6 +814,7 @@ extern "C" {
       uint32_t BleNvmRamAddress;
       uint32_t ThreadNvmRamAddress;
       uint16_t RevisionID;
+      uint16_t DeviceID;
     } SHCI_C2_CONFIG_Cmd_Param_t;
 
 #define SHCI_OPCODE_C2_802_15_4_DEINIT    (( SHCI_OGF << 10) + SHCI_OCF_C2_802_15_4_DEINIT)
@@ -800,6 +831,12 @@ extern "C" {
 #define SHCI_C2_CONFIG_CUT2_0                        (0x2000)
 #define SHCI_C2_CONFIG_CUT2_1                        (0x2001)
 #define SHCI_C2_CONFIG_CUT2_2                        (0x2003)
+
+/**
+ * Device ID
+ */
+#define SHCI_C2_CONFIG_STM32WB55xx                   (0x495)
+#define SHCI_C2_CONFIG_STM32WB15xx                   (0x494)
 
 /**
  * Config1
@@ -1173,7 +1210,7 @@ typedef struct {
 
   /**
    * SHCI_GetWirelessFwInfo
-   * @brief This function read back the information relative to the wireless binary loaded.
+   * @brief This function read back the informations relative to the wireless binary loaded.
    *         Refer yourself to MB_WirelessFwInfoTable_t structure to get the significance
    *         of the different parameters returned.
    * @param  pWirelessInfo : Pointer to WirelessFwInfo_t.

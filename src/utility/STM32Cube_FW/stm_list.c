@@ -42,11 +42,11 @@ bool LST_is_empty (tListNode * listHead)
   __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
   if(listHead->next == listHead)
   {
-    return_value = TRUE;
+    return_value = true;
   }
   else
   {
-    return_value = FALSE;
+    return_value = false;
   }
   __set_PRIMASK(primask_bit);     /**< Restore PRIMASK bit*/
 

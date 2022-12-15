@@ -42,7 +42,7 @@
  * Define Tx Power
  */
 #ifndef CFG_TX_POWER
-  #define CFG_TX_POWER (0x18) /* -0.15dBm */
+  #define CFG_TX_POWER                      (0x18) /* -0.15dBm */
 #endif
 
 /******************************************************************************
@@ -80,7 +80,7 @@
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
 #ifndef CFG_BLE_MAX_ATT_MTU
-  #define CFG_BLE_MAX_ATT_MTU (156)
+  #define CFG_BLE_MAX_ATT_MTU             (156)
 #endif
 
 /**
@@ -104,7 +104,7 @@
  */
 // #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
 #ifndef CFG_BLE_PREPARE_WRITE_LIST_SIZE
-  #define CFG_BLE_PREPARE_WRITE_LIST_SIZE (0x3A)
+  #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
 #endif
 
 /**
@@ -118,14 +118,14 @@
  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
  */
 #ifndef CFG_BLE_DATA_LENGTH_EXTENSION
-  #define CFG_BLE_DATA_LENGTH_EXTENSION 1
+  #define CFG_BLE_DATA_LENGTH_EXTENSION   1
 #endif
 
 /**
  * Sleep clock accuracy in Slave mode (ppm value)
  */
 #ifndef CFG_BLE_SLAVE_SCA
-  #define CFG_BLE_SLAVE_SCA 500
+  #define CFG_BLE_SLAVE_SCA   500
 #endif
 
 /**
@@ -140,20 +140,21 @@
  * 7 : 0 ppm to 20 ppm
  */
 #ifndef CFG_BLE_MASTER_SCA
-  #define CFG_BLE_MASTER_SCA 0
+  #define CFG_BLE_MASTER_SCA   0
 #endif
 
 /**
  * LsSource
  * Some information for Low speed clock mapped in bits field
  * - bit 0:   1: Calibration for the RF system wakeup clock source   0: No calibration for the RF system wakeup clock source
- * - bit 1:   1: STM32W5M Module device                              0: Other devices as STM32WBxx SOC, STM32WB1M module
+ * - bit 1:   1: STM32WB5M Module device                             0: Other devices as STM32WBxx SOC, STM32WB1M module
+ * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
  */
-#ifndef CFG_BLE_LSE_SOURCE
+#ifndef CFG_BLE_LS_SOURCE
   #if defined(STM32WB5Mxx)
-    #define CFG_BLE_LSE_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LSE_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LSE_MOD5MM_DEV)
+    #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
   #else
-    #define CFG_BLE_LSE_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LSE_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LSE_OTHER_DEV)
+    #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
   #endif
 #endif
 
@@ -161,14 +162,14 @@
  * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
  */
 #ifndef CFG_BLE_HSE_STARTUP_TIME
-  #define CFG_BLE_HSE_STARTUP_TIME 0x148
+  #define CFG_BLE_HSE_STARTUP_TIME  0x148
 #endif
 
 /**
  * Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
  */
 #ifndef CFG_BLE_MAX_CONN_EVENT_LENGTH
-  #define CFG_BLE_MAX_CONN_EVENT_LENGTH (0xFFFFFFFF)
+  #define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
 #endif
 
 /**
@@ -190,8 +191,16 @@
  * - SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV
  * - SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2
  * - SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2
+ * - SHCI_C2_BLE_INIT_OPTIONS_REDUC_GATTDB_NVM
+ * - SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM
+ * - SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_USED
+ * - SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED
  * - SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_1
  * - SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3
+ * - SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_WRITABLE
+ * - SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY
+ * - SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_SUPPORTED
+ * - SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED
  * which are used to set following configuration bits:
  * (bit 0): 1: LL only
  *          0: LL + host
@@ -203,8 +212,16 @@
  *          0: extended advertizing not supported
  * (bit 4): 1: CS Algo #2 supported
  *          0: CS Algo #2 not supported
+ * (bit 5): 1: Reduced GATT database in NVM
+ *          0: Full GATT database in NVM
+ * (bit 6): 1: GATT caching is used
+ *          0: GATT caching is not used
  * (bit 7): 1: LE Power Class 1
  *          0: LE Power Class 2-3
+ * (bit 8): 1: appearance Writable
+ *          0: appearance Read-Only
+ * (bit 9): 1: Enhanced ATT supported
+ *          0: Enhanced ATT not supported
  * other bits: reserved (shall be set to 0)
  */
 #define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY)
@@ -257,5 +274,12 @@
 
 #define CFG_BLE_RX_PATH_COMPENS    (0)
 
-#endif /* APP_CONF_DEFAULT_H */
+  /* BLE core version (16-bit signed integer).
+   * - SHCI_C2_BLE_INIT_BLE_CORE_5_2
+   * - SHCI_C2_BLE_INIT_BLE_CORE_5_3
+   * which are used to set: 11(5.2), 12(5.3).
+   */
 
+#define CFG_BLE_CORE_VERSION   (SHCI_C2_BLE_INIT_BLE_CORE_5_3)
+
+#endif /* APP_CONF_DEFAULT_H */
