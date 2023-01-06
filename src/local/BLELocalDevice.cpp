@@ -335,24 +335,24 @@ void BLELocalDevice::stopAdvertise()
   GAP.stopAdvertise();
 }
 
-int BLELocalDevice::scan(bool withDuplicates)
+int BLELocalDevice::scan(bool withDuplicates, bool activeScan)
 {
-  return GAP.scan(withDuplicates);
+  return GAP.scan(withDuplicates, activeScan);
 }
 
-int BLELocalDevice::scanForName(String name, bool withDuplicates)
+int BLELocalDevice::scanForName(String name, bool withDuplicates, bool activeScan)
 {
-  return GAP.scanForName(name, withDuplicates);
+  return GAP.scanForName(name, withDuplicates, activeScan);
 }
 
-int BLELocalDevice::scanForUuid(String uuid, bool withDuplicates)
+int BLELocalDevice::scanForUuid(String uuid, bool withDuplicates, bool activeScan)
 {
-  return GAP.scanForUuid(uuid, withDuplicates);
+  return GAP.scanForUuid(uuid, withDuplicates, activeScan);
 }
 
-int BLELocalDevice::scanForAddress(String address, bool withDuplicates)
+int BLELocalDevice::scanForAddress(String address, bool withDuplicates, bool activeScan)
 {
-  return GAP.scanForAddress(address, withDuplicates);
+  return GAP.scanForAddress(address, withDuplicates, activeScan);
 }
 
 void BLELocalDevice::stopScan()
@@ -367,16 +367,16 @@ BLEDevice BLELocalDevice::central()
   return ATT.central();
 }
 
-BLEDevice BLELocalDevice::available()
+BLEDevice BLELocalDevice::available(bool includeAdvertised)
 {
   HCI.poll();
 
-  return GAP.available();
+  return GAP.available(includeAdvertised);
 }
 
 void BLELocalDevice::setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler)
 {
-  if (event == BLEDiscovered) {
+  if (event == BLEDiscovered || event == BLEAdvertised) {
     GAP.setEventHandler(event, eventHandler);
   } else {
     ATT.setEventHandler(event, eventHandler);
