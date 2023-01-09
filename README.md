@@ -1,9 +1,9 @@
 # STM32duinoBLE
 
 This library is a fork of ArduinoBLE library to add the support of STM32WBxx, SPBTLE-RF and SPBTLE-1S BLE modules.
-It was successfully tested with the P-NUCELO_WB55RG, STM32WB5MM-DK, X-NUCLEO-IDB05A2 or X-NUCLEO-IDB05A1 or
-X-NUCLEO-BNRG2A1 expansion board and a NUCLEO-F401RE or NUCLEO-L476RG or NUCLEO-L053R8, with B-L475E-IOT01A
-and with STEVAL-MKSBOX1V1.
+It was successfully tested with the NUCLEO-WB15CC, P-NUCELO_WB55RG, STM32WB5MM-DK, X-NUCLEO-IDB05A2 or
+X-NUCLEO-IDB05A1 or X-NUCLEO-BNRG2A1 expansion board and a NUCLEO-F401RE or NUCLEO-L476RG or NUCLEO-L053R8,
+with B-L475E-IOT01A and with STEVAL-MKSBOX1V1.
 
  - In order to use this library with SM32WBxx series, you need to update the STM32WB Copro Wireless Binaries  
 with stm32wbxx_BLE_HCILayer_fw.bin depending of your mcu:  
