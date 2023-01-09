@@ -53,7 +53,11 @@
  * Valid values are from 1 to 8
  */
 #ifndef CFG_BLE_NUM_LINK
+#ifdef STM32WB15xx
+  #define CFG_BLE_NUM_LINK            3
+#else
   #define CFG_BLE_NUM_LINK            8
+#endif
 #endif
 
 /**
@@ -61,7 +65,11 @@
  * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
  */
 #ifndef CFG_BLE_NUM_GATT_SERVICES
+#ifdef STM32WB15xx
+  #define CFG_BLE_NUM_GATT_SERVICES   4
+#else
   #define CFG_BLE_NUM_GATT_SERVICES   8
+#endif
 #endif
 
 /**
@@ -72,7 +80,11 @@
  * so this parameters should be 9 plus the number of user Attributes
  */
 #ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
-  #define CFG_BLE_NUM_GATT_ATTRIBUTES 68
+#ifdef STM32WB15xx
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES   30
+#else
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES   68
+#endif
 #endif
 
 /**
@@ -95,7 +107,11 @@
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
 #ifndef CFG_BLE_ATT_VALUE_ARRAY_SIZE
+#ifdef STM32WB15xx
+  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1290)
+#else
   #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
+#endif
 #endif
 
 /**
@@ -250,8 +266,11 @@
  * on Max Extended advertising configuration supported.
  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
  */
-
-#define CFG_BLE_MAX_ADV_SET_NBR     (8)
+#if defined(STM32WB15xx)
+  #define CFG_BLE_MAX_ADV_SET_NBR     (3)
+#else
+  #define CFG_BLE_MAX_ADV_SET_NBR     (8)
+#endif
 
  /* Maximum advertising data length (in bytes)
  * Range: 31 .. 1650 with limitation:
@@ -259,8 +278,11 @@
  * on Max Extended advertising configuration supported.
  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
  */
-
-#define CFG_BLE_MAX_ADV_DATA_LEN    (207)
+#if defined(STM32WB15xx)
+  #define CFG_BLE_MAX_ADV_DATA_LEN    (414)
+#else
+  #define CFG_BLE_MAX_ADV_DATA_LEN    (207)
+#endif
 
  /* RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
   * Range: -1280 .. 1280
