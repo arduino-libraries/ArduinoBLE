@@ -54,40 +54,40 @@ BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
 /* Shield IDB05A2 with SPI clock on D13 */
-/*#define SpiHCI SPI
-HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M0, A1, A0, D7, 8000000, SPI_MODE0);
-#if !defined(FAKE_BLELOCALDEVICE)
-BLELocalDevice BLEObj(&HCISpiTransport);
-BLELocalDevice& BLE = BLEObj;
-#endif */
+// #define SpiHCI SPI
+// HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M0, A1, A0, D7, 8000000, SPI_MODE0);
+// #if !defined(FAKE_BLELOCALDEVICE)
+// BLELocalDevice BLEObj(&HCISpiTransport);
+// BLELocalDevice& BLE = BLEObj;
+// #endif
 /* Shield IDB05A1 with SPI clock on D3 */
-/*SPIClass SpiHCI(D11, D12, D3);
-HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
-#if !defined(FAKE_BLELOCALDEVICE)
-BLELocalDevice BLEObj(&HCISpiTransport);
-BLELocalDevice& BLE = BLEObj;
-#endif */
+// SPIClass SpiHCI(D11, D12, D3);
+// HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
+// #if !defined(FAKE_BLELOCALDEVICE)
+// BLELocalDevice BLEObj(&HCISpiTransport);
+// BLELocalDevice& BLE = BLEObj;
+// #endif
 /* Shield IDB05A1 with SPI clock on D13 */
-/*#define SpiHCI SPI
-HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
-#if !defined(FAKE_BLELOCALDEVICE)
-BLELocalDevice BLEObj(&HCISpiTransport);
-BLELocalDevice& BLE = BLEObj;
-#endif */
+// #define SpiHCI SPI
+// HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
+// #if !defined(FAKE_BLELOCALDEVICE)
+// BLELocalDevice BLEObj(&HCISpiTransport);
+// BLELocalDevice& BLE = BLEObj;
+// #endif
 /* Shield BNRG2A1 with SPI clock on D3 */
-/*SPIClass SpiHCI(D11, D12, D3);
-HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
-#if !defined(FAKE_BLELOCALDEVICE)
-BLELocalDevice BLEObj(&HCISpiTransport);
-BLELocalDevice& BLE = BLEObj;
-#endif */
+// SPIClass SpiHCI(D11, D12, D3);
+// HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
+// #if !defined(FAKE_BLELOCALDEVICE)
+// BLELocalDevice BLEObj(&HCISpiTransport);
+// BLELocalDevice& BLE = BLEObj;
+// #endif
 /* Shield BNRG2A1 with SPI clock on D13 */
-/*#define SpiHCI SPI
-HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
-#if !defined(FAKE_BLELOCALDEVICE)
-BLELocalDevice BLEObj(&HCISpiTransport);
-BLELocalDevice& BLE = BLEObj;
-#endif */
+// #define SpiHCI SPI
+// HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
+// #if !defined(FAKE_BLELOCALDEVICE)
+// BLELocalDevice BLEObj(&HCISpiTransport);
+// BLELocalDevice& BLE = BLEObj;
+// #endif
 #endif
 
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // BLE LED Service
