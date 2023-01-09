@@ -23,7 +23,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_LP, PA2, PB11, PD4, 1000000
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13
 #elif defined(ARDUINO_STEVAL_MKSBOX1V1)
 /* STEVAL-MKSBOX1V1 */
 SPIClass SpiHCI(PC3, PD3, PD1);

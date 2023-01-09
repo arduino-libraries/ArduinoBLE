@@ -17,6 +17,12 @@
 
 #include <STM32duinoBLE.h>
 
+#ifdef USER_BTN
+const int buttonPin = USER_BTN; // set buttonPin to on-board user button
+#else
+const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
+#endif
+
 #if defined(ARDUINO_STEVAL_MKBOXPRO)
 /* STEVAL-MKBOXPRO */
 SPIClass SpiHCI(PA7, PA6, PA5);
@@ -25,7 +31,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_LP, PA2, PB11, PD4, 1000000
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13
 #elif defined(ARDUINO_STEVAL_MKSBOX1V1)
 /* STEVAL-MKSBOX1V1 */
 SPIClass SpiHCI(PC3, PD3, PD1);
@@ -34,7 +39,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_1S, PD0, PD4, PA8, 1000000, 
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PG1; // set buttonPin to digital pin PG1
 #elif defined(ARDUINO_B_L475E_IOT01A) || defined(ARDUINO_B_L4S5I_IOT01A)
 /* B-L475E-IOT01A1 or B_L4S5I_IOT01A */
 SPIClass SpiHCI(PC12, PC11, PC10);
@@ -43,14 +47,12 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, PD13, PE6, PA8, 8000000,
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13
 #elif defined(ARDUINO_NUCLEO_WB15CC) || defined(ARDUINO_P_NUCLEO_WB55RG) || defined(ARDUINO_STM32WB5MM_DK)
 HCISharedMemTransportClass HCISharedMemTransport;
 #if !defined(FAKE_BLELOCALDEVICE)
 BLELocalDevice BLEObj(&HCISharedMemTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC4; // set buttonPin to digital pin PC4
 #else
 /* Shield IDB05A2 with SPI clock on D3 */
 SPIClass SpiHCI(D11, D12, D3);
@@ -59,7 +61,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M0, A1, A0, D7, 8000000, SP
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13
 /* Shield IDB05A2 with SPI clock on D13 */
 /*#define SpiHCI SPI
 HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M0, A1, A0, D7, 8000000, SPI_MODE0);
@@ -67,7 +68,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M0, A1, A0, D7, 8000000, SP
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
 /* Shield IDB05A1 with SPI clock on D3 */
 /*SPIClass SpiHCI(D11, D12, D3);
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
@@ -75,7 +75,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
 /* Shield IDB05A1 with SPI clock on D13 */
 /*#define SpiHCI SPI
 HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI_MODE0);
@@ -83,7 +82,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, SPBTLE_RF, A1, A0, D7, 8000000, SPI
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
 /* Shield BNRG2A1 with SPI clock on D3 */
 /*SPIClass SpiHCI(D11, D12, D3);
 HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
@@ -91,7 +89,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, 
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
 /* Shield BNRG2A1 with SPI clock on D13 */
 /*#define SpiHCI SPI
 HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, SPI_MODE1);
@@ -99,7 +96,6 @@ HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_M2SP, A1, A0, D7, 1000000, 
 BLELocalDevice BLEObj(&HCISpiTransport);
 BLELocalDevice& BLE = BLEObj;
 #endif
-const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
 #endif
 
 const int ledPin = LED_BUILTIN; // set ledPin to on-board LED
