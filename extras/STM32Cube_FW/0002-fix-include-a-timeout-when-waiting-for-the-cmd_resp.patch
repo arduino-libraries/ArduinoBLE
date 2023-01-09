@@ -1,4 +1,4 @@
-From e12c9c97eec7eacb648720fc65adc2a3897ec257 Mon Sep 17 00:00:00 2001
+From a3c689a99506126587dfd7285c4b198db4a790e5 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Mon, 12 Dec 2022 17:17:48 +0100
 Subject: [PATCH 2/3] fix: include a timeout when waiting for the cmd_resp

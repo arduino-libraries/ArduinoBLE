@@ -1,15 +1,15 @@
-From d7d18d20b957f52810315147d671c1976a18c1d2 Mon Sep 17 00:00:00 2001
+From 81472cc135126cb46701a058647de2cf82160fb9 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Mon, 12 Dec 2022 17:29:27 +0100
 Subject: [PATCH 3/3] chore: add support for customize app_conf_default.h
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/app_conf_default.h | 58 +++++++++++++++------
- 1 file changed, 42 insertions(+), 16 deletions(-)
+ src/utility/STM32Cube_FW/app_conf_default.h | 88 ++++++++++++++++-----
+ 1 file changed, 68 insertions(+), 20 deletions(-)
 
 diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
-index cc8c3e8..57f1027 100644
+index cc8c3e8..35cad34 100644
 --- a/src/utility/STM32Cube_FW/app_conf_default.h
 +++ b/src/utility/STM32Cube_FW/app_conf_default.h
 @@ -41,7 +41,9 @@
@@ -23,13 +23,17 @@ index cc8c3e8..57f1027 100644
  
  /******************************************************************************
   * BLE Stack
-@@ -50,13 +52,17 @@
+@@ -50,13 +52,25 @@
   * Maximum number of simultaneous connections that the device will support.
   * Valid values are from 1 to 8
   */
 -#define CFG_BLE_NUM_LINK            8
 +#ifndef CFG_BLE_NUM_LINK
++#ifdef STM32WB15xx
++  #define CFG_BLE_NUM_LINK            3
++#else
 +  #define CFG_BLE_NUM_LINK            8
++#endif
 +#endif
  
  /**
@@ -38,18 +42,26 @@ index cc8c3e8..57f1027 100644
   */
 -#define CFG_BLE_NUM_GATT_SERVICES   8
 +#ifndef CFG_BLE_NUM_GATT_SERVICES
++#ifdef STM32WB15xx
++  #define CFG_BLE_NUM_GATT_SERVICES   4
++#else
 +  #define CFG_BLE_NUM_GATT_SERVICES   8
++#endif
 +#endif
  
  /**
   * Maximum number of Attributes
-@@ -65,13 +71,17 @@
+@@ -65,13 +79,21 @@
   * Note that certain characteristics and relative descriptors are added automatically during device initialization
   * so this parameters should be 9 plus the number of user Attributes
   */
 -#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
 +#ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
-+  #define CFG_BLE_NUM_GATT_ATTRIBUTES 68
++#ifdef STM32WB15xx
++  #define CFG_BLE_NUM_GATT_ATTRIBUTES   30
++#else
++  #define CFG_BLE_NUM_GATT_ATTRIBUTES   68
++#endif
 +#endif
  
  /**
@@ -63,13 +75,17 @@ index cc8c3e8..57f1027 100644
  
  /**
   * Size of the storage area for Attribute values
-@@ -84,14 +94,18 @@
+@@ -84,14 +106,22 @@
   *  The total amount of memory needed is the sum of the above quantities for each attribute.
   * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
   */
 -#define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
 +#ifndef CFG_BLE_ATT_VALUE_ARRAY_SIZE
++#ifdef STM32WB15xx
++  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1290)
++#else
 +  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
++#endif
 +#endif
  
  /**
@@ -84,7 +100,7 @@ index cc8c3e8..57f1027 100644
  
  /**
   * Number of allocated memory blocks
-@@ -103,12 +117,16 @@
+@@ -103,12 +133,16 @@
  /**
   * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
   */
@@ -103,7 +119,7 @@ index cc8c3e8..57f1027 100644
  
  /**
   * Sleep clock accuracy in Master mode
-@@ -121,7 +139,9 @@
+@@ -121,7 +155,9 @@
   * 6 : 21 ppm to 30 ppm
   * 7 : 0 ppm to 20 ppm
   */
@@ -114,7 +130,7 @@ index cc8c3e8..57f1027 100644
  
  /**
   * LsSource
-@@ -130,21 +150,27 @@
+@@ -130,21 +166,27 @@
   * - bit 1:   1: STM32WB5M Module device                             0: Other devices as STM32WBxx SOC, STM32WB1M module
   * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
   */
@@ -148,6 +164,34 @@ index cc8c3e8..57f1027 100644
  
  /**
   * Viterbi Mode
+@@ -224,8 +266,11 @@
+  * on Max Extended advertising configuration supported.
+  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
+  */
+-
+-#define CFG_BLE_MAX_ADV_SET_NBR     (8)
++#if defined(STM32WB15xx)
++  #define CFG_BLE_MAX_ADV_SET_NBR     (3)
++#else
++  #define CFG_BLE_MAX_ADV_SET_NBR     (8)
++#endif
+ 
+  /* Maximum advertising data length (in bytes)
+  * Range: 31 .. 1650 with limitation:
+@@ -233,8 +278,11 @@
+  * on Max Extended advertising configuration supported.
+  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
+  */
+-
+-#define CFG_BLE_MAX_ADV_DATA_LEN    (207)
++#if defined(STM32WB15xx)
++  #define CFG_BLE_MAX_ADV_DATA_LEN    (414)
++#else
++  #define CFG_BLE_MAX_ADV_DATA_LEN    (207)
++#endif
+ 
+  /* RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+   * Range: -1280 .. 1280
 -- 
 2.38.0.windows.1
 
