@@ -61,6 +61,9 @@ extern "C" {
 #define TL_BLEEVT_CS_PACKET_SIZE       (TL_EVT_HDR_SIZE + sizeof(TL_CsEvt_t))
 #define TL_BLEEVT_CS_BUFFER_SIZE       (sizeof(TL_PacketHeader_t) + TL_BLEEVT_CS_PACKET_SIZE)
 
+#define TL_BLEEVT_CC_PACKET_SIZE       (TL_EVT_HDR_SIZE + sizeof(TL_CcEvt_t))
+#define TL_BLEEVT_CC_BUFFER_SIZE       (sizeof(TL_PacketHeader_t) + TL_BLEEVT_CC_PACKET_SIZE)
+
 /* Exported types ------------------------------------------------------------*/
 /**< Packet header */
 typedef PACKED_STRUCT

@@ -42,7 +42,7 @@ uint8_t SHCI_C2_FUS_GetState( SHCI_FUS_GetState_ErrorCode_t *p_error_code )
   /**
    * A command status event + payload has the same size than the expected command complete
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE + 1];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -66,7 +66,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_FwUpgrade( uint32_t fw_src_add,  uint32_t fw_dest_a
    * TL_BLEEVT_CS_BUFFER_SIZE is 15 bytes so it is large enough to hold the 8 bytes of command parameters
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
   uint32_t *p_cmd;
   uint8_t cmd_length;
@@ -101,7 +101,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_FwDelete( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -119,7 +119,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_UpdateAuthKey( SHCI_C2_FUS_UpdateAuthKey_Cmd_Param_
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -137,7 +137,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_LockAuthKey( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -155,7 +155,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_StoreUsrKey( SHCI_C2_FUS_StoreUsrKey_Cmd_Param_t *p
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE + 1];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
   uint8_t local_payload_len;
 
@@ -189,7 +189,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_LoadUsrKey( uint8_t key_index )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -209,7 +209,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_StartWs( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -227,7 +227,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_LockUsrKey( uint8_t key_index )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -247,7 +247,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_UnloadUsrKey( uint8_t key_index )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -267,7 +267,7 @@ SHCI_CmdStatus_t SHCI_C2_FUS_ActivateAntiRollback( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -285,7 +285,7 @@ SHCI_CmdStatus_t SHCI_C2_BLE_Init( SHCI_C2_Ble_Init_Cmd_Packet_t *pCmdPacket )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -303,7 +303,7 @@ SHCI_CmdStatus_t SHCI_C2_THREAD_Init( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -321,7 +321,7 @@ SHCI_CmdStatus_t SHCI_C2_LLDTESTS_Init( uint8_t param_size, uint8_t * p_param )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -339,7 +339,7 @@ SHCI_CmdStatus_t SHCI_C2_BLE_LLD_Init( uint8_t param_size, uint8_t * p_param )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -357,7 +357,7 @@ SHCI_CmdStatus_t SHCI_C2_DEBUG_Init( SHCI_C2_DEBUG_Init_Cmd_Packet_t *pCmdPacket
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -375,7 +375,7 @@ SHCI_CmdStatus_t SHCI_C2_FLASH_EraseActivity( SHCI_EraseActivity_t erase_activit
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -395,7 +395,7 @@ SHCI_CmdStatus_t SHCI_C2_CONCURRENT_SetMode( SHCI_C2_CONCURRENT_Mode_Param_t Mod
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -415,7 +415,7 @@ SHCI_CmdStatus_t SHCI_C2_CONCURRENT_GetNextBleEvtTime( SHCI_C2_CONCURRENT_GetNex
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE+4];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -435,7 +435,7 @@ SHCI_CmdStatus_t SHCI_C2_CONCURRENT_EnableNext_802154_EvtNotification( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -453,7 +453,7 @@ SHCI_CmdStatus_t SHCI_C2_FLASH_StoreData( SHCI_C2_FLASH_Ip_t Ip )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -473,7 +473,7 @@ SHCI_CmdStatus_t SHCI_C2_FLASH_EraseData( SHCI_C2_FLASH_Ip_t Ip )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -493,7 +493,7 @@ SHCI_CmdStatus_t SHCI_C2_RADIO_AllowLowPower( SHCI_C2_FLASH_Ip_t Ip,uint8_t  Fla
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -514,7 +514,7 @@ SHCI_CmdStatus_t SHCI_C2_Reinit( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -533,7 +533,7 @@ SHCI_CmdStatus_t SHCI_C2_ExtpaConfig(uint32_t gpio_port, uint16_t gpio_pin_numbe
    * TL_BLEEVT_CS_BUFFER_SIZE is 15 bytes so it is large enough to hold the 8 bytes of command parameters
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -557,7 +557,7 @@ SHCI_CmdStatus_t SHCI_C2_SetFlashActivityControl(SHCI_C2_SET_FLASH_ACTIVITY_CONT
    * TL_BLEEVT_CS_BUFFER_SIZE is 15 bytes so it is large enough to hold the 1 byte of command parameter
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -577,7 +577,7 @@ SHCI_CmdStatus_t SHCI_C2_Config(SHCI_C2_CONFIG_Cmd_Param_t *pCmdPacket)
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -595,7 +595,7 @@ SHCI_CmdStatus_t SHCI_C2_802_15_4_DeInit( void )
   /**
    * Buffer is large enough to hold command complete without payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CS_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
