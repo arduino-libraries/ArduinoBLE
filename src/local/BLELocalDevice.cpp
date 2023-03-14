@@ -133,6 +133,15 @@ int BLELocalDevice::begin()
    * Force both MSB bits to b00 in order to define Static Random Address
    */
   randomNumber[5] |= 0xC0;
+
+  // Copy the random address in private variable as it will be sent to the BLE chip
+  randomAddress [0] = randomNumber[0];
+  randomAddress [1] = randomNumber[1];
+  randomAddress [2] = randomNumber[2];
+  randomAddress [3] = randomNumber[3];
+  randomAddress [4] = randomNumber[4];
+  randomAddress [5] = randomNumber[5];
+
   if (HCI.leSetRandomAddress((uint8_t*)randomNumber) != 0) {
     end();
     return 0;
@@ -245,6 +254,16 @@ void BLELocalDevice::end()
 #endif 
   _advertisingData.clear();
   _scanResponseData.clear();
+}
+
+void BLELocalDevice::getRandomAddress(uint8_t buff[6])
+{
+  buff [0] = randomAddress[0];
+  buff [1] = randomAddress[1];
+  buff [2] = randomAddress[2];
+  buff [3] = randomAddress[3];
+  buff [4] = randomAddress[4];
+  buff [5] = randomAddress[5];
 }
 
 void BLELocalDevice::poll()

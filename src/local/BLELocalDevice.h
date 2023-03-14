@@ -91,6 +91,8 @@ public:
 
   virtual void setTimeout(unsigned long timeout);
 
+  virtual void getRandomAddress(uint8_t buff[6]);
+
   virtual void debug(Stream& stream);
   virtual void noDebug();
   
@@ -122,6 +124,7 @@ protected:
   virtual BLEAdvertisingData& getScanResponseData();
 
 private:
+  uint8_t randomAddress[6];
   BLEAdvertisingData _advertisingData;
   BLEAdvertisingData _scanResponseData;
   uint8_t _ownBdaddrType;
