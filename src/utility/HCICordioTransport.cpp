@@ -235,7 +235,7 @@ void HCICordioTransportClass::end()
     bleLoopThread = NULL;
   }
 
-#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA)
+#if !defined(TARGET_STM32H7)
   CordioHCIHook::getDriver().terminate();
 #endif
 
