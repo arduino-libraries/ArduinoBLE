@@ -82,7 +82,7 @@ String BLEDevice::address() const
 
 void BLEDevice::address(uint8_t* address) const
 {
-  memcpy( _address, address, sizeof(_address) );
+  memcpy( address, _address, sizeof(_address) );
 }
 
 
