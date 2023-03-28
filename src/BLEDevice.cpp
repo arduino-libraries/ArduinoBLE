@@ -80,6 +80,12 @@ String BLEDevice::address() const
   return result;
 }
 
+void BLEDevice::address(uint8_t* address) const
+{
+  memcpy( _address, address, sizeof(_address) );
+}
+
+
 bool BLEDevice::hasLocalName() const
 {
   return (localName().length() > 0);
