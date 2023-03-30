@@ -67,10 +67,10 @@ int HCISpiTransportClass::begin()
   digitalWrite(_ble_rst, HIGH);
   delay(5);
 
-  if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0 || _ble_chip == BLUENRG_LP) {
+  if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0 || _ble_chip == BLUENRG_LP || _ble_chip == BLUENRG_M2SP) {
     // Wait for Blue Initialize
     wait_for_blue_initialize();
-  } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+  } else if (_ble_chip == SPBTLE_1S) {
     // Wait a while for the reset of the BLE module
     delay(300);
   } else {
@@ -146,7 +146,7 @@ int HCISpiTransportClass::available()
 
               /* Read the response */
               for (int j = 0; j < byte_count; j++) {
-                _rxbuff[_write_index_initial] = _spi->transfer(0xFF);
+                _rxbuff[_write_index_initial] = _spi->transfer(0x00);
                 _write_index_initial++;
               }
 
@@ -172,7 +172,7 @@ int HCISpiTransportClass::available()
 
               /* Read the response */
               for (int j = 0; j < byte_count; j++) {
-                _rxbuff[_write_index] = _spi->transfer(0xFF);
+                _rxbuff[_write_index] = _spi->transfer(0x00);
                 _write_index++;
               }
             }
@@ -190,7 +190,7 @@ int HCISpiTransportClass::available()
 
             /* Read the response */
             for (int j = 0; j < byte_count; j++) {
-              _rxbuff[_write_index_initial] = _spi->transfer(0xFF);
+              _rxbuff[_write_index_initial] = _spi->transfer(0x00);
               _write_index_initial++;
             }
 
@@ -217,7 +217,7 @@ int HCISpiTransportClass::available()
 
             /* Read the response */
             for (int j = 0; j < byte_count; j++) {
-              _rxbuff[_write_index] = _spi->transfer(0xFF);
+              _rxbuff[_write_index] = _spi->transfer(0x00);
               _write_index++;
             }
           }
@@ -234,11 +234,15 @@ int HCISpiTransportClass::available()
     }
 
     if (ble_reset) {
-      if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0 || _ble_chip == BLUENRG_LP) {
+      if (_ble_chip == BLUENRG_M2SP) {
+        wait_for_blue_initialize();
+      }
+
+      if (_ble_chip == SPBTLE_RF || _ble_chip == BLUENRG_M0 || _ble_chip == BLUENRG_LP || _ble_chip == BLUENRG_M2SP) {
         /* BLE chip was reset: we need to enable LL_ONLY */
         enable_ll_only();
         wait_for_enable_ll_only();
-      } else if (_ble_chip == SPBTLE_1S || _ble_chip == BLUENRG_M2SP) {
+      } else if (_ble_chip == SPBTLE_1S) {
         /* BLE chip was reset: we need to wait for a while */
         delay(300);
       }
@@ -447,7 +451,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
             /* Read the response */
             if (byte_count == 6) {
               for (int j = 0; j < byte_count; j++) {
-                event[j] = _spi->transfer(0xFF);
+                event[j] = _spi->transfer(0x00);
               }
 
               if (event[0] == 0x04 &&
@@ -460,7 +464,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
               }
             } else {
               for (int j = 0; j < byte_count; j++) {
-                _spi->transfer(0xFF);
+                _spi->transfer(0x00);
               }
             }
           }
@@ -472,7 +476,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
           /* Read the response */
           if (byte_count == 6) {
             for (int j = 0; j < byte_count; j++) {
-              event[j] = _spi->transfer(0xFF);
+              event[j] = _spi->transfer(0x00);
             }
 
             if (event[0] == 0x04 &&
@@ -485,7 +489,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
             }
           } else {
             for (int j = 0; j < byte_count; j++) {
-              _spi->transfer(0xFF);
+              _spi->transfer(0x00);
             }
           }
         }
@@ -496,7 +500,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
           /* Read the response */
           if (byte_count == 7) {
             for (int j = 0; j < byte_count; j++) {
-              event[j] = _spi->transfer(0xFF);
+              event[j] = _spi->transfer(0x00);
             }
 
             if (event[0] == 0x82 &&
@@ -510,7 +514,7 @@ void HCISpiTransportClass::wait_for_blue_initialize()
             }
           } else {
             for (int j = 0; j < byte_count; j++) {
-              _spi->transfer(0xFF);
+              _spi->transfer(0x00);
             }
           }
         }
@@ -563,7 +567,7 @@ void HCISpiTransportClass::wait_for_enable_ll_only()
           if (byte_count > 0) {
             /* Read the response */
             for (int j = 0; j < byte_count; j++) {
-              data[j] = _spi->transfer(0xFF);
+              data[j] = _spi->transfer(0x00);
             }
 
             if (byte_count >= 7) {
@@ -585,7 +589,7 @@ void HCISpiTransportClass::wait_for_enable_ll_only()
         if (byte_count > 0) {
           /* Read the response */
           for (int j = 0; j < byte_count; j++) {
-            data[j] = _spi->transfer(0xFF);
+            data[j] = _spi->transfer(0x00);
           }
 
           if (byte_count >= 7) {
@@ -725,7 +729,7 @@ void HCISpiTransportClass::wait_for_aci_gatt_init()
           if (byte_count > 0) {
             /* Read the response */
             for (int j = 0; j < byte_count; j++) {
-              data[j] = _spi->transfer(0xFF);
+              data[j] = _spi->transfer(0x00);
             }
 
             if (byte_count >= 7) {
@@ -747,7 +751,7 @@ void HCISpiTransportClass::wait_for_aci_gatt_init()
         if (byte_count > 0) {
           /* Read the response */
           for (int j = 0; j < byte_count; j++) {
-            data[j] = _spi->transfer(0xFF);
+            data[j] = _spi->transfer(0x00);
           }
 
           if (byte_count >= 7) {
@@ -887,7 +891,7 @@ void HCISpiTransportClass::wait_for_aci_gap_init()
           if (byte_count > 0) {
             /* Read the response */
             for (int j = 0; j < byte_count; j++) {
-              data[j] = _spi->transfer(0xFF);
+              data[j] = _spi->transfer(0x00);
             }
 
             if (byte_count >= 13) {
@@ -909,7 +913,7 @@ void HCISpiTransportClass::wait_for_aci_gap_init()
         if (byte_count > 0) {
           /* Read the response */
           for (int j = 0; j < byte_count; j++) {
-            data[j] = _spi->transfer(0xFF);
+            data[j] = _spi->transfer(0x00);
           }
 
           if (byte_count >= 13) {
@@ -1058,7 +1062,7 @@ void HCISpiTransportClass::wait_for_aci_read_config_parameter()
           if (byte_count > 0) {
             /* Read the response */
             for (int j = 0; j < byte_count; j++) {
-              data[j] = _spi->transfer(0xFF);
+              data[j] = _spi->transfer(0x00);
             }
 
             if (byte_count >= 13) {
@@ -1081,7 +1085,7 @@ void HCISpiTransportClass::wait_for_aci_read_config_parameter()
         if (byte_count > 0) {
           /* Read the response */
           for (int j = 0; j < byte_count; j++) {
-            data[j] = _spi->transfer(0xFF);
+            data[j] = _spi->transfer(0x00);
           }
 
           if (byte_count >= 14) {
@@ -1293,7 +1297,9 @@ void HCISpiTransportClass::wait_for_set_address()
   uint8_t data[15];
   int status = 0;
 
-  if (_ble_chip != BLUENRG_LP) return;
+  if (_ble_chip != BLUENRG_LP) {
+    return;
+  }
 
   do {
     while (!data_avail);
@@ -1321,7 +1327,7 @@ void HCISpiTransportClass::wait_for_set_address()
       if (byte_count > 0) {
         /* Read the response */
         for (int j = 0; j < byte_count; j++) {
-          data[j] = _spi->transfer(0xFF);
+          data[j] = _spi->transfer(0x00);
         }
 
         if (byte_count >= 7) { // 040E0401052000
