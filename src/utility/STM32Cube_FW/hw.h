@@ -26,21 +26,14 @@ extern "C" {
 #endif
 
   /* Includes ------------------------------------------------------------------*/
-#include "stm32_def.h"
-#include "stm32wbxx_ll_bus.h"
-#include "stm32wbxx_ll_exti.h"
-#include "stm32wbxx_ll_system.h"
-#include "stm32wbxx_ll_rcc.h"
-#include "stm32wbxx_ll_ipcc.h"
-#include "stm32wbxx_ll_cortex.h"
-#include "stm32wbxx_ll_utils.h"
-#include "stm32wbxx_ll_pwr.h"
 
   /******************************************************************************
    * HW IPCC
    ******************************************************************************/
   void HW_IPCC_Enable( void );
   void HW_IPCC_Init( void );
+  void HW_IPCC_Rx_Handler( void );
+  void HW_IPCC_Tx_Handler( void );
 
   void HW_IPCC_BLE_Init( void );
   void HW_IPCC_BLE_SendCmd( void );
@@ -86,6 +79,23 @@ extern "C" {
   
   void HW_IPCC_TRACES_Init( void );
   void HW_IPCC_TRACES_EvtNot( void );
+
+  void HW_IPCC_MAC_802_15_4_Init( void );
+  void HW_IPCC_MAC_802_15_4_SendCmd( void );
+  void HW_IPCC_MAC_802_15_4_SendAck( void );
+  void HW_IPCC_MAC_802_15_4_CmdEvtNot( void );
+  void HW_IPCC_MAC_802_15_4_EvtNot( void );
+
+  void HW_IPCC_ZIGBEE_Init( void );
+
+  void HW_IPCC_ZIGBEE_SendM4RequestToM0(void); /* M4 Request to M0 */
+  void HW_IPCC_ZIGBEE_RecvAppliAckFromM0(void); /* Request ACK from M0 */
+
+  void HW_IPCC_ZIGBEE_RecvM0NotifyToM4(void); /* M0 Notify to M4 */
+  void HW_IPCC_ZIGBEE_SendM4AckToM0Notify(void); /* Notify ACK from M4 */
+  void HW_IPCC_ZIGBEE_RecvM0RequestToM4(void); /* M0 Request to M4 */
+  void HW_IPCC_ZIGBEE_SendM4AckToM0Request(void); /* Request ACK from M4 */
+
 
 #ifdef __cplusplus
 }

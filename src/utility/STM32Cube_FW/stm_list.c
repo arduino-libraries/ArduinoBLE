@@ -16,13 +16,13 @@
   ******************************************************************************
   */
 
-#if defined(STM32WBxx)
+
 /******************************************************************************
  * Include Files
  ******************************************************************************/
+#include "utilities_common.h"
+
 #include "stm_list.h"
-#include "cmsis_gcc.h"
-#include "stm32_wpan_common.h"
 
 /******************************************************************************
  * Function Definitions
@@ -33,20 +33,20 @@ void LST_init_head (tListNode * listHead)
   listHead->prev = listHead;
 }
 
-bool LST_is_empty (tListNode * listHead)
+uint8_t LST_is_empty (tListNode * listHead)
 {
   uint32_t primask_bit;
-  bool return_value;
+  uint8_t return_value;
 
   primask_bit = __get_PRIMASK();  /**< backup PRIMASK bit */
   __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
   if(listHead->next == listHead)
   {
-    return_value = true;
+    return_value = TRUE;
   }
   else
   {
-    return_value = false;
+    return_value = FALSE;
   }
   __set_PRIMASK(primask_bit);     /**< Restore PRIMASK bit*/
 
@@ -204,4 +204,3 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
 
   __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
 }
-#endif /* STM32WBxx */

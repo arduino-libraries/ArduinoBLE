@@ -61,9 +61,6 @@ extern "C" {
 #define TL_BLEEVT_CS_PACKET_SIZE       (TL_EVT_HDR_SIZE + sizeof(TL_CsEvt_t))
 #define TL_BLEEVT_CS_BUFFER_SIZE       (sizeof(TL_PacketHeader_t) + TL_BLEEVT_CS_PACKET_SIZE)
 
-#define TL_BLEEVT_CC_PACKET_SIZE       (TL_EVT_HDR_SIZE + sizeof(TL_CcEvt_t))
-#define TL_BLEEVT_CC_BUFFER_SIZE       (sizeof(TL_PacketHeader_t) + TL_BLEEVT_CC_PACKET_SIZE)
-
 /* Exported types ------------------------------------------------------------*/
 /**< Packet header */
 typedef PACKED_STRUCT
@@ -205,6 +202,19 @@ typedef struct
   uint8_t *p_BleLldM0CmdBuffer;
 } TL_BLE_LLD_Config_t;
 
+typedef struct
+{
+  uint8_t *p_Mac_802_15_4_CmdRspBuffer;
+  uint8_t *p_Mac_802_15_4_NotAckBuffer;
+} TL_MAC_802_15_4_Config_t;
+
+typedef struct
+{
+  uint8_t *p_ZigbeeOtCmdRspBuffer;
+  uint8_t *p_ZigbeeNotAckBuffer;
+  uint8_t *p_ZigbeeNotifRequestBuffer;
+} TL_ZIGBEE_Config_t;
+
 /**
  * @brief Contain the BLE HCI Init Configuration
  * @{
@@ -227,6 +237,43 @@ typedef struct
   void (* IoBusCallBackUserEvt) (TL_EvtPacket_t *phcievt);
   uint8_t *p_cmdbuffer;
 } TL_SYS_InitConf_t;
+
+/*****************************************************************************************
+ * Event type copied from ble_legacy.h
+ */
+
+typedef PACKED_STRUCT
+{
+  uint8_t type;
+  uint8_t data[1];
+} hci_uart_pckt;
+
+typedef PACKED_STRUCT
+{
+  uint8_t         evt;
+  uint8_t         plen;
+  uint8_t         data[1];
+} hci_event_pckt;
+
+typedef PACKED_STRUCT
+{
+  uint8_t         subevent;
+  uint8_t         data[1];
+} evt_le_meta_event;
+
+/**
+ * Vendor specific event for BLE core.
+ */
+typedef PACKED_STRUCT
+{
+  uint16_t ecode; /**< One of the BLE core event codes. */
+  uint8_t  data[1];
+} evt_blecore_aci;
+
+/* Bluetooth 48 bit address (in little-endian order).
+ */
+typedef	uint8_t	tBDAddr[6];
+
 
 /* Exported constants --------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/
@@ -297,6 +344,26 @@ void TL_MM_EvtDone( TL_EvtPacket_t * hcievt );
  ******************************************************************************/
 void TL_TRACES_Init( void );
 void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt );
+
+/******************************************************************************
+ * MAC 802.15.4
+ ******************************************************************************/
+void TL_MAC_802_15_4_Init( TL_MAC_802_15_4_Config_t *p_Config );
+void TL_MAC_802_15_4_SendCmd( void );
+void TL_MAC_802_15_4_CmdEvtReceived( TL_EvtPacket_t * Otbuffer );
+void TL_MAC_802_15_4_NotReceived( TL_EvtPacket_t * Notbuffer );
+void TL_MAC_802_15_4_SendAck ( void );
+
+/******************************************************************************
+ * ZIGBEE
+ ******************************************************************************/
+void TL_ZIGBEE_Init( TL_ZIGBEE_Config_t *p_Config );
+void TL_ZIGBEE_SendM4RequestToM0( void );
+void TL_ZIGBEE_SendM4AckToM0Notify ( void );
+void TL_ZIGBEE_NotReceived( TL_EvtPacket_t * Notbuffer );
+void TL_ZIGBEE_CmdEvtReceived( TL_EvtPacket_t * Otbuffer );
+void TL_ZIGBEE_M0RequestReceived(TL_EvtPacket_t * Otbuffer );
+void TL_ZIGBEE_SendM4AckToM0Request(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

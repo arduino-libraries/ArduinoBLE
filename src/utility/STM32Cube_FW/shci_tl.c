@@ -16,14 +16,12 @@
  ******************************************************************************
  */
 
-#if defined(STM32WBxx)
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
 #include "stm_list.h"
 #include "shci_tl.h"
-#include "stm32_def.h"
-#include "wiring_time.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum
@@ -72,6 +70,8 @@ void shci_init(void(* UserEvtRx)(void* pData), void* pConf)
   shci_register_io_bus (&shciContext.io);
 
   TlInit((TL_CmdPacket_t *)(((SHCI_TL_HciInitConf_t *)pConf)->p_cmdbuffer));
+
+  return;
 }
 
 void shci_user_evt_proc(void)
@@ -127,6 +127,8 @@ void shci_user_evt_proc(void)
     shci_notify_asynch_evt((void*) &SHciAsynchEventQueue);
   }
 
+
+  return;
 }
 
 void shci_resume_flow( void )
@@ -138,6 +140,8 @@ void shci_resume_flow( void )
    * be called
    */
   shci_notify_asynch_evt((void*) &SHciAsynchEventQueue);
+
+  return;
 }
 
 void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payload, TL_EvtPacket_t * p_rsp )
@@ -160,20 +164,8 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
   memcpy( &(p_rsp->evtserial), pCmdBuffer, ((TL_EvtSerial_t*)pCmdBuffer)->evt.plen + TL_EVT_HDR_SIZE );
 
   Cmd_SetStatus(SHCI_TL_CmdAvailable);
-}
 
-void shci_notify_asynch_evt(void *pdata)
-{
-  UNUSED(pdata);
-  /* Need to parse data in future version */
-  shci_user_evt_proc();
-}
-
-void shci_register_io_bus(tSHciIO *fops)
-{
-  /* Register IO bus services */
-  fops->Init    = TL_SYS_Init;
-  fops->Send    = TL_SYS_SendCmd;
+  return;
 }
 
 /* Private functions ---------------------------------------------------------*/
@@ -198,6 +190,8 @@ static void TlInit( TL_CmdPacket_t * p_cmdbuffer )
     Conf.IoBusCallBackUserEvt = TlUserEvtReceived;
     shciContext.io.Init(&Conf);
   }
+
+  return;
 }
 
 static void Cmd_SetStatus(SHCI_TL_CmdStatus_t shcicmdstatus)
@@ -218,29 +212,35 @@ static void Cmd_SetStatus(SHCI_TL_CmdStatus_t shcicmdstatus)
       StatusNotCallBackFunction( SHCI_TL_CmdAvailable );
     }
   }
+
+  return;
 }
 
 static void TlCmdEvtReceived(TL_EvtPacket_t *shcievt)
 {
   (void)(shcievt);
   shci_cmd_resp_release(0); /**< Notify the application the Cmd response has been received */
+
+  return;
 }
 
 static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
 {
   LST_insert_tail(&SHciAsynchEventQueue, (tListNode *)shcievt);
   shci_notify_asynch_evt((void*) &SHciAsynchEventQueue); /**< Notify the application a full HCI event has been received */
+
+  return;
 }
 
 /* Weak implementation ----------------------------------------------------------------*/
 __WEAK void shci_cmd_resp_wait(uint32_t timeout)
 {
+  (void)timeout;
+
   CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
-  for (unsigned long start = millis(); (millis() - start) < timeout;) {
-    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
-      break;
-    }
-  }
+  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
+
+  return;
 }
 
 __WEAK void shci_cmd_resp_release(uint32_t flag)
@@ -248,5 +248,6 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
   (void)flag;
 
   CmdRspStatusFlag = SHCI_TL_CMD_RESP_RELEASE;
+
+  return;
 }
-#endif /* STM32WBxx */

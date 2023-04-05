@@ -5,7 +5,7 @@
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2022 STMicroelectronics.
+ * Copyright (c) 2018-2023 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -76,13 +76,6 @@
                       BLE_MBLOCKS_SECURE_CONNECTIONS))
 
 /*
- * BLE_DEFAULT_MBLOCKS_COUNT: default memory blocks count
- */
-#define BLE_DEFAULT_MBLOCKS_COUNT(n_link) \
-          BLE_MBLOCKS_CALC(BLE_DEFAULT_PREP_WRITE_LIST_SIZE, \
-                           BLE_DEFAULT_MAX_ATT_MTU, n_link)
-
-/*
  * BLE_FIXED_BUFFER_SIZE_BYTES:
  * A part of the RAM, is dynamically allocated by initializing all the pointers
  * defined in a global context variable "mem_alloc_ctx_p".
@@ -120,11 +113,11 @@
 #elif (LL_ONLY != 0)
 #define BLE_PER_LINK_SIZE_BYTES       244   /* LL only Full */
 #elif (SLAVE_ONLY != 0)
-#define BLE_PER_LINK_SIZE_BYTES       336   /* Peripheral only */
+#define BLE_PER_LINK_SIZE_BYTES       344   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)
-#define BLE_PER_LINK_SIZE_BYTES       412   /* Basic Features */
+#define BLE_PER_LINK_SIZE_BYTES       420   /* Basic Features */
 #else
-#define BLE_PER_LINK_SIZE_BYTES       424   /* Full stack */
+#define BLE_PER_LINK_SIZE_BYTES       432   /* Full stack */
 #endif
 
 /*
