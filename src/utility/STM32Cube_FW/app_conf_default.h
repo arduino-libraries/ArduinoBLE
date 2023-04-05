@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    app_conf.h
+  * @file    app_conf_default.h
   * @author  MCD Application Team
-  * @brief   Application configuration file for STM32WPAN Middleware.
+  * @brief   Default application configuration file for STM32WPAN Middleware.
   ******************************************************************************
   * @attention
   *
@@ -19,18 +19,38 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef APP_CONF_H
-#define APP_CONF_H
-
+#ifndef APP_CONF_DEFAULT_H
+#define APP_CONF_DEFAULT_H
+#if 0
 #include "hw.h"
 #include "hw_conf.h"
 #include "hw_if.h"
 #include "ble_bufsize.h"
-
+#endif
 /******************************************************************************
  * Application Config
  ******************************************************************************/
 
+/**< generic parameters ******************************************************/
+/* HCI related defines */
+
+#define ACI_HAL_SET_TX_POWER_LEVEL 0xFC0F
+#define ACI_WRITE_CONFIG_DATA_OPCODE 0xFC0C
+#define ACI_READ_CONFIG_DATA_OPCODE 0xFC0D
+#define MAX_HCI_ACL_PACKET_SIZE (sizeof(TL_PacketHeader_t) + 5 + 251)
+#define HCI_RESET 0x0C03
+
+#ifndef BLE_SHARED_MEM_BYTE_ORDER
+  #define BLE_SHARED_MEM_BYTE_ORDER  MSBFIRST
+#endif
+#define BLE_MODULE_SHARED_MEM_BUFFER_SIZE 128
+
+/**
+ * Define Tx Power
+ */
+#define CFG_TX_POWER                      (0x18) /* -0.15dBm */
+
+#if 0
 /**
  * Define Secure Connections Support
  */
@@ -104,7 +124,7 @@
 #define CFG_FW_SUBVERSION         (1)
 #define CFG_FW_BRANCH             (0)
 #define CFG_FW_BUILD              (0)
-
+#endif
 /******************************************************************************
  * BLE Stack
  ******************************************************************************/
@@ -152,13 +172,15 @@
  * Prepare Write List size in terms of number of packet
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
+// #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
+#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
 
 /**
  * Number of allocated memory blocks
  * This parameter is overwritten by the CPU2 with an hardcoded optimal value when the parameter CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-#define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
+//#define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
+#define CFG_BLE_MBLOCK_COUNT              (0x79)
 
 /**
  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
@@ -250,7 +272,7 @@
  *          0: LE Power Class 2-3
  * other bits: complete with Options_extension flag
  */
-#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
+#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY)
 
 /**
  * BLE stack Options_extension flags to be configured with:
@@ -323,6 +345,7 @@
 
 #define CFG_BLE_CORE_VERSION   (SHCI_C2_BLE_INIT_BLE_CORE_5_3)
 
+#if 0
 /******************************************************************************
  * Transport Layer
  ******************************************************************************/
@@ -657,5 +680,5 @@ typedef enum
 #define CFG_OTP_BASE_ADDRESS    OTP_AREA_BASE
 
 #define CFG_OTP_END_ADRESS      OTP_AREA_END_ADDR
-
-#endif /*APP_CONF_H */
+#endif
+#endif /*APP_CONF_DEFAULT_H */
