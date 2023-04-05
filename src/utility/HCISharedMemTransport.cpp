@@ -658,7 +658,8 @@ int HCISharedMemTransportClass::stm32wb_start_ble(void)
     CFG_BLE_MAX_ADV_DATA_LEN,
     CFG_BLE_TX_PATH_COMPENS,
     CFG_BLE_RX_PATH_COMPENS,
-    CFG_BLE_CORE_VERSION
+    CFG_BLE_CORE_VERSION,
+    CFG_BLE_OPTIONS_EXT
   };
   /**
    * Starts the BLE Stack on CPU2
