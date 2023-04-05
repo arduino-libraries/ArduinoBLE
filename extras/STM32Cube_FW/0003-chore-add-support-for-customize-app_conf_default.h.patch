@@ -1,18 +1,18 @@
-From 81472cc135126cb46701a058647de2cf82160fb9 Mon Sep 17 00:00:00 2001
+From 8575588fedd55cf7238a1a810708100e700e57c0 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Mon, 12 Dec 2022 17:29:27 +0100
-Subject: [PATCH 3/3] chore: add support for customize app_conf_default.h
+Subject: [PATCH 3/4] chore: add support for customize app_conf_default.h
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/app_conf_default.h | 88 ++++++++++++++++-----
- 1 file changed, 68 insertions(+), 20 deletions(-)
+ src/utility/STM32Cube_FW/app_conf_default.h | 86 ++++++++++++++++-----
+ 1 file changed, 68 insertions(+), 18 deletions(-)
 
 diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
-index cc8c3e8..35cad34 100644
+index e89df14..1f17900 100644
 --- a/src/utility/STM32Cube_FW/app_conf_default.h
 +++ b/src/utility/STM32Cube_FW/app_conf_default.h
-@@ -41,7 +41,9 @@
+@@ -48,7 +48,9 @@
  /**
   * Define Tx Power
   */
@@ -21,9 +21,9 @@ index cc8c3e8..35cad34 100644
 +  #define CFG_TX_POWER                      (0x18) /* -0.15dBm */
 +#endif
  
- /******************************************************************************
-  * BLE Stack
-@@ -50,13 +52,25 @@
+ #if 0
+ /**
+@@ -132,13 +134,25 @@
   * Maximum number of simultaneous connections that the device will support.
   * Valid values are from 1 to 8
   */
@@ -51,7 +51,7 @@ index cc8c3e8..35cad34 100644
  
  /**
   * Maximum number of Attributes
-@@ -65,13 +79,21 @@
+@@ -147,13 +161,21 @@
   * Note that certain characteristics and relative descriptors are added automatically during device initialization
   * so this parameters should be 9 plus the number of user Attributes
   */
@@ -75,7 +75,7 @@ index cc8c3e8..35cad34 100644
  
  /**
   * Size of the storage area for Attribute values
-@@ -84,14 +106,22 @@
+@@ -166,14 +188,22 @@
   *  The total amount of memory needed is the sum of the above quantities for each attribute.
   * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
   */
@@ -100,7 +100,7 @@ index cc8c3e8..35cad34 100644
  
  /**
   * Number of allocated memory blocks
-@@ -103,12 +133,16 @@
+@@ -185,12 +215,16 @@
  /**
   * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
   */
@@ -119,7 +119,7 @@ index cc8c3e8..35cad34 100644
  
  /**
   * Sleep clock accuracy in Master mode
-@@ -121,7 +155,9 @@
+@@ -203,7 +237,9 @@
   * 6 : 21 ppm to 30 ppm
   * 7 : 0 ppm to 20 ppm
   */
@@ -130,7 +130,7 @@ index cc8c3e8..35cad34 100644
  
  /**
   * LsSource
-@@ -130,21 +166,27 @@
+@@ -212,21 +248,27 @@
   * - bit 1:   1: STM32WB5M Module device                             0: Other devices as STM32WBxx SOC, STM32WB1M module
   * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
   */
@@ -164,11 +164,10 @@ index cc8c3e8..35cad34 100644
  
  /**
   * Viterbi Mode
-@@ -224,8 +266,11 @@
-  * on Max Extended advertising configuration supported.
+@@ -314,7 +356,11 @@
   * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
   */
--
+ 
 -#define CFG_BLE_MAX_ADV_SET_NBR     (8)
 +#if defined(STM32WB15xx)
 +  #define CFG_BLE_MAX_ADV_SET_NBR     (3)
@@ -178,11 +177,10 @@ index cc8c3e8..35cad34 100644
  
   /* Maximum advertising data length (in bytes)
   * Range: 31 .. 1650 with limitation:
-@@ -233,8 +278,11 @@
-  * on Max Extended advertising configuration supported.
+@@ -323,7 +369,11 @@
   * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
   */
--
+ 
 -#define CFG_BLE_MAX_ADV_DATA_LEN    (207)
 +#if defined(STM32WB15xx)
 +  #define CFG_BLE_MAX_ADV_DATA_LEN    (414)
