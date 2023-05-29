@@ -32,14 +32,14 @@
 BLELocalCharacteristic::BLELocalCharacteristic(const char* uuid, uint16_t permissions, int valueSize, bool fixedLength) :
   BLELocalAttribute(uuid),
   _properties((uint8_t)(permissions&0x000FF)),
+  _permissions((uint8_t)((permissions&0xFF00)>>8)),
   _valueSize(min(valueSize, 512)),
   _valueLength(0),
   _fixedLength(fixedLength),
   _handle(0x0000),
   _broadcast(false),
   _written(false),
-  _cccdValue(0x0000),
-  _permissions((uint8_t)((permissions&0xFF00)>>8))
+  _cccdValue(0x0000)
 {
   memset(_eventHandlers, 0x00, sizeof(_eventHandlers));
 
