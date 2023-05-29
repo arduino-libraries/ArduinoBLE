@@ -553,7 +553,6 @@ int HCIClass::readStoredLK(uint8_t BD_ADDR[], uint8_t read_all ){
 }
 
 int HCIClass::tryResolveAddress(uint8_t* BDAddr, uint8_t* address){
-  uint8_t iphone[16] = {0xA6, 0xD2, 0xD, 0xD3, 0x4F, 0x13, 0x42, 0x4F, 0xE1, 0xC1, 0xFD, 0x22, 0x2E, 0xC5, 0x6A, 0x2D};
   bool foundMatch = false;
   if(HCI._getIRKs!=0){
     uint8_t nIRKs = 0;
