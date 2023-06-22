@@ -73,6 +73,26 @@ int BLELocalDevice::begin()
   // BT_REG_ON -> HIGH
   pinMode(BT_REG_ON, OUTPUT);
   digitalWrite(BT_REG_ON, HIGH);
+#elif defined(ARDUINO_PORTENTA_C33)
+#define NINA_GPIO0      (100)
+#define NINA_RESETN     (101)
+  pinMode(NINA_GPIO0, OUTPUT);
+  pinMode(NINA_RESETN, OUTPUT);
+  Serial5.begin(921600);
+
+  digitalWrite(NINA_GPIO0, HIGH);
+  delay(100);
+  digitalWrite(NINA_RESETN, HIGH);
+  digitalWrite(NINA_RESETN, LOW);
+  digitalWrite(NINA_RESETN, HIGH);
+  auto _start = millis();
+  while (millis() - _start < 500) {
+    if (Serial5.available()) {
+      Serial5.read();
+    }
+  }
+  //pinMode(94, OUTPUT);
+  //digitalWrite(94, LOW);
 #endif
 
 
