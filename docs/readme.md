@@ -11,7 +11,7 @@ Bluetooth® 4.0 includes both traditional Bluetooth®, now labeled "Bluetooth® 
 
 Unlike standard Bluetooth® communication basically based on an asynchronous serial connection (UART) a Bluetooth® LE radio acts like a community bulletin board. The computers that connect to it are like community members that read the bulletin board. Each radio acts as either the bulletin board or the reader. If your radio is a bulletin board (called a peripheral device in Bluetooth® LE parlance) it posts data for all radios in the community to read. If your radio is a reader (called a central device in Blueooth LE terms) it reads from any of the bulletin boards (peripheral devices) that have information about which it cares. You can also think of peripheral devices as the servers in a client-server transaction, because they contain the information that reader radios ask for. Similarly, central devices are the clients of the Bluetooth® LE world because they read information available from the peripherals.
 
-![Communication between central and peripheral devices](https://www.arduino.cc/en/uploads/Reference/ble-bulletin-board-model.png)
+![Communication between central and peripheral devices](https://raw.githubusercontent.com/arduino-libraries/ArduinoBLE/master/docs/assets/ble-bulletin-board-model.png)
 
 Think of a Bluetooth® LE peripheral device as a bulletin board and central devices as viewers of the board. Central devices view the services, get the data, then move on. Each transaction is quick (a few milliseconds), so multiple central devices can get data from one peripheral.
 
@@ -35,7 +35,7 @@ Just as with writing to a characteristic, you could update your characteristics 
 
 ## Services, characteristics, and UUIDs
 
-A Bluetooth® Low Energy peripheral will provide **services**, which in turn provide **characteristics**. You can define your own services, or use [standard services](https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx).
+A Bluetooth® Low Energy peripheral will provide **services**, which in turn provide **characteristics**. You can define your own services, or use standard services (see section 3.4 in the [Assigned Numbers document](https://www.bluetooth.com/specifications/assigned-numbers/)).
 
 Services are identified by unique numbers known as UUIDs. You know about UUIDs from other contexts. Standard services have a 16-bit UUID and custom services have a 128-bit UUID. The ability to define services and characteristics depends on the radio you're using and its firmware.
 
