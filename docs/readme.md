@@ -35,7 +35,7 @@ Just as with writing to a characteristic, you could update your characteristics 
 
 ## Services, characteristics, and UUIDs
 
-A Bluetooth® Low Energy peripheral will provide **services**, which in turn provide **characteristics**. You can define your own services, or use [standard services](https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx).
+A Bluetooth® Low Energy peripheral will provide **services**, which in turn provide **characteristics**. You can define your own services, or use standard services (see section 3.4 in the [Assigned Numbers document](https://www.bluetooth.com/specifications/assigned-numbers/)).
 
 Services are identified by unique numbers known as UUIDs. You know about UUIDs from other contexts. Standard services have a 16-bit UUID and custom services have a 128-bit UUID. The ability to define services and characteristics depends on the radio you're using and its firmware.
 
