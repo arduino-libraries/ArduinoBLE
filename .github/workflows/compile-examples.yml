@@ -15,6 +15,7 @@ jobs:
           - arduino:megaavr:uno2018:mode=on
           - arduino:mbed:nano33ble
           - arduino:mbed_nano:nanorp2040connect
+          - arduino:renesas_uno:unor4wifi
 
     steps:
       - uses: actions/checkout@v3
