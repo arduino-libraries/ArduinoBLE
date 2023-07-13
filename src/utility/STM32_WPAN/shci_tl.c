@@ -24,6 +24,7 @@
 #include "stm_list.h"
 #include "shci_tl.h"
 #include "stm32_def.h"
+#include "wiring_time.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum
@@ -251,10 +252,11 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
 /* Weak implementation ----------------------------------------------------------------*/
 __WEAK void shci_cmd_resp_wait(uint32_t timeout)
 {
-  (void)timeout;
-
-  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
-
+  for (unsigned long start = millis(); (millis() - start) < timeout;) {
+    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
+      break;
+    }
+  }
   return;
 }
 
