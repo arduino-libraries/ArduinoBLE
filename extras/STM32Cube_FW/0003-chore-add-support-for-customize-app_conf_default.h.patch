@@ -1,7 +1,7 @@
-From 8575588fedd55cf7238a1a810708100e700e57c0 Mon Sep 17 00:00:00 2001
+From 663ed22fd680de1f32c542df0799c403665ecb2e Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Mon, 12 Dec 2022 17:29:27 +0100
-Subject: [PATCH 3/4] chore: add support for customize app_conf_default.h
+Subject: [PATCH 3/3] chore: add support for customize app_conf_default.h
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
  1 file changed, 68 insertions(+), 18 deletions(-)
 
 diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
-index e89df14..1f17900 100644
+index 1c6dd91..d39492e 100644
 --- a/src/utility/STM32Cube_FW/app_conf_default.h
 +++ b/src/utility/STM32Cube_FW/app_conf_default.h
 @@ -48,7 +48,9 @@

@@ -1,7 +1,7 @@
-From 12683bb7a3f0b0ad1e10400cba0e3694f9b9ee95 Mon Sep 17 00:00:00 2001
+From 598c654f18fc9389be8326610a51052943151f04 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
-Date: Mon, 12 Dec 2022 17:17:48 +0100
-Subject: [PATCH 2/4] fix: include a timeout when waiting for the cmd_resp
+Date: Thu, 13 Jul 2023 17:16:40 +0200
+Subject: [PATCH 2/3] fix: include a timeout when waiting for the cmd_resp
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
  1 file changed, 6 insertions(+), 4 deletions(-)
 
 diff --git a/src/utility/STM32Cube_FW/shci_tl.c b/src/utility/STM32Cube_FW/shci_tl.c
-index a336aa6..d1d35f5 100644
+index e343809..6038025 100644
 --- a/src/utility/STM32Cube_FW/shci_tl.c
 +++ b/src/utility/STM32Cube_FW/shci_tl.c
 @@ -23,6 +23,7 @@
@@ -20,13 +20,12 @@ index a336aa6..d1d35f5 100644
  
  /* Private typedef -----------------------------------------------------------*/
  typedef enum
-@@ -250,11 +251,12 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
+@@ -250,10 +251,11 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
  /* Weak implementation ----------------------------------------------------------------*/
  __WEAK void shci_cmd_resp_wait(uint32_t timeout)
  {
 -  (void)timeout;
 -
-   CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
 -  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
 -
 +  for (unsigned long start = millis(); (millis() - start) < timeout;) {
