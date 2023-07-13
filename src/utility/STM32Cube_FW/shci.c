@@ -16,7 +16,7 @@
  ******************************************************************************
  */
 
-
+#if defined(STM32WBxx)
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
@@ -739,3 +739,4 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
 
   return (SHCI_Success);
 }
+#endif /* STM32WBxx */
