@@ -76,13 +76,6 @@
                       BLE_MBLOCKS_SECURE_CONNECTIONS))
 
 /*
- * BLE_DEFAULT_MBLOCKS_COUNT: default memory blocks count
- */
-#define BLE_DEFAULT_MBLOCKS_COUNT(n_link) \
-          BLE_MBLOCKS_CALC(BLE_DEFAULT_PREP_WRITE_LIST_SIZE, \
-                           BLE_DEFAULT_MAX_ATT_MTU, n_link)
-
-/*
  * BLE_FIXED_BUFFER_SIZE_BYTES:
  * A part of the RAM, is dynamically allocated by initializing all the pointers
  * defined in a global context variable "mem_alloc_ctx_p".
@@ -103,11 +96,11 @@
 #elif (LL_ONLY != 0)
 #define BLE_FIXED_BUFFER_SIZE_BYTES  6036   /* LL only Full */
 #elif (SLAVE_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6292   /* Peripheral only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6300   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6624   /* Basic Features */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6632   /* Basic Features */
 #else
-#define BLE_FIXED_BUFFER_SIZE_BYTES  7144   /* Full stack */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  7152   /* Full stack */
 #endif
 
 /*

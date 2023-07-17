@@ -16,14 +16,12 @@
  ******************************************************************************
  */
 
-#if defined(STM32WBxx)
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
 #include "stm_list.h"
 #include "shci_tl.h"
-#include "stm32_def.h"
-#include "wiring_time.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum
@@ -154,7 +152,7 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
   pCmdBuffer->cmdserial.cmd.plen = len_cmd_payload;
 
   memcpy(pCmdBuffer->cmdserial.cmd.payload, p_cmd_payload, len_cmd_payload );
-
+  CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
   shciContext.io.Send(0,0);
 
   shci_cmd_resp_wait(SHCI_TL_DEFAULT_TIMEOUT);
@@ -168,20 +166,6 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
   Cmd_SetStatus(SHCI_TL_CmdAvailable);
 
   return;
-}
-
-void shci_notify_asynch_evt(void *pdata)
-{
-  UNUSED(pdata);
-  /* Need to parse data in future version */
-  shci_user_evt_proc();
-}
-
-void shci_register_io_bus(tSHciIO *fops)
-{
-  /* Register IO bus services */
-  fops->Init    = TL_SYS_Init;
-  fops->Send    = TL_SYS_SendCmd;
 }
 
 /* Private functions ---------------------------------------------------------*/
@@ -251,12 +235,10 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
 /* Weak implementation ----------------------------------------------------------------*/
 __WEAK void shci_cmd_resp_wait(uint32_t timeout)
 {
-  CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
-  for (unsigned long start = millis(); (millis() - start) < timeout;) {
-    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
-      break;
-    }
-  }
+  (void)timeout;
+
+  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
+
   return;
 }
 
@@ -268,4 +250,3 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
 
   return;
 }
-#endif /* STM32WBxx */

@@ -16,7 +16,7 @@
  ******************************************************************************
  */
 
-#if defined(STM32WBxx)
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
@@ -40,9 +40,9 @@
 uint8_t SHCI_C2_FUS_GetState( SHCI_FUS_GetState_ErrorCode_t *p_error_code )
 {
   /**
-   * A command status event + payload has the same size than the expected command complete
+   * Buffer is large enough to hold command complete with payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE + 1];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -63,7 +63,7 @@ uint8_t SHCI_C2_FUS_GetState( SHCI_FUS_GetState_ErrorCode_t *p_error_code )
 SHCI_CmdStatus_t SHCI_C2_FUS_FwUpgrade( uint32_t fw_src_add,  uint32_t fw_dest_add )
 {
   /**
-   * TL_BLEEVT_CS_BUFFER_SIZE is 15 bytes so it is large enough to hold the 8 bytes of command parameters
+   * TL_BLEEVT_CC_BUFFER_SIZE is 16 bytes so it is large enough to hold the 8 bytes of command parameters
    * Buffer is large enough to hold command complete without payload
    */
   uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
@@ -153,9 +153,9 @@ SHCI_CmdStatus_t SHCI_C2_FUS_LockAuthKey( void )
 SHCI_CmdStatus_t SHCI_C2_FUS_StoreUsrKey( SHCI_C2_FUS_StoreUsrKey_Cmd_Param_t *pParam, uint8_t *p_key_index )
 {
   /**
-   * Buffer is large enough to hold command complete without payload
+   * Buffer is large enough to hold command complete with payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE + 1];
   TL_EvtPacket_t * p_rsp;
   uint8_t local_payload_len;
 
@@ -431,9 +431,9 @@ SHCI_CmdStatus_t SHCI_C2_CONCURRENT_SetMode( SHCI_C2_CONCURRENT_Mode_Param_t Mod
 SHCI_CmdStatus_t SHCI_C2_CONCURRENT_GetNextBleEvtTime( SHCI_C2_CONCURRENT_GetNextBleEvtTime_Param_t *pParam )
 {
   /**
-   * Buffer is large enough to hold command complete without payload
+   * Buffer is large enough to hold command complete with payload
    */
-  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE+4];
   TL_EvtPacket_t * p_rsp;
 
   p_rsp = (TL_EvtPacket_t *)local_buffer;
@@ -566,7 +566,7 @@ SHCI_CmdStatus_t SHCI_C2_Reinit( void )
 SHCI_CmdStatus_t SHCI_C2_ExtpaConfig(uint32_t gpio_port, uint16_t gpio_pin_number, uint8_t gpio_polarity, uint8_t gpio_status)
 {
   /**
-   * TL_BLEEVT_CS_BUFFER_SIZE is 15 bytes so it is large enough to hold the 8 bytes of command parameters
+   * TL_BLEEVT_CC_BUFFER_SIZE is 16 bytes so it is large enough to hold the 8 bytes of command parameters
    * Buffer is large enough to hold command complete without payload
    */
   uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
@@ -590,7 +590,7 @@ SHCI_CmdStatus_t SHCI_C2_ExtpaConfig(uint32_t gpio_port, uint16_t gpio_pin_numbe
 SHCI_CmdStatus_t SHCI_C2_SetFlashActivityControl(SHCI_C2_SET_FLASH_ACTIVITY_CONTROL_Source_t Source)
 {
   /**
-   * TL_BLEEVT_CS_BUFFER_SIZE is 15 bytes so it is large enough to hold the 1 byte of command parameter
+   * TL_BLEEVT_CC_BUFFER_SIZE is 16 bytes so it is large enough to hold the 1 byte of command parameter
    * Buffer is large enough to hold command complete without payload
    */
   uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
@@ -739,4 +739,3 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
 
   return (SHCI_Success);
 }
-#endif /* STM32WBxx */

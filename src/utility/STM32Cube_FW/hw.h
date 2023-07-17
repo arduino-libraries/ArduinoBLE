@@ -26,23 +26,14 @@ extern "C" {
 #endif
 
   /* Includes ------------------------------------------------------------------*/
-#include "stm32_def.h"
-#include "stm32wbxx_ll_bus.h"
-#include "stm32wbxx_ll_exti.h"
-#include "stm32wbxx_ll_system.h"
-#include "stm32wbxx_ll_rcc.h"
-#include "stm32wbxx_ll_ipcc.h"
-#include "stm32wbxx_ll_cortex.h"
-#include "stm32wbxx_ll_utils.h"
-#include "stm32wbxx_ll_pwr.h"
 
   /******************************************************************************
    * HW IPCC
    ******************************************************************************/
   void HW_IPCC_Enable( void );
   void HW_IPCC_Init( void );
-#define HW_IPCC_Rx_Handler IPCC_C1_RX_IRQHandler
-#define HW_IPCC_Tx_Handler IPCC_C1_TX_IRQHandler
+  void HW_IPCC_Rx_Handler( void );
+  void HW_IPCC_Tx_Handler( void );
 
   void HW_IPCC_BLE_Init( void );
   void HW_IPCC_BLE_SendCmd( void );
