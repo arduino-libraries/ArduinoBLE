@@ -99,7 +99,6 @@ void TL_Init( void )
   TL_RefTable.p_sys_table = &TL_SysTable;
   TL_RefTable.p_mem_manager_table = &TL_MemManagerTable;
   TL_RefTable.p_traces_table = &TL_TracesTable;
-
 #if 0
   TL_RefTable.p_mac_802_15_4_table = &TL_Mac_802_15_4_Table;
   TL_RefTable.p_zigbee_table = &TL_Zigbee_Table;

@@ -154,7 +154,7 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
   pCmdBuffer->cmdserial.cmd.plen = len_cmd_payload;
 
   memcpy(pCmdBuffer->cmdserial.cmd.payload, p_cmd_payload, len_cmd_payload );
-
+  CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
   shciContext.io.Send(0,0);
 
   shci_cmd_resp_wait(SHCI_TL_DEFAULT_TIMEOUT);
@@ -251,7 +251,6 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
 /* Weak implementation ----------------------------------------------------------------*/
 __WEAK void shci_cmd_resp_wait(uint32_t timeout)
 {
-  CmdRspStatusFlag = SHCI_TL_CMD_RESP_WAIT;
   for (unsigned long start = millis(); (millis() - start) < timeout;) {
     if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
       break;

@@ -535,7 +535,7 @@ extern "C" {
    * - bit 4:   1: CS Algo #2 supported             0: CS Algo #2 not supported
    * - bit 5:   1: Reduced GATT database in NVM     0: Full GATT database in NVM
    * - bit 6:   1: GATT caching is used             0: GATT caching is not used
-   * - bit 7:   1: LE Power Class 1                 0: LE Power Classe 2-3
+   * - bit 7:   1: LE Power Class 1                 0: LE Power Class 2-3
    * - other bits: complete with Options_extension flag
    */
   uint8_t Options;
@@ -668,6 +668,7 @@ extern "C" {
    */
 #define SHCI_C2_BLE_INIT_BLE_CORE_5_2               11
 #define SHCI_C2_BLE_INIT_BLE_CORE_5_3               12
+#define SHCI_C2_BLE_INIT_BLE_CORE_5_4               13
 
    /**
    * LsSource information
@@ -904,7 +905,7 @@ extern "C" {
 #define FUS_DEVICE_INFO_TABLE_VALIDITY_KEYWORD    (0xA94656B9)
 
 /*
-  *   At startup, the informations relative to the wireless binary are stored in RAM trough a structure defined by
+  *   At startup, the information relative to the wireless binary are stored in RAM through a structure defined by
   *   MB_WirelessFwInfoTable_t.This structure contains 4 fields (Version,MemorySize, Stack_info and a reserved part)
   *   each of those coded on 32 bits as shown on the table below:
   *
@@ -1150,7 +1151,7 @@ typedef struct {
   * @brief Starts the LLD tests CLI
   *
   * @param  param_size : Nb of bytes
-  * @param  p_param : pointeur with data to give from M4 to M0
+  * @param  p_param : pointer with data to give from M4 to M0
   * @retval Status
   */
   SHCI_CmdStatus_t SHCI_C2_LLDTESTS_Init( uint8_t param_size, uint8_t * p_param );
@@ -1160,7 +1161,7 @@ typedef struct {
   * @brief Starts the LLD tests BLE
   *
   * @param  param_size : Nb of bytes
-  * @param  p_param : pointeur with data to give from M4 to M0
+  * @param  p_param : pointer with data to give from M4 to M0
   * @retval Status
   */
   SHCI_CmdStatus_t SHCI_C2_BLE_LLD_Init( uint8_t param_size, uint8_t * p_param );
@@ -1260,7 +1261,7 @@ typedef struct {
 
   /**
    * SHCI_GetWirelessFwInfo
-   * @brief This function read back the informations relative to the wireless binary loaded.
+   * @brief This function read back the information relative to the wireless binary loaded.
    *         Refer yourself to MB_WirelessFwInfoTable_t structure to get the significance
    *         of the different parameters returned.
    * @param  pWirelessInfo : Pointer to WirelessFwInfo_t.

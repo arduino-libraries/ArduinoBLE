@@ -58,12 +58,8 @@ extern "C" {
 #define TL_BLEEVT_CS_OPCODE            (0x0F)
 #define TL_BLEEVT_VS_OPCODE            (0xFF)
 
-#define TL_BLEEVT_CS_PACKET_SIZE       (TL_EVT_HDR_SIZE + sizeof(TL_CsEvt_t))
-#define TL_BLEEVT_CS_BUFFER_SIZE       (sizeof(TL_PacketHeader_t) + TL_BLEEVT_CS_PACKET_SIZE)
-
 #define TL_BLEEVT_CC_PACKET_SIZE       (TL_EVT_HDR_SIZE + sizeof(TL_CcEvt_t))
 #define TL_BLEEVT_CC_BUFFER_SIZE       (sizeof(TL_PacketHeader_t) + TL_BLEEVT_CC_PACKET_SIZE)
-
 /* Exported types ------------------------------------------------------------*/
 /**< Packet header */
 typedef PACKED_STRUCT
@@ -93,7 +89,7 @@ typedef PACKED_STRUCT
 {
   uint8_t   numcmd;
   uint16_t  cmdcode;
-  uint8_t   payload[255];
+  uint8_t   payload[2];
 } TL_CcEvt_t;
 
 /**
@@ -102,7 +98,7 @@ typedef PACKED_STRUCT
 typedef PACKED_STRUCT
 {
   uint16_t  subevtcode;
-  uint8_t   payload[255];
+  uint8_t   payload[2];
 } TL_AsynchEvt_t;
 
 /**
@@ -112,7 +108,7 @@ typedef PACKED_STRUCT
 {
   uint8_t   evtcode;
   uint8_t   plen;
-  uint8_t   payload[255];
+  uint8_t   payload[2];
 } TL_Evt_t;
 
 typedef PACKED_STRUCT
