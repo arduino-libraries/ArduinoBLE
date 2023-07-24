@@ -108,7 +108,7 @@ typedef PACKED_STRUCT
 {
   uint8_t   evtcode;
   uint8_t   plen;
-  uint8_t   payload[2];
+  uint8_t   payload[4];
 } TL_Evt_t;
 
 typedef PACKED_STRUCT
