@@ -1,7 +1,7 @@
-From 663ed22fd680de1f32c542df0799c403665ecb2e Mon Sep 17 00:00:00 2001
+From 370e1082edae9b69d50f824db85b5cbe3b786e79 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Mon, 12 Dec 2022 17:29:27 +0100
-Subject: [PATCH 3/3] chore: add support for customize app_conf_default.h
+Subject: [PATCH 3/4] chore: add support for customize app_conf_default.h
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
