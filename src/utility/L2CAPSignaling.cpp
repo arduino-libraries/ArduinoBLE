@@ -264,12 +264,12 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
   }
   else if(code == CONNECTION_PAIRING_FAILED)
   {
+#ifdef _BLE_TRACE_
     struct __attribute__ ((packed)) PairingFailed
     {
       uint8_t code;
       uint8_t reason;
     } *pairingFailed = (PairingFailed*)data;
-#ifdef _BLE_TRACE_
     Serial.print("Pairing failed with code: 0x");
     Serial.println(pairingFailed->reason,HEX);
 #endif
@@ -293,7 +293,7 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     } *identityAddress = (IdentityAddress*)data;
     // we can save this information now.
     uint8_t peerAddress[6];
-    for(int i; i<6; i++) peerAddress[5-i] = identityAddress->address[i];
+    for(int i=0; i<6; i++) peerAddress[5-i] = identityAddress->address[i];
 
     HCI.saveNewAddress(identityAddress->addressType, peerAddress, ATT.peerIRK, ATT.localIRK);
     if(HCI._storeLTK!=0){
@@ -315,11 +315,6 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     };
     memcpy(generateDHKeyCommand.x,connectionPairingPublicKey->x,32);
     memcpy(generateDHKeyCommand.y,connectionPairingPublicKey->y,32);
-    struct __attribute__ ((packed)) ReadPublicKeyCommand {
-      uint8_t code;
-    } readPublicKeyCommand = {
-      LE_COMMAND::READ_LOCAL_P256,
-    };
 
     if(ATT.setPeerEncryption(connectionHandle, ATT.getPeerEncryption(connectionHandle) | PEER_ENCRYPTION::REQUESTED_ENCRYPTION)){
 #ifdef _BLE_TRACE_

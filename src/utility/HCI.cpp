@@ -553,16 +553,12 @@ int HCIClass::readStoredLK(uint8_t BD_ADDR[], uint8_t read_all ){
 }
 
 int HCIClass::tryResolveAddress(uint8_t* BDAddr, uint8_t* address){
-  uint8_t iphone[16] = {0xA6, 0xD2, 0xD, 0xD3, 0x4F, 0x13, 0x42, 0x4F, 0xE1, 0xC1, 0xFD, 0x22, 0x2E, 0xC5, 0x6A, 0x2D};
-  uint8_t irk[16];
-  for(int i=0; i<16; i++) irk[15-i] = iphone[i];
   bool foundMatch = false;
   if(HCI._getIRKs!=0){
     uint8_t nIRKs = 0;
     uint8_t** BDAddrType = new uint8_t*;
     uint8_t*** BADDRs = new uint8_t**;
     uint8_t*** IRKs = new uint8_t**;
-    uint8_t* memcheck;
 
 
     if(!HCI._getIRKs(&nIRKs, BDAddrType, BADDRs, IRKs)){
@@ -971,33 +967,12 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
       data += 2;
     }
   }
-  else if(eventHdr->evt == EVT_RETURN_LINK_KEYS)
-  {
-    uint8_t num_keys = (uint8_t)pdata[sizeof(HCIEventHdr)];
-    // Serial.print("N keys: ");
-    // Serial.println(num_keys);
-    uint8_t BD_ADDRs[num_keys][6];
-    uint8_t LKs[num_keys][16];
-    auto nAddresss = [pdata](uint8_t nAddr)->uint8_t*{
-      return (uint8_t*) &pdata[sizeof(HCIEventHdr)] + 1 + nAddr*6 + nAddr*16;
-    };
-    auto nLK = [pdata](uint8_t nLK)->uint8_t*{
-      return (uint8_t*) &pdata[sizeof(HCIEventHdr)] + 1 + (nLK+1)*6 + nLK*16;
-    };
-    // Serial.println("Stored LKs are: ");
-    // for(int i=0; i<num_keys; i++){
-    //   Serial.print("Address : ");
-    //   btct.printBytes(nAddresss(i),6);
-    //   Serial.print("LK      : ");
-    //   btct.printBytes(nLK(i),16);
-    // }
-  }
   else if(eventHdr->evt == 0x10)
   {
+#ifdef _BLE_TRACE_
     struct __attribute__ ((packed)) CmdHardwareError {
       uint8_t hardwareCode;
     } *cmdHardwareError = (CmdHardwareError*)&pdata[sizeof(HCIEventHdr)];
-#ifdef _BLE_TRACE_
     Serial.print("Bluetooth hardware error.");
     Serial.print(" Code: 0x");
     Serial.println(cmdHardwareError->hardwareCode, HEX);
@@ -1096,9 +1071,6 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
                                 leConnectionComplete->supervisionTimeout,
                                 leConnectionComplete->masterClockAccuracy);
         }
-        uint8_t address[6];
-        uint8_t BDAddr[6];
-        for(int i=0; i<6; i++) BDAddr[5-i] = leConnectionComplete->peerBdaddr[i];
         // leReadPeerResolvableAddress(leConnectionComplete->peerBdaddrType,BDAddr,address);
         // Serial.print("Resolving address: ");
         // btct.printBytes(BDAddr, 6);
@@ -1325,11 +1297,6 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
 
           // Send Pairing confirm response
           HCI.sendAclPkt(connectionHandle, SECURITY_CID, sizeof(pairingConfirm), &pairingConfirm);
-          // Start calculating DH Key 
-          uint8_t remotePublicKeyReversed[sizeof(HCI.remotePublicKeyBuffer)];
-          for(int i=0; i<sizeof(HCI.remotePublicKeyBuffer); i++){
-            remotePublicKeyReversed[sizeof(HCI.remotePublicKeyBuffer)-i] = HCI.remotePublicKeyBuffer[i];
-          }
           
           HCI.sendCommand( (OGF_LE_CTL << 10) | LE_COMMAND::GENERATE_DH_KEY_V1, sizeof(HCI.remotePublicKeyBuffer), HCI.remotePublicKeyBuffer);
         }else{
