@@ -478,6 +478,11 @@ void BLELocalDevice::noDebug()
   HCI.noDebug();
 }
 
+void BLELocalDevice::setLowPowerMode(bool status)
+{
+  HCI.leSetLPMode(status);
+}
+
 #if !defined(FAKE_BLELOCALDEVICE)
 BLELocalDevice BLEObj;
 BLELocalDevice& BLE = BLEObj;

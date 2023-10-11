@@ -107,6 +107,9 @@ public:
 
   virtual void setDisplayCode(void (*displayCode)(uint32_t confirmationCode));
   virtual void setBinaryConfirmPairing(bool (*binaryConfirmPairing)());
+
+  virtual void setLowPowerMode(bool status);
+
   uint8_t BDaddress[6];
   
 protected:
