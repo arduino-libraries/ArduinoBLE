@@ -480,7 +480,7 @@ void BLELocalDevice::noDebug()
 
 void BLELocalDevice::setLowPowerModeEnabled(bool enabled)
 {
-  HCI.leSetLPMode(status);
+  HCI.leSetLPMode(enabled);
 }
 
 #if !defined(FAKE_BLELOCALDEVICE)
