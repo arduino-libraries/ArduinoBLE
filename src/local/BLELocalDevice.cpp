@@ -478,7 +478,7 @@ void BLELocalDevice::noDebug()
   HCI.noDebug();
 }
 
-void BLELocalDevice::setLowPowerMode(bool status)
+void BLELocalDevice::setLowPowerModeEnabled(bool enabled)
 {
   HCI.leSetLPMode(status);
 }
