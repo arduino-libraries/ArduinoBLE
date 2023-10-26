@@ -72,7 +72,10 @@ int BLELocalDevice::begin()
 #elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
   // BT_REG_ON -> HIGH
   pinMode(BT_REG_ON, OUTPUT);
+  digitalWrite(BT_REG_ON, LOW);
+  delay(500);
   digitalWrite(BT_REG_ON, HIGH);
+  delay(500);
 #elif defined(ARDUINO_PORTENTA_C33)
 #define NINA_GPIO0      (100)
 #define NINA_RESETN     (101)
