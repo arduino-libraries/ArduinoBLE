@@ -5,13 +5,13 @@ Subject: [PATCH 2/4] fix: include a timeout when waiting for the cmd_resp
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/shci_tl.c | 10 ++++++----
+ src/utility/STM32_WPAN/shci_tl.c | 10 ++++++----
  1 file changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/src/utility/STM32Cube_FW/shci_tl.c b/src/utility/STM32Cube_FW/shci_tl.c
+diff --git a/src/utility/STM32_WPAN/shci_tl.c b/src/utility/STM32_WPAN/shci_tl.c
 index e343809..6038025 100644
---- a/src/utility/STM32Cube_FW/shci_tl.c
-+++ b/src/utility/STM32Cube_FW/shci_tl.c
+--- a/src/utility/STM32_WPAN/shci_tl.c
++++ b/src/utility/STM32_WPAN/shci_tl.c
 @@ -23,6 +23,7 @@
  #include "stm_list.h"
  #include "shci_tl.h"

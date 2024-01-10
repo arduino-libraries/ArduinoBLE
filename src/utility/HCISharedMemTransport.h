@@ -26,10 +26,10 @@
 #include "stm32wbxx_ll_rcc.h"
 #include "stm32wbxx_ll_ipcc.h"
 #include "stm32wbxx_ll_system.h"
-#include "STM32Cube_FW/tl.h"
-#include "STM32Cube_FW/shci.h"
-#include "STM32Cube_FW/shci_tl.h"
-#include "STM32Cube_FW/app_conf.h"
+#include "STM32_WPAN/tl.h"
+#include "STM32_WPAN/shci.h"
+#include "STM32_WPAN/shci_tl.h"
+#include "STM32_WPAN/app_conf.h"
 
 /* this one is for printing info content when HW serial enabled */
 //#define PRINT_IPCC_INFO

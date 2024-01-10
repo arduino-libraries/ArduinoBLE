@@ -19,7 +19,7 @@
 #if defined(STM32WBxx)
 
 #include "HCISharedMemTransport.h"
-#include "STM32Cube_FW/hw.h"
+#include "STM32_WPAN/hw.h"
 #include "otp.h"
 
 /* Private variables ---------------------------------------------------------*/

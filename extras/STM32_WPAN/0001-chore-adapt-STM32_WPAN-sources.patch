@@ -1,24 +1,24 @@
 From 542e007fa5a1b53664d2efb5f01d67767123a357 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Thu, 13 Jul 2023 17:08:05 +0200
-Subject: [PATCH 1/4] chore: adapt STM32Cube_FW sources
+Subject: [PATCH 1/4] chore: adapt STM32_WPAN sources
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/app_conf_default.h | 46 ++++++++++++++++-----
- src/utility/STM32Cube_FW/ble_bufsize.h      |  7 ++++
- src/utility/STM32Cube_FW/hw.h               | 13 +++++-
- src/utility/STM32Cube_FW/hw_ipcc.c          |  5 ++-
- src/utility/STM32Cube_FW/shci.c             |  3 +-
- src/utility/STM32Cube_FW/shci_tl.c          | 18 +++++++-
- src/utility/STM32Cube_FW/stm_list.c         |  7 +++-
- src/utility/STM32Cube_FW/tl_mbox.c          |  7 +++-
+ src/utility/STM32_WPAN/app_conf_default.h | 46 ++++++++++++++++-----
+ src/utility/STM32_WPAN/ble_bufsize.h      |  7 ++++
+ src/utility/STM32_WPAN/hw.h               | 13 +++++-
+ src/utility/STM32_WPAN/hw_ipcc.c          |  5 ++-
+ src/utility/STM32_WPAN/shci.c             |  3 +-
+ src/utility/STM32_WPAN/shci_tl.c          | 18 +++++++-
+ src/utility/STM32_WPAN/stm_list.c         |  7 +++-
+ src/utility/STM32_WPAN/tl_mbox.c          |  7 +++-
  8 files changed, 86 insertions(+), 20 deletions(-)
 
-diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
+diff --git a/src/utility/STM32_WPAN/app_conf_default.h b/src/utility/STM32_WPAN/app_conf_default.h
 index 51bd33a..1c6dd91 100644
---- a/src/utility/STM32Cube_FW/app_conf_default.h
-+++ b/src/utility/STM32Cube_FW/app_conf_default.h
+--- a/src/utility/STM32_WPAN/app_conf_default.h
++++ b/src/utility/STM32_WPAN/app_conf_default.h
 @@ -1,9 +1,9 @@
  /* USER CODE BEGIN Header */
  /**
@@ -125,10 +125,10 @@ index 51bd33a..1c6dd91 100644
 -#endif /*APP_CONF_H */
 +#endif
 +#endif /*APP_CONF_DEFAULT_H */
-diff --git a/src/utility/STM32Cube_FW/ble_bufsize.h b/src/utility/STM32Cube_FW/ble_bufsize.h
+diff --git a/src/utility/STM32_WPAN/ble_bufsize.h b/src/utility/STM32_WPAN/ble_bufsize.h
 index b9935c0..d4d2890 100644
---- a/src/utility/STM32Cube_FW/ble_bufsize.h
-+++ b/src/utility/STM32Cube_FW/ble_bufsize.h
+--- a/src/utility/STM32_WPAN/ble_bufsize.h
++++ b/src/utility/STM32_WPAN/ble_bufsize.h
 @@ -75,6 +75,13 @@
            ((pw) + MAX(BLE_MEM_BLOCK_X_MTU(mtu, n_link), \
                        BLE_MBLOCKS_SECURE_CONNECTIONS))
@@ -143,10 +143,10 @@ index b9935c0..d4d2890 100644
  /*
   * BLE_FIXED_BUFFER_SIZE_BYTES:
   * A part of the RAM, is dynamically allocated by initializing all the pointers
-diff --git a/src/utility/STM32Cube_FW/hw.h b/src/utility/STM32Cube_FW/hw.h
+diff --git a/src/utility/STM32_WPAN/hw.h b/src/utility/STM32_WPAN/hw.h
 index 651e1f1..1472a5e 100644
---- a/src/utility/STM32Cube_FW/hw.h
-+++ b/src/utility/STM32Cube_FW/hw.h
+--- a/src/utility/STM32_WPAN/hw.h
++++ b/src/utility/STM32_WPAN/hw.h
 @@ -26,14 +26,23 @@ extern "C" {
  #endif
  
@@ -173,10 +173,10 @@ index 651e1f1..1472a5e 100644
  
    void HW_IPCC_BLE_Init( void );
    void HW_IPCC_BLE_SendCmd( void );
-diff --git a/src/utility/STM32Cube_FW/hw_ipcc.c b/src/utility/STM32Cube_FW/hw_ipcc.c
+diff --git a/src/utility/STM32_WPAN/hw_ipcc.c b/src/utility/STM32_WPAN/hw_ipcc.c
 index fd620b8..c730482 100644
---- a/src/utility/STM32Cube_FW/hw_ipcc.c
-+++ b/src/utility/STM32Cube_FW/hw_ipcc.c
+--- a/src/utility/STM32_WPAN/hw_ipcc.c
++++ b/src/utility/STM32_WPAN/hw_ipcc.c
 @@ -17,9 +17,9 @@
    ******************************************************************************
    */
@@ -194,10 +194,10 @@ index fd620b8..c730482 100644
  
  __weak void HW_IPCC_TRACES_EvtNot( void ){};
 +#endif /* STM32WBxx */
-diff --git a/src/utility/STM32Cube_FW/shci.c b/src/utility/STM32Cube_FW/shci.c
+diff --git a/src/utility/STM32_WPAN/shci.c b/src/utility/STM32_WPAN/shci.c
 index eaa35d7..4525656 100644
---- a/src/utility/STM32Cube_FW/shci.c
-+++ b/src/utility/STM32Cube_FW/shci.c
+--- a/src/utility/STM32_WPAN/shci.c
++++ b/src/utility/STM32_WPAN/shci.c
 @@ -16,7 +16,7 @@
   ******************************************************************************
   */
@@ -212,10 +212,10 @@ index eaa35d7..4525656 100644
    return (SHCI_Success);
  }
 +#endif /* STM32WBxx */
-diff --git a/src/utility/STM32Cube_FW/shci_tl.c b/src/utility/STM32Cube_FW/shci_tl.c
+diff --git a/src/utility/STM32_WPAN/shci_tl.c b/src/utility/STM32_WPAN/shci_tl.c
 index 0f60430..e343809 100644
---- a/src/utility/STM32Cube_FW/shci_tl.c
-+++ b/src/utility/STM32Cube_FW/shci_tl.c
+--- a/src/utility/STM32_WPAN/shci_tl.c
++++ b/src/utility/STM32_WPAN/shci_tl.c
 @@ -16,12 +16,13 @@
   ******************************************************************************
   */
@@ -257,10 +257,10 @@ index 0f60430..e343809 100644
    return;
  }
 +#endif /* STM32WBxx */
-diff --git a/src/utility/STM32Cube_FW/stm_list.c b/src/utility/STM32Cube_FW/stm_list.c
+diff --git a/src/utility/STM32_WPAN/stm_list.c b/src/utility/STM32_WPAN/stm_list.c
 index 4c92864..4e8c364 100644
---- a/src/utility/STM32Cube_FW/stm_list.c
-+++ b/src/utility/STM32Cube_FW/stm_list.c
+--- a/src/utility/STM32_WPAN/stm_list.c
++++ b/src/utility/STM32_WPAN/stm_list.c
 @@ -16,11 +16,13 @@
    ******************************************************************************
    */
@@ -282,10 +282,10 @@ index 4c92864..4e8c364 100644
    __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
  }
 +#endif /* STM32WBxx */
-diff --git a/src/utility/STM32Cube_FW/tl_mbox.c b/src/utility/STM32Cube_FW/tl_mbox.c
+diff --git a/src/utility/STM32_WPAN/tl_mbox.c b/src/utility/STM32_WPAN/tl_mbox.c
 index 27a998a..1139316 100644
---- a/src/utility/STM32Cube_FW/tl_mbox.c
-+++ b/src/utility/STM32Cube_FW/tl_mbox.c
+--- a/src/utility/STM32_WPAN/tl_mbox.c
++++ b/src/utility/STM32_WPAN/tl_mbox.c
 @@ -16,6 +16,7 @@
   ******************************************************************************
   */

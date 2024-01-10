@@ -9,13 +9,13 @@ which require 4 bytes.
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/tl.h | 2 +-
+ src/utility/STM32_WPAN/tl.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/src/utility/STM32Cube_FW/tl.h b/src/utility/STM32Cube_FW/tl.h
+diff --git a/src/utility/STM32_WPAN/tl.h b/src/utility/STM32_WPAN/tl.h
 index 8e8c6cb..7452087 100644
---- a/src/utility/STM32Cube_FW/tl.h
-+++ b/src/utility/STM32Cube_FW/tl.h
+--- a/src/utility/STM32_WPAN/tl.h
++++ b/src/utility/STM32_WPAN/tl.h
 @@ -108,7 +108,7 @@ typedef PACKED_STRUCT
  {
    uint8_t   evtcode;

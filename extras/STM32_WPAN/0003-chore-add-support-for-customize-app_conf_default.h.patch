@@ -5,13 +5,13 @@ Subject: [PATCH 3/4] chore: add support for customize app_conf_default.h
 
 Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
 ---
- src/utility/STM32Cube_FW/app_conf_default.h | 86 ++++++++++++++++-----
+ src/utility/STM32_WPAN/app_conf_default.h | 86 ++++++++++++++++-----
  1 file changed, 68 insertions(+), 18 deletions(-)
 
-diff --git a/src/utility/STM32Cube_FW/app_conf_default.h b/src/utility/STM32Cube_FW/app_conf_default.h
+diff --git a/src/utility/STM32_WPAN/app_conf_default.h b/src/utility/STM32_WPAN/app_conf_default.h
 index 1c6dd91..d39492e 100644
---- a/src/utility/STM32Cube_FW/app_conf_default.h
-+++ b/src/utility/STM32Cube_FW/app_conf_default.h
+--- a/src/utility/STM32_WPAN/app_conf_default.h
++++ b/src/utility/STM32_WPAN/app_conf_default.h
 @@ -48,7 +48,9 @@
  /**
   * Define Tx Power
