@@ -17,9 +17,9 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-#if defined(STM32WBxx)
+
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+#include "app_common.h"
 #include "mbox_def.h"
 
 /* Global variables ---------------------------------------------------------*/
@@ -667,4 +667,3 @@ static void HW_IPCC_TRACES_EvtHandler( void )
 }
 
 __weak void HW_IPCC_TRACES_EvtNot( void ){};
-#endif /* STM32WBxx */

@@ -227,6 +227,7 @@ extern "C" {
     SHCI_OCF_C2_CONCURRENT_GET_NEXT_BLE_EVT_TIME,
     SHCI_OCF_C2_CONCURRENT_ENABLE_NEXT_802154_EVT_NOTIFICATION,
     SHCI_OCF_C2_802_15_4_DEINIT,
+    SHCI_OCF_C2_SET_SYSTEM_CLOCK,
   } SHCI_OCF_t;
 
 #define SHCI_OPCODE_C2_FUS_GET_STATE         (( SHCI_OGF << 10) + SHCI_OCF_C2_FUS_GET_STATE)
@@ -436,7 +437,7 @@ extern "C" {
    * PrWriteListSize
    * NOTE: This parameter is ignored by the CPU2 when the parameter "Options" is set to "LL_only" ( see Options description in that structure )
    *
-   * Maximum number of supported “prepare write request”
+   * Maximum number of supported "prepare write request"
    *    - Min value: given by the macro DEFAULT_PREP_WRITE_LIST_SIZE
    *    - Max value: a value higher than the minimum required can be specified, but it is not recommended
    */
@@ -464,20 +465,20 @@ extern "C" {
   uint16_t AttMtu;
 
   /**
-   * SlaveSca
-   * The sleep clock accuracy (ppm value) that used in BLE connected slave mode to calculate the window widening
+   * PeripheralSca
+   * The sleep clock accuracy (ppm value) that used in BLE connected Peripheral mode to calculate the window widening
    * (in combination with the sleep clock accuracy sent by master in CONNECT_REQ PDU),
    * refer to BLE 5.0 specifications - Vol 6 - Part B - chap 4.5.7 and 4.2.2
    *     - Min value: 0
    *     - Max value: 500 (worst possible admitted by specification)
    */
-  uint16_t SlaveSca;
+  uint16_t PeripheralSca;
 
   /**
-   * MasterSca
-   * The sleep clock accuracy handled in master mode. It is used to determine the connection and advertising events timing.
+   * CentralSca
+   * The sleep clock accuracy handled in Central mode. It is used to determine the connection and advertising events timing.
    * It is transmitted to the slave in CONNEC_REQ PDU used by the slave to calculate the window widening,
-   * see SlaveSca and Bluetooth Core Specification v5.0 Vol 6 - Part B - chap 4.5.7 and 4.2.2
+   * see PeripheralSca and Bluetooth Core Specification v5.0 Vol 6 - Part B - chap 4.5.7 and 4.2.2
    * Possible values:
    *    - 251 ppm to 500 ppm: 0
    *    - 151 ppm to 250 ppm: 1
@@ -488,7 +489,7 @@ extern "C" {
    *    - 21 ppm to 30 ppm: 6
    *    - 0 ppm to 20 ppm: 7
    */
-  uint8_t MasterSca;
+  uint8_t CentralSca;
 
   /**
    * LsSource
@@ -503,7 +504,7 @@ extern "C" {
    * MaxConnEventLength
    * This parameter determines the maximum duration of a slave connection event. When this duration is reached the slave closes
    * the current connections event (whatever is the CE_length parameter specified by the master in HCI_CREATE_CONNECTION HCI command),
-   * expressed in units of 625/256 µs (~2.44 µs)
+   * expressed in units of 625/256 us (~2.44 us)
    *    - Min value: 0 (if 0 is specified, the master and slave perform only a single TX-RX exchange per connection event)
    *    - Max value: 1638400 (4000 ms). A higher value can be specified (max 0xFFFFFFFF) but results in a maximum connection time
    *      of 4000 ms as specified. In this case the parameter is not applied, and the predicted CE length calculated on slave is not shortened
@@ -512,7 +513,7 @@ extern "C" {
 
   /**
    * HsStartupTime
-   * Startup time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 µs (~2.44 µs).
+   * Startup time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us).
    *    - Min value: 0
    *    - Max value:  820 (~2 ms). A higher value can be specified, but the value that implemented in stack is forced to ~2 ms
    */
@@ -598,7 +599,7 @@ extern "C" {
   int16_t rx_path_compens;
 
   /* BLE core specification version (8-bit unsigned integer).
-   * values as: 11(5.2), 12(5.3)
+   * values as: 11(5.2), 12(5.3), 13(5.4)
    */
   uint8_t ble_core_version;
 
@@ -829,6 +830,7 @@ extern "C" {
     /** No response parameters*/
 
 #define SHCI_OPCODE_C2_CONFIG   (( SHCI_OGF << 10) + SHCI_OCF_C2_CONFIG)
+
   /** Command parameters */
     typedef PACKED_STRUCT{
       uint8_t PayloadCmdSize;
@@ -842,6 +844,15 @@ extern "C" {
     } SHCI_C2_CONFIG_Cmd_Param_t;
 
 #define SHCI_OPCODE_C2_802_15_4_DEINIT    (( SHCI_OGF << 10) + SHCI_OCF_C2_802_15_4_DEINIT)
+
+#define SHCI_OPCODE_C2_SET_SYSTEM_CLOCK   (( SHCI_OGF << 10) + SHCI_OCF_C2_SET_SYSTEM_CLOCK)
+  /** Command parameters */
+    typedef enum
+    {
+      SET_SYSTEM_CLOCK_HSE_TO_PLL,
+      SET_SYSTEM_CLOCK_PLL_ON_TO_HSE,
+      SET_SYSTEM_CLOCK_PLL_OFF_TO_HSE,
+    }SHCI_C2_SET_SYSTEM_CLOCK_Cmd_Param_t;
 
 /**
  * PayloadCmdSize
@@ -859,8 +870,8 @@ extern "C" {
 /**
  * Device ID
  */
-#define SHCI_C2_CONFIG_STM32WB55xx                   (0x495)
-#define SHCI_C2_CONFIG_STM32WB15xx                   (0x494)
+#define SHCI_C2_CONFIG_STM32WB55xx                    (0x495)
+#define SHCI_C2_CONFIG_STM32WB15xx                    (0x494)
 
 /**
  * Config1
@@ -878,7 +889,7 @@ extern "C" {
  */
 #define SHCI_C2_CONFIG_EVTMASK1_BIT0_ERROR_NOTIF_ENABLE               (1<<0)
 #define SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE        (1<<1)
-#define SHCI_C2_CONFIG_EVTMASK1_BIT2_THREAD_NVM_RAM_UPDATE_ENABLE         (1<<2)
+#define SHCI_C2_CONFIG_EVTMASK1_BIT2_THREAD_NVM_RAM_UPDATE_ENABLE     (1<<2)
 #define SHCI_C2_CONFIG_EVTMASK1_BIT3_NVM_START_WRITE_ENABLE           (1<<3)
 #define SHCI_C2_CONFIG_EVTMASK1_BIT4_NVM_END_WRITE_ENABLE             (1<<4)
 #define SHCI_C2_CONFIG_EVTMASK1_BIT5_NVM_START_ERASE_ENABLE           (1<<5)
@@ -965,7 +976,8 @@ extern "C" {
 #define INFO_STACK_TYPE_ZIGBEE_RFD                  0x31
 #define INFO_STACK_TYPE_MAC                         0x40
 #define INFO_STACK_TYPE_BLE_THREAD_FTD_STATIC       0x50
-#define INFO_STACK_TYPE_BLE_THREAD_FTD_DYAMIC       0x51
+#define INFO_STACK_TYPE_BLE_THREAD_FTD_DYNAMIC      0x51
+#define INFO_STACK_TYPE_BLE_THREAD_LIGHT_DYNAMIC    0x52
 #define INFO_STACK_TYPE_802154_LLD_TESTS            0x60
 #define INFO_STACK_TYPE_802154_PHY_VALID            0x61
 #define INFO_STACK_TYPE_BLE_PHY_VALID               0x62
@@ -1364,9 +1376,24 @@ typedef struct {
    */
   SHCI_CmdStatus_t SHCI_C2_802_15_4_DeInit( void );
 
-  #ifdef __cplusplus
+  /**
+  * SHCI_C2_SetSystemClock
+  * @brief Request CPU2 to change system clock
+  *
+  * @param clockSel: It can be one of the following list
+  *                -  SET_SYSTEM_CLOCK_HSE_TO_PLL : CPU2 set system clock to PLL, PLL must be configured and started before.
+  *                -  SET_SYSTEM_CLOCK_PLL_ON_TO_HSE : CPU2 set System clock to HSE, PLL is still ON after command execution.
+  *                -  SET_SYSTEM_CLOCK_PLL_OFF_TO_HSE : CPU2 set System clock to HSE, PLL is turned OFF after command execution.
+  *
+  * @retval Status
+  */
+  SHCI_CmdStatus_t SHCI_C2_SetSystemClock( SHCI_C2_SET_SYSTEM_CLOCK_Cmd_Param_t clockSel );
+
+
+#ifdef __cplusplus
 }
 #endif
 
 #endif /*__SHCI_H */
 
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

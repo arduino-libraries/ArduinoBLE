@@ -16,7 +16,7 @@
  ******************************************************************************
  */
 
-#if defined(STM32WBxx)
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 
@@ -644,6 +644,26 @@ SHCI_CmdStatus_t SHCI_C2_802_15_4_DeInit( void )
   return (SHCI_CmdStatus_t)(((TL_CcEvt_t*)(p_rsp->evtserial.evt.payload))->payload[0]);
 }
 
+SHCI_CmdStatus_t SHCI_C2_SetSystemClock( SHCI_C2_SET_SYSTEM_CLOCK_Cmd_Param_t clockSel )
+{
+  /**
+   * Buffer is large enough to hold command complete without payload
+   */
+  uint8_t local_buffer[TL_BLEEVT_CC_BUFFER_SIZE];
+  TL_EvtPacket_t * p_rsp;
+
+  p_rsp = (TL_EvtPacket_t *)local_buffer;
+
+  local_buffer[0] = (uint8_t)clockSel;
+
+  shci_send( SHCI_OPCODE_C2_SET_SYSTEM_CLOCK,
+             1,
+             local_buffer,
+             p_rsp );
+
+  return (SHCI_CmdStatus_t)(((TL_CcEvt_t*)(p_rsp->evtserial.evt.payload))->payload[0]);
+}
+
 /**
  *  Local System COMMAND
  *  These commands are NOT sent to the CPU2
@@ -739,4 +759,3 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
 
   return (SHCI_Success);
 }
-#endif /* STM32WBxx */
