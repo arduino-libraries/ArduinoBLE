@@ -1,4 +1,4 @@
-From a6ae9acf134d326f74ff04818b4e2c643c826b35 Mon Sep 17 00:00:00 2001
+From 324eef795bfd0a754aae4d5f9b528d4c8ad706c8 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Mon, 24 Jul 2023 10:55:20 +0200
 Subject: [PATCH 4/4] fix: TL_Evt_t payload size for reset

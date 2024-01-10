@@ -1,4 +1,4 @@
-From 5587ff466e0276de186103d21e6a4e498820e49f Mon Sep 17 00:00:00 2001
+From 7f99c89e8a6f834daf4a76bf98307e9ebcd01c91 Mon Sep 17 00:00:00 2001
 From: Frederic Pillon <frederic.pillon@st.com>
 Date: Wed, 10 Jan 2024 18:16:01 +0100
 Subject: [PATCH 1/4] chore: adapt STM32_WPAN sources
@@ -15,7 +15,7 @@ Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
  7 files changed, 85 insertions(+), 12 deletions(-)
 
 diff --git a/src/utility/STM32_WPAN/app_conf_default.h b/src/utility/STM32_WPAN/app_conf_default.h
-index 846be3c..6c9beb3 100644
+index 71fc107..bf2274a 100644
 --- a/src/utility/STM32_WPAN/app_conf_default.h
 +++ b/src/utility/STM32_WPAN/app_conf_default.h
 @@ -1,9 +1,9 @@
@@ -124,7 +124,7 @@ index 846be3c..6c9beb3 100644
  /******************************************************************************
   * Transport Layer
   ******************************************************************************/
-@@ -659,4 +691,5 @@ typedef enum
+@@ -660,4 +692,5 @@ typedef enum
  
  #define CFG_OTP_END_ADRESS      OTP_AREA_END_ADDR
  
@@ -162,7 +162,7 @@ index 651e1f1..1472a5e 100644
    void HW_IPCC_BLE_Init( void );
    void HW_IPCC_BLE_SendCmd( void );
 diff --git a/src/utility/STM32_WPAN/hw_ipcc.c b/src/utility/STM32_WPAN/hw_ipcc.c
-index fd620b8..3461cbe 100644
+index 6a311b1..ad3c9d4 100644
 --- a/src/utility/STM32_WPAN/hw_ipcc.c
 +++ b/src/utility/STM32_WPAN/hw_ipcc.c
 @@ -18,8 +18,9 @@
@@ -174,9 +174,9 @@ index fd620b8..3461cbe 100644
 -#include "app_common.h"
 +#include "hw.h"
  #include "mbox_def.h"
+ #include "utilities_conf.h"
  
- /* Global variables ---------------------------------------------------------*/
-@@ -667,3 +668,4 @@ static void HW_IPCC_TRACES_EvtHandler( void )
+@@ -745,3 +746,4 @@ static void HW_IPCC_TRACES_EvtHandler( void )
  }
  
  __weak void HW_IPCC_TRACES_EvtNot( void ){};
@@ -267,7 +267,7 @@ index 4c92864..df6c215 100644
  }
 +#endif /* STM32WBxx */
 diff --git a/src/utility/STM32_WPAN/tl_mbox.c b/src/utility/STM32_WPAN/tl_mbox.c
-index 27a998a..40c9679 100644
+index df07a19..9a2a297 100644
 --- a/src/utility/STM32_WPAN/tl_mbox.c
 +++ b/src/utility/STM32_WPAN/tl_mbox.c
 @@ -16,6 +16,7 @@
@@ -300,7 +300,7 @@ index 27a998a..40c9679 100644
    HW_IPCC_Init();
  
    return;
-@@ -846,3 +851,4 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
+@@ -847,3 +852,4 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
  
    return;
  }
