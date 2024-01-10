@@ -17,10 +17,13 @@
   */
 
 
+#if defined(STM32WBxx)
 /******************************************************************************
  * Include Files
  ******************************************************************************/
-#include "utilities_common.h"
+#include "stdint.h"
+#include "cmsis_gcc.h"
+#include "stm32_wpan_common.h"
 
 #include "stm_list.h"
 
@@ -204,3 +207,4 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
 
   __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
 }
+#endif /* STM32WBxx */
