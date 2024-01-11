@@ -16,7 +16,7 @@ jobs:
           - STMicroelectronics:stm32:Nucleo_64:pnum=P_NUCLEO_WB55RG
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@main
       - uses: arduino/compile-sketches@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
