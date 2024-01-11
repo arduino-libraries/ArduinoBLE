@@ -21,12 +21,14 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef APP_CONF_DEFAULT_H
 #define APP_CONF_DEFAULT_H
+
 #if 0
 #include "hw.h"
 #include "hw_conf.h"
 #include "hw_if.h"
 #include "ble_bufsize.h"
 #endif
+
 /******************************************************************************
  * Application Config
  ******************************************************************************/
@@ -49,7 +51,7 @@
  * Define Tx Power
  */
 #ifndef CFG_TX_POWER
-  #define CFG_TX_POWER                      (0x18) /* -0.15dBm */
+  #define CFG_TX_POWER                        (0x18) /* -0.15dBm */
 #endif
 
 #if 0
@@ -83,14 +85,14 @@
 #define CFG_GAP_DEVICE_NAME_LENGTH      (8)
 
 /**
-*   Identity root key used to derive LTK and CSRK
+*   Identity root key used to derive IRK and DHK(Legacy)
 */
-#define CFG_BLE_IRK     {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0}
+#define CFG_BLE_IR     {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0}
 
 /**
-* Encryption root key used to derive LTK and CSRK
+* Encryption root key used to derive LTK(Legacy) and CSRK
 */
-#define CFG_BLE_ERK     {0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21, 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21}
+#define CFG_BLE_ER     {0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21, 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21}
 
 /**
  * SMPS supply
@@ -127,6 +129,7 @@
 #define CFG_FW_BRANCH             (0)
 #define CFG_FW_BUILD              (0)
 #endif
+
 /******************************************************************************
  * BLE Stack
  ******************************************************************************/
@@ -163,9 +166,9 @@
  */
 #ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
 #ifdef STM32WB15xx
-  #define CFG_BLE_NUM_GATT_ATTRIBUTES   30
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES 30
 #else
-  #define CFG_BLE_NUM_GATT_ATTRIBUTES   68
+  #define CFG_BLE_NUM_GATT_ATTRIBUTES 68
 #endif
 #endif
 
@@ -173,9 +176,7 @@
  * Maximum supported ATT_MTU size
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-#ifndef CFG_BLE_MAX_ATT_MTU
-  #define CFG_BLE_MAX_ATT_MTU             (156)
-#endif
+#define CFG_BLE_MAX_ATT_MTU             (156)
 
 /**
  * Size of the storage area for Attribute values
@@ -188,29 +189,19 @@
  *  The total amount of memory needed is the sum of the above quantities for each attribute.
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-#ifndef CFG_BLE_ATT_VALUE_ARRAY_SIZE
-#ifdef STM32WB15xx
-  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1290)
-#else
-  #define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
-#endif
-#endif
+#define CFG_BLE_ATT_VALUE_ARRAY_SIZE    (1344)
 
 /**
  * Prepare Write List size in terms of number of packet
  * This parameter is ignored by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-// #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
-#ifndef CFG_BLE_PREPARE_WRITE_LIST_SIZE
-  #define CFG_BLE_PREPARE_WRITE_LIST_SIZE         (0x3A)
-#endif
+#define CFG_BLE_PREPARE_WRITE_LIST_SIZE         BLE_PREP_WRITE_X_ATT(CFG_BLE_MAX_ATT_MTU)
 
 /**
  * Number of allocated memory blocks
  * This parameter is overwritten by the CPU2 with an hardcoded optimal value when the parameter CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY flag set
  */
-//#define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
-#define CFG_BLE_MBLOCK_COUNT              (0x79)
+#define CFG_BLE_MBLOCK_COUNT            (BLE_MBLOCKS_CALC(CFG_BLE_PREPARE_WRITE_LIST_SIZE, CFG_BLE_MAX_ATT_MTU, CFG_BLE_NUM_LINK))
 
 /**
  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
@@ -220,14 +211,14 @@
 #endif
 
 /**
- * Sleep clock accuracy in Slave mode (ppm value)
+ * Sleep clock accuracy in Peripheral mode (ppm value)
  */
-#ifndef CFG_BLE_SLAVE_SCA
-  #define CFG_BLE_SLAVE_SCA   500
+#ifndef CFG_BLE_PERIPHERAL_SCA
+  #define CFG_BLE_PERIPHERAL_SCA   500
 #endif
 
 /**
- * Sleep clock accuracy in Master mode
+ * Sleep clock accuracy in Central mode
  * 0 : 251 ppm to 500 ppm
  * 1 : 151 ppm to 250 ppm
  * 2 : 101 ppm to 150 ppm
@@ -237,8 +228,8 @@
  * 6 : 21 ppm to 30 ppm
  * 7 : 0 ppm to 20 ppm
  */
-#ifndef CFG_BLE_MASTER_SCA
-  #define CFG_BLE_MASTER_SCA   0
+#ifndef CFG_BLE_CENTRAL_SCA
+  #define CFG_BLE_CENTRAL_SCA   0
 #endif
 
 /**
@@ -264,7 +255,7 @@
 #endif
 
 /**
- * Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
+ * Maximum duration of the connection event when the device is in Peripheral mode in units of 625/256 us (~2.44 us)
  */
 #ifndef CFG_BLE_MAX_CONN_EVENT_LENGTH
   #define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
@@ -314,7 +305,7 @@
  *          0: LE Power Class 2-3
  * other bits: complete with Options_extension flag
  */
-#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY)
+#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
 
 /**
  * BLE stack Options_extension flags to be configured with:
@@ -390,10 +381,11 @@
   /* BLE core version (16-bit signed integer).
    * - SHCI_C2_BLE_INIT_BLE_CORE_5_2
    * - SHCI_C2_BLE_INIT_BLE_CORE_5_3
-   * which are used to set: 11(5.2), 12(5.3).
+   * - SHCI_C2_BLE_INIT_BLE_CORE_5_4
+   * which are used to set: 11(5.2), 12(5.3), 13(5.4).
    */
 
-#define CFG_BLE_CORE_VERSION   (SHCI_C2_BLE_INIT_BLE_CORE_5_3)
+#define CFG_BLE_CORE_VERSION   (SHCI_C2_BLE_INIT_BLE_CORE_5_4)
 
 #if 0
 /******************************************************************************
@@ -559,13 +551,13 @@ typedef enum
  * Debug
  ******************************************************************************/
 /**
- * When set, this resets some hw resources to set the device in the same state than the power up
- * The FW resets only register that may prevent the FW to run properly
+ * When set, this resets some hw resources to put the device in the same state as at power up.
+ * It resets only register that may prevent the FW to run properly.
  *
  * This shall be set to 0 in a final product
  *
  */
-#define CFG_HW_RESET_BY_FW         1
+#define CFG_HW_RESET_BY_FW         0
 
 /**
  * keep debugger enabled while in any low power mode when set to 1
