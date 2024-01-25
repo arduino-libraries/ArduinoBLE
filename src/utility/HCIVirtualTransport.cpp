@@ -65,10 +65,12 @@ HCIVirtualTransportClass::~HCIVirtualTransportClass()
 
 int HCIVirtualTransportClass::begin()
 {
+#ifdef ARDUINO_ARCH_ESP32
+  if (!btStart()) {
+    return 0;
+  }
+#else
   btStarted(); // this somehow stops the arduino ide from initializing bluedroid
-
-  rec_buffer = xStreamBufferCreate(258, 1);
-  send_buffer = xStreamBufferCreate(258, 1);
 
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -86,17 +88,26 @@ int HCIVirtualTransportClass::begin()
   esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
   esp_bt_controller_init(&bt_cfg);
   esp_bt_controller_enable(ESP_BT_MODE_BLE);
+#endif
+
+  rec_buffer = xStreamBufferCreate(258, 1);
+  send_buffer = xStreamBufferCreate(258, 1);
+
   xTaskCreatePinnedToCore(&bleTask, "bleTask", 2048, NULL, 5, &bleHandle, 0);
   return 1;
 }
 
 void HCIVirtualTransportClass::end()
 {
+  vTaskDelete(bleHandle);
   vStreamBufferDelete(rec_buffer);
   vStreamBufferDelete(send_buffer);
+#ifdef ARDUINO_ARCH_ESP32
+  btStop();
+#else
   esp_bt_controller_disable();
   esp_bt_controller_deinit();
-  vTaskDelete(bleHandle);
+#endif
 }
 
 void HCIVirtualTransportClass::wait(unsigned long timeout)
