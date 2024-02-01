@@ -28,6 +28,7 @@ class BLEUuid
 {
 public:
   BLEUuid(const char * str);
+  ~BLEUuid();
 
   const char* str() const;
   const uint8_t * data() const;
@@ -36,7 +37,7 @@ public:
   static const char* uuidToString(const uint8_t* data, uint8_t length);
 
 private:
-  const char* _str;
+  char* _str;
   uint8_t     _data[BLE_UUID_MAX_LENGTH];
   uint8_t     _length;
 };
