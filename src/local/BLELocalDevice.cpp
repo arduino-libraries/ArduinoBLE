@@ -25,7 +25,7 @@
 
 #include "BLELocalDevice.h"
 
-#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
+#if defined(PORTENTA_H7_PINS) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
 #ifndef BT_REG_ON
 #define BT_REG_ON PJ_12
 #endif
@@ -69,7 +69,7 @@ int BLELocalDevice::begin()
   delay(100);
   digitalWrite(NINA_RESETN, HIGH);
   delay(750);
-#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
+#elif defined(PORTENTA_H7_PINS) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
   // BT_REG_ON -> HIGH
   pinMode(BT_REG_ON, OUTPUT);
   digitalWrite(BT_REG_ON, LOW);
