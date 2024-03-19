@@ -19,6 +19,7 @@
 
 #include "utility/ATT.h"
 #include "utility/BLEUuid.h"
+#include "utility/BLEServiceData.h"
 #include "utility/HCI.h"
 
 #include "remote/BLERemoteDevice.h"
@@ -85,6 +86,11 @@ bool BLEDevice::hasLocalName() const
   return (localName().length() > 0);
 }
 
+bool BLEDevice::hasServiceData() const
+{
+  return (serviceData().length() > 0);
+}
+
 bool BLEDevice::hasAdvertisedServiceUuid() const
 {
   return hasAdvertisedServiceUuid(0);
@@ -144,6 +150,27 @@ String BLEDevice::localName() const
   }
 
   return localName;
+}
+
+String BLEDevice::serviceData() const
+{
+  String serviceData = "";
+
+  for (int i = 0; i < _eirDataLength;) {
+    int eirLength = _eirData[i++];
+    int eirType = _eirData[i++];
+	
+	//Serial.println(eirType);
+
+    if (eirType == 0x16) {
+      serviceData = BLEServiceData::serviceDataToString(&_eirData[i], eirLength);
+      break;
+    }
+
+    i += (eirLength - 1);
+  }
+
+  return serviceData;
 }
 
 String BLEDevice::advertisedServiceUuid() const
