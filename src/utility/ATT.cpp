@@ -1246,7 +1246,11 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
     return;
   }
 
-  uint16_t handle = *(uint16_t*)data;
+  /// uint16_t handle = *(uint16_t*)data; // This hangs Arduino Nano 33 IoT in cases when data is unaligned
+  /// mainly when dealing with large packets. Copy the handle byte by byte in endianness independent way.
+  uint16_t handle;
+  ((uint8_t *)&handle)[0] = ((uint8_t*)data)[0];
+  ((uint8_t *)&handle)[1] = ((uint8_t*)data)[1];
 
   if ((uint16_t)(handle - 1) > GATT.attributeCount()) {
     if (withResponse) {
