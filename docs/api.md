@@ -254,6 +254,39 @@ None
 
 ```
 
+### `BLE.address(uint8_t* address)`
+
+Query the Bluetooth® address of the Bluetooth® Low Energy device.
+
+#### Syntax
+
+```
+uint8_t address[6];
+BLE.address(address)
+
+```
+
+#### Parameters
+
+None
+
+#### Returns
+- The **Bluetooth® address** of the Bluetooth® Low Energy device (as a array of byte).
+
+#### Example
+
+```arduino
+
+  uint8_t address[6];
+  BLE.address(address);
+
+  Serial.print(“Local address is: “);
+  for(int i=0;i<6;i++)
+    Serial.print(address[i], HEX);
+
+
+```
+
 ### `BLE.rssi()`
 
 Query the RSSI (Received signal strength indication) of the connected Bluetooth® Low Energy device.
