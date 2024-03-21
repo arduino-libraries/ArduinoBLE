@@ -2672,7 +2672,8 @@ Create a new Bluetooth® Low Energy characteristic.
 #### Syntax
 
 ```
-BLECharacteristic(uuid, properties, value, valueSize)
+BLECharacteristic(uuid, properties, valueSize)
+BLECharacteristic(uuid, properties, valueSize, fixedLength)
 BLECharacteristic(uuid, properties, stringValue)
 
 BLEBoolCharacteristic(uuid, properties)
@@ -2696,6 +2697,7 @@ BLEDoubleCharacteristic(uuid, properties)
 - **uuid**: 16-bit or 128-bit UUID in **String** format
 - **properties**: mask of the properties (BLEBroadcast, BLERead, BLEWriteWithoutResponse, BLEWrite, BLENotify, BLEIndicate)
 - **valueSize**: (maximum) size of characteristic value
+- **fixedLength**: if true, size of characteristic value is fixed
 - **stringValue**: value as a string
 
 #### Returns
