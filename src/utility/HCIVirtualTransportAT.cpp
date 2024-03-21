@@ -105,6 +105,11 @@ size_t HCIVirtualTransportATClass::write(const uint8_t* data, size_t length)
   return 0;
 }
 
+void HCIVirtualTransportATClass::setLPMode(bool status) 
+{
+  (void)status;
+}
+
 HCIVirtualTransportATClass HCIVirtualTransportAT;
 
 HCITransportInterface& HCITransport = HCIVirtualTransportAT;
