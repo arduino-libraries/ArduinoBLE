@@ -5,7 +5,7 @@
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2023 STMicroelectronics.
+ * Copyright (c) 2018-2024 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -35,13 +35,13 @@
  * equal to BLE_DEFAULT_ATT_MTU (23).
  */
 #define BLE_PREP_WRITE_X_ATT(max_att) \
-          (DIVC(max_att, BLE_DEFAULT_ATT_MTU - 5) * 2)
+        (DIVC(max_att, BLE_DEFAULT_ATT_MTU - 5) * 2)
 
 /*
  * BLE_DEFAULT_PREP_WRITE_LIST_SIZE: default minimum Prepare Write List size.
  */
 #define BLE_DEFAULT_PREP_WRITE_LIST_SIZE \
-          BLE_PREP_WRITE_X_ATT(BLE_DEFAULT_MAX_ATT_SIZE)
+        BLE_PREP_WRITE_X_ATT(BLE_DEFAULT_MAX_ATT_SIZE)
 
 /*
  * BLE_MEM_BLOCK_X_MTU: compute how many memory blocks are needed to compose
@@ -49,14 +49,21 @@
  */
 #define BLE_MEM_BLOCK_SIZE                   32
 
+#if (SLAVE_ONLY != 0) ||(BASIC_FEATURES != 0)
+#define BLE_MEM_BLOCK_X_PTX(n_link)           0
+#else
+#define BLE_MEM_BLOCK_X_PTX(n_link)           (n_link)
+#endif
+
 #define BLE_MEM_BLOCK_X_TX(mtu) \
-          (DIVC((mtu) + 4U, BLE_MEM_BLOCK_SIZE) + 1U)
+        (DIVC((mtu) + 4U, BLE_MEM_BLOCK_SIZE) + 1)
 
 #define BLE_MEM_BLOCK_X_RX(mtu, n_link) \
-          ((DIVC((mtu) + 4U, BLE_MEM_BLOCK_SIZE) + 2U) * (n_link) + 1)
+        ((DIVC((mtu) + 4U, BLE_MEM_BLOCK_SIZE) + 2U) * (n_link) + 1)
 
 #define BLE_MEM_BLOCK_X_MTU(mtu, n_link) \
-          (BLE_MEM_BLOCK_X_TX(mtu) + BLE_MEM_BLOCK_X_RX(mtu, n_link))
+        (BLE_MEM_BLOCK_X_TX(mtu) + BLE_MEM_BLOCK_X_PTX(n_link) + \
+         BLE_MEM_BLOCK_X_RX(mtu, n_link))
 
 /*
  * BLE_MBLOCKS_SECURE_CONNECTIONS: minimum number of blocks required for
@@ -72,8 +79,8 @@
  *  - n_link: maximum number of simultaneous connections
  */
 #define BLE_MBLOCKS_CALC(pw, mtu, n_link) \
-          ((pw) + MAX(BLE_MEM_BLOCK_X_MTU(mtu, n_link), \
-                      BLE_MBLOCKS_SECURE_CONNECTIONS))
+        ((pw) + MAX(BLE_MEM_BLOCK_X_MTU(mtu, n_link), \
+                    BLE_MBLOCKS_SECURE_CONNECTIONS))
 
 /*
  * BLE_FIXED_BUFFER_SIZE_BYTES:
@@ -90,30 +97,30 @@
  *   mentioned parameters.
 */
 #if (BEACON_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  4092   /* Beacon only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  4100   /* Beacon only */
 #elif (LL_ONLY_BASIC != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  5788   /* LL only Basic*/
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6040   /* LL only Basic*/
 #elif (LL_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6036   /* LL only Full */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6288   /* LL only Full */
 #elif (SLAVE_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6300   /* Peripheral only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  6408   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  6632   /* Basic Features */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  7184   /* Basic Features */
 #else
-#define BLE_FIXED_BUFFER_SIZE_BYTES  7152   /* Full stack */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  7468   /* Full stack */
 #endif
 
 /*
  * BLE_PER_LINK_SIZE_BYTES: additional memory size used per link
  */
 #if (BEACON_ONLY != 0)
-#define BLE_PER_LINK_SIZE_BYTES       112   /* Beacon only */
+#define BLE_PER_LINK_SIZE_BYTES       108   /* Beacon only */
 #elif (LL_ONLY_BASIC != 0)
 #define BLE_PER_LINK_SIZE_BYTES       244   /* LL only Basic */
 #elif (LL_ONLY != 0)
 #define BLE_PER_LINK_SIZE_BYTES       244   /* LL only Full */
 #elif (SLAVE_ONLY != 0)
-#define BLE_PER_LINK_SIZE_BYTES       344   /* Peripheral only */
+#define BLE_PER_LINK_SIZE_BYTES       392   /* Peripheral only */
 #elif (BASIC_FEATURES != 0)
 #define BLE_PER_LINK_SIZE_BYTES       420   /* Basic Features */
 #else
@@ -131,9 +138,9 @@
  * @param mblocks_count: Number of memory blocks allocated for packets.
  */
 #define BLE_TOTAL_BUFFER_SIZE(n_link, mblocks_count) \
-          (16 + BLE_FIXED_BUFFER_SIZE_BYTES + \
-           (BLE_PER_LINK_SIZE_BYTES * (n_link)) + \
-           ((BLE_MEM_BLOCK_SIZE + 12) * (mblocks_count)))
+        (16 + BLE_FIXED_BUFFER_SIZE_BYTES + \
+         (BLE_PER_LINK_SIZE_BYTES * (n_link)) + \
+         ((BLE_MEM_BLOCK_SIZE + 8) * (mblocks_count)))
 
 /*
  * BLE_EXT_ADV_BUFFER_SIZE
@@ -148,7 +155,7 @@
  * Valid values are from 31 to 1650.
  */
 #define BLE_EXT_ADV_BUFFER_SIZE(set_nbr, data_len) \
-          (2512 + ((892 + (DIVC(data_len, 207) * 244)) * (set_nbr)))
+        (2512 + ((892 + (DIVC(data_len, 207) * 244)) * (set_nbr)))
 
 /*
  * BLE_TOTAL_BUFFER_SIZE_GATT: this macro returns the amount of memory,
@@ -168,8 +175,8 @@
  * @param att_value_array_size: Size of the storage area for Attribute values.
   */
 #define BLE_TOTAL_BUFFER_SIZE_GATT(num_gatt_attributes, num_gatt_services, att_value_array_size) \
-          (((((att_value_array_size) - 1) | 3) + 1) + \
-           (40 * (num_gatt_attributes)) + (48 * (num_gatt_services)))
+        (((((att_value_array_size) - 1) | 3) + 1) + \
+         (40 * (num_gatt_attributes)) + (48 * (num_gatt_services)))
 
 
 #endif /* BLE_BUFSIZE_H__ */
