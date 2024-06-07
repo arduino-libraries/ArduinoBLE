@@ -34,6 +34,8 @@
 
 #include "ATT.h"
 
+extern "C" int strcasecmp(char const *a, char const *b);
+
 #define ATT_OP_ERROR              0x01
 #define ATT_OP_MTU_REQ            0x02
 #define ATT_OP_MTU_RESP           0x03
