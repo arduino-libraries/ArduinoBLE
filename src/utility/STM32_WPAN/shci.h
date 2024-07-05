@@ -882,6 +882,7 @@ extern "C" {
 #define SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM              (1<<0)
 #define SHCI_C2_CONFIG_CONFIG1_BIT1_THREAD_NVM_DATA_TO_INTERNAL_FLASH (0<<1)
 #define SHCI_C2_CONFIG_CONFIG1_BIT1_THREAD_NVM_DATA_TO_SRAM           (1<<1)
+#define SHCI_C2_CONFIG_CONFIG1_BIT2_SET_EUI64_FORMAT                  (1<<2)
 
 /**
  * EvtMask1
@@ -1340,7 +1341,9 @@ typedef struct {
   *                               1 - BLE NVM Data are written in SRAM cache pointed by BleNvmRamAddress
   *                     - bit1 :  0 - THREAD NVM Data  data are flushed in internal secure flash
   *                               1 - THREAD NVM Data are written in SRAM cache pointed by ThreadNvmRamAddress
-  *                     - bit2 to bit7 : Unused, shall be set to 0
+  *                     - bit2 :  0 - Thread EUI64 is set to new (and current) format
+  *                               1 - Thread EUI64 is set to old format
+  *                     - bit3 to bit7 : Unused, shall be set to 0
   *                    uint8_t EvtMask1 :
   *                            When a bit is set to 0, the event is not reported
   *                            bit0 : Asynchronous Event with Sub Evt Code 0x9201 (= SHCI_SUB_EVT_ERROR_NOTIF)

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * @file    ble_bufsize.h
- * @author  MDG
+ *
  * @brief   Definition of BLE stack buffers size
  *****************************************************************************
  * @attention
@@ -49,7 +49,7 @@
  */
 #define BLE_MEM_BLOCK_SIZE                   32
 
-#if (SLAVE_ONLY != 0) ||(BASIC_FEATURES != 0)
+#if (SLAVE_ONLY != 0) || (BASIC_FEATURES != 0)
 #define BLE_MEM_BLOCK_X_PTX(n_link)           0
 #else
 #define BLE_MEM_BLOCK_X_PTX(n_link)           (n_link)

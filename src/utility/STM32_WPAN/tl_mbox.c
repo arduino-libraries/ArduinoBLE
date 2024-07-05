@@ -16,7 +16,6 @@
  ******************************************************************************
  */
 
-#if defined(STM32WBxx)
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_wpan_common.h"
 #include "hw.h"
@@ -52,10 +51,8 @@ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_BleLldTable_t TL_BleLldTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_SysTable_t TL_SysTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_MemManagerTable_t TL_MemManagerTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_TracesTable_t TL_TracesTable;
-#if 0
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_Mac_802_15_4_t TL_Mac_802_15_4_Table;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_ZigbeeTable_t TL_Zigbee_Table;
-#endif
 
 /**< tables */
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  FreeBufQueue;
@@ -100,10 +97,8 @@ void TL_Init( void )
   TL_RefTable.p_sys_table = &TL_SysTable;
   TL_RefTable.p_mem_manager_table = &TL_MemManagerTable;
   TL_RefTable.p_traces_table = &TL_TracesTable;
-#if 0
   TL_RefTable.p_mac_802_15_4_table = &TL_Mac_802_15_4_Table;
   TL_RefTable.p_zigbee_table = &TL_Zigbee_Table;
-#endif
   HW_IPCC_Init();
 
   return;
@@ -851,4 +846,3 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
 
   return;
 }
-#endif /* STM32WBxx */
