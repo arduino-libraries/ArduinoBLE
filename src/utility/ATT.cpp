@@ -582,7 +582,7 @@ BLEDevice ATTClass::central()
   return BLEDevice();
 }
 
-bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
+bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, uint16_t *length)
 {
   int numNotifications = 0;
 
@@ -600,9 +600,9 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
     memcpy(&notification[1], &handle, sizeof(handle));
     notificationLength += sizeof(handle);
 
-    length = min((uint16_t)(_peers[i].mtu - notificationLength), (uint16_t)length);
-    memcpy(&notification[notificationLength], value, length);
-    notificationLength += length;
+    *length = min((uint16_t)(_peers[i].mtu - notificationLength), *length);
+    memcpy(&notification[notificationLength], value, *length);
+    notificationLength += *length;
 
     /// TODO: Set encryption requirement on notify.
     HCI.sendAclPkt(_peers[i].connectionHandle, ATT_CID, notificationLength, notification);
@@ -613,7 +613,7 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
   return (numNotifications > 0);
 }
 
-bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
+bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, uint16_t *length)
 {
   int numIndications = 0;
 
@@ -631,9 +631,10 @@ bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
     memcpy(&indication[1], &handle, sizeof(handle));
     indicationLength += sizeof(handle);
 
-    length = min((uint16_t)(_peers[i].mtu - indicationLength), (uint16_t)length);
-    memcpy(&indication[indicationLength], value, length);
-    indicationLength += length;
+    *length = min((uint16_t)(_peers[i].mtu - indicationLength), *length);
+
+    memcpy(&indication[indicationLength], value, *length);
+    indicationLength += *length;
 
     _cnf = false;
 
