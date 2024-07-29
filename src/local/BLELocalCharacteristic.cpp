@@ -119,9 +119,9 @@ int BLELocalCharacteristic::writeValue(const uint8_t value[], int length)
   }
 
   if ((_properties & BLEIndicate) && (_cccdValue & 0x0002)) {
-    return ATT.handleInd(valueHandle(), _value, _valueLength);
+    return ATT.handleInd(valueHandle(), _value,&_valueLength);
   } else if ((_properties & BLENotify) && (_cccdValue & 0x0001)) {
-    return ATT.handleNotify(valueHandle(), _value, _valueLength);
+    return ATT.handleNotify(valueHandle(), _value, &_valueLength);
   }
 
   if (_broadcast) {
@@ -140,6 +140,47 @@ int BLELocalCharacteristic::writeValue(const uint8_t value[], int length)
 int BLELocalCharacteristic::writeValue(const char* value)
 {
   return writeValue((uint8_t*)value, strlen(value));
+}
+
+int BLELocalCharacteristic::write(const uint8_t value[], int length)
+{
+  _valueLength = min(length, _valueSize);
+  memcpy(_value, value, _valueLength);
+
+  if (_fixedLength) {
+    _valueLength = _valueSize;
+  }
+
+  if ((_properties & BLEIndicate) && (_cccdValue & 0x0002)) {
+    uint8_t res = ATT.handleInd(valueHandle(), _value,  &_valueLength);
+    if (res != 1){
+      return res;
+    }
+    return _valueLength;
+  } else if ((_properties & BLENotify) && (_cccdValue & 0x0001)) {
+    uint8_t res = ATT.handleNotify(valueHandle(), _value,  &_valueLength);
+     if (res != 1){
+      return res;
+    }
+    return _valueLength;
+  }
+
+  if (_broadcast) {
+    uint16_t serviceUuid = GATT.serviceUuidForCharacteristic(this);
+
+    BLE.setAdvertisedServiceData(serviceUuid, value, length);
+  
+    if (!ATT.connected() && GAP.advertising()) {
+      BLE.advertise();
+    }
+  }
+
+  return _valueLength;
+}
+
+int BLELocalCharacteristic::write(const char* value)
+{
+  return write((uint8_t*)value, strlen(value));
 }
 
 int BLELocalCharacteristic::broadcast()
