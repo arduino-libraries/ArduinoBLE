@@ -22,6 +22,8 @@
 
 #include "BLEService.h"
 
+extern "C" int strcasecmp(char const *a, char const *b);
+
 BLEService::BLEService() :
   BLEService((BLELocalService*)NULL)
 {

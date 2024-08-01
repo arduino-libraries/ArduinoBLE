@@ -25,6 +25,8 @@
 
 #include "BLEDevice.h"
 
+extern "C" int strcasecmp(char const *a, char const *b);
+
 BLEDevice::BLEDevice() :
   _advertisementTypeMask(0),
   _eirDataLength(0),
