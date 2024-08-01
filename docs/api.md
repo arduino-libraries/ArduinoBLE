@@ -120,7 +120,7 @@ BLE.setEventHandler(eventType, callback)
 
 #### Parameters
 
-- **eventType**: event type (BLEConnected, BLEDisconnected)
+- **eventType**: event type (BLEConnected, BLEDisconnected, BLEDiscovered, BLEAdvertised)
 - **callback**: function to call when event occurs
 #### Returns
 Nothing.
@@ -812,12 +812,14 @@ Start scanning for Bluetooth® Low Energy devices that are advertising.
 ```
 BLE.scan()
 BLE.scan(withDuplicates)
+BLE.scan(withDuplicates, activeScan)
 
 ```
 
 #### Parameters
 
 - **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered
+- **activeScan:** optional, defaults to **true**. If **true**, an active scan is performed. Otherwise a passive scan is performed.
 
 #### Returns
 - 1 on success, 
@@ -859,6 +861,7 @@ Start scanning for Bluetooth® Low Energy devices that are advertising with a pa
 ```
 BLE.scanForName(name)
 BLE.scanForName(name, withDuplicates)
+BLE.scanForName(name, withDuplicates, activeScan)
 
 ```
 
@@ -866,6 +869,8 @@ BLE.scanForName(name, withDuplicates)
 
 -  **name:** (local) name of device (as a **String**) to filter for
 - **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered.
+- **activeScan:** optional, defaults to **true**. If **true**, an active scan is performed. Otherwise a passive scan is performed.
+Note that it is not common to include the name is a passive advertisement. For most device an active scan should be used when scanning for name.
 
 #### Returns
 - 1 on success,
@@ -907,6 +912,7 @@ Start scanning for Bluetooth® Low Energy devices that are advertising with a pa
 ```
 BLE.scanForAddress(address)
 BLE.scanForAddress(address, withDuplicates)
+BLE.scanForAddress(address, withDuplicates, activeScan)
 
 ```
 
@@ -914,6 +920,7 @@ BLE.scanForAddress(address, withDuplicates)
 
 - **address:** (Bluetooth®) address (as a String) to filter for
 - **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered
+- **activeScan:** optional, defaults to **true**. If **true**, an active scan is performed. Otherwise a passive scan is performed.
 
 #### Returns
 - 1 on success, 
@@ -955,6 +962,7 @@ Start scanning for Bluetooth® Low Energy devices that are advertising with a pa
 ```
 BLE.scanForUuid(uuid)
 BLE.scanForUuid(uuid, withDuplicates)
+BLE.scanForUuid(uuid, withDuplicates, activeScan)
 
 ```
 
@@ -962,6 +970,7 @@ BLE.scanForUuid(uuid, withDuplicates)
 
 - **uuid:** (service) UUID (as a **String**) to filter for
 - **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered.
+- **activeScan:** optional, defaults to **true**. If **true**, an active scan is performed. Otherwise a passive scan is performed.
 
 #### Returns
 - 1 on success,
@@ -1042,12 +1051,13 @@ Query for a discovered Bluetooth® Low Energy device that was found during scann
 
 ```
 BLE.available()
+BLE.available(includeAdvertised)
 
 ```
 
 #### Parameters
 
-Nothing
+- **includeAdvertised:** optional, defaults to **false**. If **true**, also devices for which only the passive advertise data is known are returned.
 
 #### Returns
 - **BLEDevice** representing the discovered device.
