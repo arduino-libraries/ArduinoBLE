@@ -469,13 +469,13 @@ bool BLECharacteristic::canSubscribe()
   return false;
 }
 
-bool BLECharacteristic::subscribe()
+int BLECharacteristic::subscribe()
 {
   if (_remote) {
     return _remote->writeCccd((properties() & BLEIndicate) ? 0x0002 : 0x0001);
   }
 
-  return false;
+  return 0;
 }
 
 bool BLECharacteristic::canUnsubscribe()
@@ -483,11 +483,11 @@ bool BLECharacteristic::canUnsubscribe()
   return canSubscribe();
 }
 
-bool BLECharacteristic::unsubscribe()
+int BLECharacteristic::unsubscribe()
 {
   if (_remote) {
     return _remote->writeCccd(0x0000);
   }
 
-  return false;
+  return 0;
 }

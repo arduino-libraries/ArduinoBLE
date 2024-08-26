@@ -22,8 +22,10 @@
 
 #include <Arduino.h>
 
-class HCITransportInterface {
-public:
+struct HCITransportInterface {
+
+  virtual ~HCITransportInterface() {};
+
   virtual int begin() = 0;
   virtual void end() = 0;
 

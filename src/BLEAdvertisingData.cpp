@@ -35,6 +35,7 @@ BLEAdvertisingData::BLEAdvertisingData() :
   _hasManufacturerCompanyId(false),
   _advertisedServiceUuid(NULL),
   _advertisedServiceUuidLength(0),
+  _serviceDataUuid(0),
   _serviceData(NULL),
   _serviceDataLength(0)
 {
@@ -59,7 +60,7 @@ int BLEAdvertisingData::remainingLength() const
   return _remainingLength;
 }
 
-int BLEAdvertisingData::availableForWrite()
+int BLEAdvertisingData::availableForWrite() const
 {
   int available = (_remainingLength - AD_FIELD_OVERHEAD);
   if (available < 0) available = 0;
@@ -103,7 +104,9 @@ void BLEAdvertisingData::copy(const BLEAdvertisingData& adv)
 
 BLEAdvertisingData& BLEAdvertisingData::operator=(const BLEAdvertisingData &other) 
 {
-  copy(other);
+  if (this != &other) {
+    copy(other);
+  }
   return *this;
 }
 

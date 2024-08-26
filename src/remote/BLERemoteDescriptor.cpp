@@ -60,7 +60,7 @@ uint8_t BLERemoteDescriptor::operator[] (int offset) const
 int BLERemoteDescriptor::writeValue(const uint8_t value[], int length)
 {
   if (!ATT.connected(_connectionHandle)) {
-    return false;
+    return 0;
   }
 
   uint16_t maxLength = ATT.mtu(_connectionHandle) - 3;

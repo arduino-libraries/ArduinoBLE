@@ -56,7 +56,7 @@ public:
   BLEAdvertisingData(); 
   virtual ~BLEAdvertisingData();
 
-  int availableForWrite(); 
+  int availableForWrite() const;
   void clear();
   void copy(const BLEAdvertisingData& adv);
   BLEAdvertisingData& operator=(const BLEAdvertisingData &other);
