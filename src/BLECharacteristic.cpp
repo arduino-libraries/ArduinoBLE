@@ -262,6 +262,41 @@ int BLECharacteristic::write(const uint8_t value[], int length, bool withRespons
   return 0;
 }
 
+int BLECharacteristic::write(const void* value, int length, bool withResponse)
+{
+  return write((const uint8_t*)value, length, withResponse);
+}
+
+int BLECharacteristic::write(uint8_t value, bool withResponse)
+{
+  return write((uint8_t*)&value, sizeof(value), withResponse);
+}
+
+int BLECharacteristic::write(int8_t value, bool withResponse)
+{
+  return write((uint8_t*)&value, sizeof(value), withResponse);
+}
+
+int BLECharacteristic::write(uint16_t value, bool withResponse)
+{
+  return write((uint8_t*)&value, sizeof(value), withResponse);
+}
+
+int BLECharacteristic::write(int16_t value, bool withResponse)
+{
+  return write((uint8_t*)&value, sizeof(value), withResponse);
+}
+
+int BLECharacteristic::write(uint32_t value, bool withResponse)
+{
+  return write((uint8_t*)&value, sizeof(value), withResponse);
+}
+
+int BLECharacteristic::write(int32_t value, bool withResponse)
+{
+  return write((uint8_t*)&value, sizeof(value), withResponse);
+}
+
 int BLECharacteristic::writeValue(const uint8_t value[], int length, bool withResponse)
 {
   if (_local) {

@@ -24,6 +24,16 @@ BLEStringCharacteristic::BLEStringCharacteristic(const char* uuid, unsigned char
 {
 }
 
+int BLEStringCharacteristic::write(const char *value)
+{
+  return BLECharacteristic::write(value);
+}
+
+int BLEStringCharacteristic::write(const String &value)
+{
+  return BLECharacteristic::write(value.c_str());
+}
+
 int BLEStringCharacteristic::writeValue(const String& value)
 {
   return BLECharacteristic::writeValue(value.c_str());

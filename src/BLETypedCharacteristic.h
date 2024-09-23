@@ -27,6 +27,7 @@ template<typename T> class BLETypedCharacteristic : public BLECharacteristic
 public:
   BLETypedCharacteristic(const char* uuid, unsigned int permissions);
 
+  int write(T value);
   int writeValue(T value);
   int setValue(T value) { return writeValue(value); }
   T value(void);
@@ -50,6 +51,11 @@ template<typename T> BLETypedCharacteristic<T>::BLETypedCharacteristic(const cha
   memset(&value, 0x00, sizeof(value));
 
   writeValue(value);
+}
+
+template<typename T> int BLETypedCharacteristic<T>::write(T value)
+{
+  return BLECharacteristic::write((uint8_t*)&value, sizeof(T));
 }
 
 template<typename T> int BLETypedCharacteristic<T>::writeValue(T value)
