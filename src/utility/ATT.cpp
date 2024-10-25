@@ -993,8 +993,8 @@ void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint16_t mtu, uint8_
   }
   /// if auth error, hold the response in a buffer.
   bool holdResponse = false;
-
-  uint16_t handle = *(uint16_t*)data;
+  uint16_t handle;
+  memcpy(&handle, data, sizeof(handle));
   uint16_t offset = (opcode == ATT_OP_READ_REQ) ? 0 : *(uint16_t*)&data[sizeof(handle)];
 
   if ((uint16_t)(handle - 1) > GATT.attributeCount()) {
@@ -1248,7 +1248,8 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
     return;
   }
 
-  uint16_t handle = *(uint16_t*)data;
+  uint16_t handle;
+  memcpy(&handle, data, sizeof(handle));
 
   if ((uint16_t)(handle - 1) > GATT.attributeCount()) {
     if (withResponse) {
