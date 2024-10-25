@@ -224,7 +224,9 @@ void BLELocalDevice::end()
   digitalWrite(NINA_RESETN, LOW);
 #elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
   digitalWrite(BT_REG_ON, LOW);
-#endif
+#endif 
+  _advertisingData.clear();
+  _scanResponseData.clear();
 }
 
 void BLELocalDevice::poll()
