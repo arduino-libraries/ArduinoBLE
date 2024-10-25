@@ -77,6 +77,9 @@ public:
   int writeValue(int16_t value, bool withResponse = true);
   int writeValue(uint32_t value, bool withResponse = true);
   int writeValue(int32_t value, bool withResponse = true);
+  int write(const uint8_t value[], int length, bool withResponse = true);
+  int write(const char* value, bool withResponse = true);
+
 
   // deprecated, use writeValue(...)
   int setValue(const uint8_t value[], int length) { return writeValue(value, length); }
