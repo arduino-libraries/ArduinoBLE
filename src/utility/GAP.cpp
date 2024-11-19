@@ -137,6 +137,9 @@ void GAPClass::stopScan()
 {
   HCI.leSetScanEnable(false, false);
 
+  _scanNameFilter    = "";
+  _scanUuidFilter    = "";
+  _scanAddressFilter = "";
   _scanning = false;
 
   for (unsigned int i = 0; i < _discoveredDevices.size(); i++) {
