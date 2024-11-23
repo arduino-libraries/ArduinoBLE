@@ -272,6 +272,11 @@ String BLELocalDevice::address() const
   return result;
 }
 
+void BLELocalDevice::address(uint8_t address[6]) const
+{
+  HCI.readBdAddr(address);
+}
+
 int BLELocalDevice::rssi()
 {
   BLEDevice central = ATT.central();
@@ -344,6 +349,11 @@ void BLELocalDevice::setDeviceName(const char* deviceName)
 void BLELocalDevice::setAppearance(uint16_t appearance)
 {
   GATT.setAppearance(appearance);
+}
+
+void BLELocalDevice::setPPCP(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout)
+{
+  GATT.setPPCP(minimumConnectionInterval, maximumConnectionInterval, slaveLatency, connectionSupervisionTimeout);
 }
 
 void BLELocalDevice::addService(BLEService& service)

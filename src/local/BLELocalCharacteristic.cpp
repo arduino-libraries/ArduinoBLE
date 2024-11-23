@@ -223,7 +223,17 @@ void BLELocalCharacteristic::writeValue(BLEDevice device, const uint8_t value[],
 {
   _written = true;
 
+  if (_properties & BLEWriteWithoutResponse) {
+    _valueLength = min(length, _valueSize);
+    memcpy(_value, value, _valueLength);
+
+    if (_fixedLength) {
+      _valueLength = _valueSize;
+    }
+  } 
+  else {
   writeValue(value, length);
+  }
 
   if (_eventHandlers[BLEWritten]) {
     _eventHandlers[BLEWritten](device, BLECharacteristic(this));

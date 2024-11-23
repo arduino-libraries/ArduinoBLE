@@ -40,6 +40,10 @@ enum BLEAdField {
   BLEFieldCompleteAdvertisedService128 = 0x07,
   BLEFieldShortLocalName = 0x08,
   BLEFieldCompleteLocalName = 0x09,
+
+  BLEFieldTransmitPowerLevel = 0x0A,
+  BLEFieldConnectionInterval = 0x12,
+  
   BLEFieldServiceData = 0x16,
   BLEFieldManufacturerData = 0xFF,
 
@@ -66,6 +70,10 @@ public:
   bool setManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
   bool setManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   bool setLocalName(const char *localName);
+
+  bool setAdvertisedConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
+  bool setAdvertisedTransmitPowerLevel(uint8_t TransmitPowerLevel);
+    
   bool setAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
   bool setRawData(const uint8_t* data, int length);
   bool setRawData(const BLEAdvertisingRawData& data);
@@ -86,6 +94,10 @@ private:
   bool addManufacturerData(const uint8_t manufacturerData[], int manufacturerDataLength);
   bool addManufacturerData(const uint16_t companyId, const uint8_t manufacturerData[], int manufacturerDataLength);
   bool addLocalName(const char *localName);
+  
+  bool addAdvertisedConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
+  bool addAdvertisedTransmitPowerLevel(uint8_t TransmitPowerLevel);
+  
   bool addAdvertisedServiceData(uint16_t uuid, const uint8_t data[], int length);
   bool addRawData(const uint8_t* data, int length);
   bool addFlags(uint8_t flags);
@@ -104,6 +116,12 @@ private:
   uint8_t _flags;
   bool _hasFlags;
   const char* _localName;
+
+  uint16_t _minimumConnectionInterval;
+  uint16_t _maximumConnectionInterval;
+  bool _hasConnectionInterval;
+  uint8_t _TransmitPowerLevel;
+  bool _hasTransmitPowerLevel;
 
   const uint8_t* _manufacturerData;
   int _manufacturerDataLength;

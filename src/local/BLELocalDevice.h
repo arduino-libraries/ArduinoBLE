@@ -45,6 +45,8 @@ public:
   virtual bool disconnect();
 
   virtual String address() const;
+  
+  virtual void address(uint8_t address[6]) const;
 
   virtual int rssi();
 
@@ -60,6 +62,7 @@ public:
 
   virtual void setDeviceName(const char* deviceName);
   virtual void setAppearance(uint16_t appearance);
+  virtual void setPPCP(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout);
 
   virtual void addService(BLEService& service);
 

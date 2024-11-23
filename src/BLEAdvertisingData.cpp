@@ -29,6 +29,13 @@ BLEAdvertisingData::BLEAdvertisingData() :
   _flags(0),
   _hasFlags(false),
   _localName(NULL),
+
+  _minimumConnectionInterval(0),
+  _maximumConnectionInterval(0),
+  _hasConnectionInterval(false),
+  _TransmitPowerLevel(0),
+  _hasTransmitPowerLevel(false),
+
   _manufacturerData(NULL),
   _manufacturerDataLength(0),
   _manufacturerCompanyId(0),
@@ -73,6 +80,13 @@ void BLEAdvertisingData::clear()
   _rawDataLength = 0;
   _hasFlags = false;
   _localName = NULL;
+
+  _minimumConnectionInterval = 0;
+  _maximumConnectionInterval = 0;
+  _hasConnectionInterval = false;
+  _TransmitPowerLevel = 0;
+  _hasTransmitPowerLevel = false;
+
   _manufacturerData = NULL;
   _manufacturerDataLength = 0;
   _hasManufacturerCompanyId = false;
@@ -90,6 +104,13 @@ void BLEAdvertisingData::copy(const BLEAdvertisingData& adv)
   _flags = adv._flags;
   _hasFlags = adv._hasFlags;
   _localName = adv._localName;
+
+  _minimumConnectionInterval = adv._minimumConnectionInterval;
+  _maximumConnectionInterval = adv._maximumConnectionInterval;
+  _hasConnectionInterval = adv._hasConnectionInterval;
+  _TransmitPowerLevel = adv._TransmitPowerLevel;
+  _hasTransmitPowerLevel = adv._hasTransmitPowerLevel;
+
   _manufacturerData = adv._manufacturerData;
   _manufacturerDataLength = adv._manufacturerDataLength;
   _manufacturerCompanyId = adv._manufacturerCompanyId;
@@ -183,6 +204,29 @@ bool BLEAdvertisingData::setLocalName(const char *localName)
   return success;
 }
 
+bool BLEAdvertisingData::setAdvertisedConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval)
+{
+  int previousLength = (_hasConnectionInterval) ? ( sizeof(_minimumConnectionInterval) + sizeof(_maximumConnectionInterval) + AD_FIELD_OVERHEAD) : 0;
+  bool success = updateRemainingLength(previousLength, (sizeof(minimumConnectionInterval) + sizeof(maximumConnectionInterval) + AD_FIELD_OVERHEAD));
+  if (success) {
+    _hasConnectionInterval = true;
+    _minimumConnectionInterval = minimumConnectionInterval;
+    _maximumConnectionInterval = maximumConnectionInterval;
+  }
+  return success;
+}
+
+bool BLEAdvertisingData::setAdvertisedTransmitPowerLevel(uint8_t TransmitPowerLevel)
+{
+  int previousLength = (_hasTransmitPowerLevel) ? ( sizeof(_TransmitPowerLevel) + AD_FIELD_OVERHEAD) : 0;
+  bool success = updateRemainingLength(previousLength, (sizeof(TransmitPowerLevel) + AD_FIELD_OVERHEAD));
+  if (success) {
+    _hasTransmitPowerLevel = true;
+    _TransmitPowerLevel = TransmitPowerLevel;
+  }
+  return success;
+}
+
 bool BLEAdvertisingData::setRawData(const uint8_t* data, int length)
 {
   if (length > MAX_AD_DATA_LENGTH) {
@@ -247,6 +291,14 @@ bool BLEAdvertisingData::updateData()
   // Try to add Local name into the current advertising packet
   if (_localName) {
     success &= addLocalName(_localName);
+  }
+  // Try to add Slave Connection Interval into the current advertising packet
+  if (_hasConnectionInterval) {
+    success &= addAdvertisedConnectionInterval(_minimumConnectionInterval, _maximumConnectionInterval);
+  }
+  // Try to add Transmit Power Level into the current advertising packet
+  if (_hasTransmitPowerLevel) {
+    success &= addAdvertisedTransmitPowerLevel(_TransmitPowerLevel);
   }
   return success;
 }
@@ -328,6 +380,19 @@ bool BLEAdvertisingData::addRawData(const uint8_t* data, int length)
 bool BLEAdvertisingData::addFlags(uint8_t flags)
 {
   return addField(BLEFieldFlags, &flags, sizeof(flags));
+}
+
+bool BLEAdvertisingData::addAdvertisedConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval)
+{
+  uint8_t tempData[sizeof(minimumConnectionInterval) + sizeof(maximumConnectionInterval)];
+  memcpy(tempData, &minimumConnectionInterval, sizeof(minimumConnectionInterval));
+  memcpy(&tempData[sizeof(minimumConnectionInterval)], &maximumConnectionInterval, sizeof(maximumConnectionInterval));
+  return addField(BLEFieldConnectionInterval, tempData, sizeof(minimumConnectionInterval) + sizeof(maximumConnectionInterval));
+}
+
+bool BLEAdvertisingData::addAdvertisedTransmitPowerLevel(uint8_t TransmitPowerLevel)
+{
+  return addField(BLEFieldTransmitPowerLevel, &TransmitPowerLevel, sizeof(TransmitPowerLevel));
 }
 
 bool BLEAdvertisingData::addField(BLEAdField field, const char* data)

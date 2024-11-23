@@ -49,6 +49,8 @@ public:
 
   virtual String address() const;
 
+  virtual void address(uint8_t address[6]) const;
+
   bool hasLocalName() const;
     
   bool hasAdvertisedServiceUuid() const;

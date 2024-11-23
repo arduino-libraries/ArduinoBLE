@@ -31,8 +31,11 @@ GATTClass::GATTClass() :
   _genericAccessService(NULL),
   _deviceNameCharacteristic(NULL),
   _appearanceCharacteristic(NULL),
-  _genericAttributeService(NULL),
-  _servicesChangedCharacteristic(NULL)
+
+  _PPCPCharacteristic(NULL),
+
+  _genericAttributeService(NULL)
+//_servicesChangedCharacteristic(NULL) // removed
 {
 }
 
@@ -46,21 +49,30 @@ void GATTClass::begin()
   _genericAccessService = new BLELocalService("1800");
   _deviceNameCharacteristic = new BLELocalCharacteristic("2a00", BLERead, 20);
   _appearanceCharacteristic = new BLELocalCharacteristic("2a01", BLERead, 2);
+
+  _PPCPCharacteristic = new BLELocalCharacteristic("2a04", BLERead, 8);
+
   _genericAttributeService = new BLELocalService("1801");
-  _servicesChangedCharacteristic = new BLELocalCharacteristic("2a05", BLEIndicate, 4);
+//_servicesChangedCharacteristic = new BLELocalCharacteristic("2a05", BLEIndicate, 4); // removed
 
   _genericAccessService->retain();
   _deviceNameCharacteristic->retain();
   _appearanceCharacteristic->retain();
+
+  _PPCPCharacteristic->retain();
+
   _genericAttributeService->retain();
-  _servicesChangedCharacteristic->retain();
+//_servicesChangedCharacteristic->retain(); // removed
 
   _genericAccessService->addCharacteristic(_deviceNameCharacteristic);
   _genericAccessService->addCharacteristic(_appearanceCharacteristic);
-  _genericAttributeService->addCharacteristic(_servicesChangedCharacteristic);
+  _genericAccessService->addCharacteristic(_PPCPCharacteristic);
+//_genericAttributeService->addCharacteristic(_servicesChangedCharacteristic); // removed
 
   setDeviceName("Arduino");
-  setAppearance(0x000);
+  setAppearance(0x0000);
+
+  setPPCP(DEFAULT_PPCP_minimumConnectionInterval, DEFAULT_PPCP_maximumConnectionInterval, DEFAULT_PPCP_slaveLatency, DEFAULT_PPCP_connectionSupervisionTimeout);
 
   clearAttributes();
 
@@ -79,11 +91,14 @@ void GATTClass::end()
   if (_appearanceCharacteristic->release() == 0)
     delete(_appearanceCharacteristic);
   
+  if (_PPCPCharacteristic->release() == 0)
+    delete(_PPCPCharacteristic);
+
   if (_genericAttributeService->release() == 0)
     delete(_genericAttributeService);
   
-  if (_servicesChangedCharacteristic->release() == 0)
-    delete(_servicesChangedCharacteristic);
+//if (_servicesChangedCharacteristic->release() == 0) // removed
+//  delete(_servicesChangedCharacteristic);
   
   clearAttributes();
 }
@@ -96,6 +111,12 @@ void GATTClass::setDeviceName(const char* deviceName)
 void GATTClass::setAppearance(uint16_t appearance)
 {
   _appearanceCharacteristic->writeValue((uint8_t*)&appearance, sizeof(appearance));
+}
+
+void GATTClass::setPPCP(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout)
+{
+  uint16_t PPCPData[] = { minimumConnectionInterval, maximumConnectionInterval, slaveLatency, connectionSupervisionTimeout };
+  _PPCPCharacteristic->writeValue((uint8_t*)&PPCPData, sizeof(PPCPData));
 }
 
 void GATTClass::addService(BLEService& service)

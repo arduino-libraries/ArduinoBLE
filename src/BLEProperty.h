@@ -75,5 +75,9 @@ enum BLE_GATT_PERM_ {
   WRITE_AUTHORIZATION = 1 << 10,
 };
 
+#define   DEFAULT_PPCP_minimumConnectionInterval 80       /* 100 ms  */
+#define   DEFAULT_PPCP_maximumConnectionInterval 160      /* 200 ms  */
+#define   DEFAULT_PPCP_slaveLatency 0                     /* 0 ms    */
+#define   DEFAULT_PPCP_connectionSupervisionTimeout 1000  /* 1000 ms */
 
 #endif
