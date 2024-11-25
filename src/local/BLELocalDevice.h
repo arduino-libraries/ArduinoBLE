@@ -66,14 +66,14 @@ public:
   virtual int advertise();
   virtual void stopAdvertise();
 
-  virtual int scan(bool withDuplicates = false);
-  virtual int scanForName(String name, bool withDuplicates = false);
-  virtual int scanForUuid(String uuid, bool withDuplicates = false);
-  virtual int scanForAddress(String address, bool withDuplicates = false);
+  virtual int scan(bool withDuplicates = false, bool activeScan = true);
+  virtual int scanForName(String name, bool withDuplicates = false, bool activeScan = true);
+  virtual int scanForUuid(String uuid, bool withDuplicates = false, bool activeScan = true);
+  virtual int scanForAddress(String address, bool withDuplicates = false, bool activeScan = true);
   virtual void stopScan();
 
   virtual BLEDevice central();
-  virtual BLEDevice available();
+  virtual BLEDevice available(bool includeAdvertised = false);
 
   virtual void setAdvertisingInterval(uint16_t advertisingInterval);
   virtual void setConnectionInterval(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval);
