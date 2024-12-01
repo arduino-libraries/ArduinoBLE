@@ -55,6 +55,7 @@
 #include "CordioHCICustomDriver.h"
 
 extern BLE_NAMESPACE::CordioHCIDriver& ble_cordio_get_hci_driver();
+extern void ble_cordio_set_lp_mode(bool status);
 
 namespace BLE_NAMESPACE {
   struct CordioHCIHook {
@@ -68,6 +69,10 @@ namespace BLE_NAMESPACE {
 
     static void setDataReceivedHandler(void (*handler)(uint8_t*, uint8_t)) {
       getTransportDriver().set_data_received_handler(handler);
+    }
+
+    static void setLowPowerMode(bool status) {
+      ble_cordio_set_lp_mode(status);
     }
   };
 }
@@ -309,6 +314,11 @@ HCITransportInterface& HCITransport = HCICordioTransport;
 void HCICordioTransportClass::onDataReceived(uint8_t* data, uint8_t len)
 {
   HCICordioTransport.handleRxData(data, len);
+}
+
+void HCICordioTransportClass::setLPMode(bool status) 
+{
+  CordioHCIHook::setLowPowerMode(status);
 }
 
 #endif
