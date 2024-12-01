@@ -89,7 +89,7 @@ uint8_t BLERemoteCharacteristic::operator[] (int offset) const
 int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length, bool withResponse)
 {
   if (!ATT.connected(_connectionHandle)) {
-    return false;
+    return 0;
   }
 
   uint16_t maxLength = ATT.mtu(_connectionHandle) - 3;
@@ -193,7 +193,7 @@ bool BLERemoteCharacteristic::read()
   return true;
 }
 
-bool BLERemoteCharacteristic::writeCccd(uint16_t value)
+int BLERemoteCharacteristic::writeCccd(uint16_t value)
 {
   int numDescriptors = descriptorCount();
 
@@ -212,7 +212,7 @@ bool BLERemoteCharacteristic::writeCccd(uint16_t value)
     return cccd.writeValue((uint8_t*)&value, sizeof(value));
   }
 
-  return false;
+  return 0;
 }
 
 uint16_t BLERemoteCharacteristic::valueHandle() const
@@ -244,7 +244,7 @@ void BLERemoteCharacteristic::addDescriptor(BLERemoteDescriptor* descriptor)
   _descriptors.add(descriptor);
 }
 
-void BLERemoteCharacteristic::writeValue(BLEDevice device, const uint8_t value[], int length)
+void BLERemoteCharacteristic::writeValue(const BLEDevice& device, const uint8_t value[], int length)
 {
   _valueLength = length;
   _value = (uint8_t*)realloc(_value, _valueLength);

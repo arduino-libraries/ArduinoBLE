@@ -27,7 +27,7 @@
 class BLEStringCharacteristic : public BLECharacteristic
 {
 public:
-  BLEStringCharacteristic(const char* uuid, unsigned char properties, int valueSize);
+  BLEStringCharacteristic(const char* uuid, uint16_t properties, int valueSize);
 
   int writeValue(const String& value);
   int setValue(const String& value) { return writeValue(value); }
