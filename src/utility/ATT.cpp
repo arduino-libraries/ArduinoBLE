@@ -553,6 +553,22 @@ bool ATTClass::disconnect()
 
     numDisconnects++;
 
+    BLEDevice bleDevice(_peers[i].addressType, _peers[i].address);
+
+    // clear CCCD values on disconnect
+    for (uint16_t att = 0; att < GATT.attributeCount(); att++) {
+      BLELocalAttribute* attribute = GATT.attribute(att);
+
+      if (attribute->type() == BLETypeCharacteristic) {
+        BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)attribute;
+
+        characteristic->writeCccdValue(bleDevice, 0x0000);
+      }
+    }
+
+    _longWriteHandle = 0x0000;
+    _longWriteValueLength = 0;
+
     _peers[i].connectionHandle = 0xffff;
     _peers[i].role = 0x00;
     _peers[i].addressType = 0x00;
