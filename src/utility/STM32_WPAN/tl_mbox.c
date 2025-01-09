@@ -676,6 +676,7 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
 {
   TL_EvtPacket_t *p_evt_packet;
   TL_CmdPacket_t *p_cmd_packet;
+  TL_EvtSerial_t *p_cmd_rsp_packet;
 
   switch(packet_type)
   {
@@ -799,28 +800,28 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
       break;
 
     case TL_MB_SYS_CMD_RSP:
-      p_evt_packet = (TL_EvtPacket_t*)buffer;
-      switch(p_evt_packet->evtserial.evt.evtcode)
+      p_cmd_rsp_packet = (TL_EvtSerial_t*)buffer;
+      switch(p_cmd_rsp_packet->evt.evtcode)
       {
         case TL_BLEEVT_CC_OPCODE:
-          TL_SHCI_CMD_DBG_MSG("sys rsp: 0x%02X", p_evt_packet->evtserial.evt.evtcode);
-          TL_SHCI_CMD_DBG_MSG(" cmd opcode: 0x%02X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->cmdcode);
-          TL_SHCI_CMD_DBG_MSG(" status: 0x%02X", ((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload[0]);
-          if((p_evt_packet->evtserial.evt.plen-4) != 0)
+          TL_SHCI_CMD_DBG_MSG("sys rsp: 0x%02X", p_cmd_rsp_packet->evt.evtcode);
+          TL_SHCI_CMD_DBG_MSG(" cmd opcode: 0x%02X", ((TL_CcEvt_t*)(p_cmd_rsp_packet->evt.payload))->cmdcode);
+          TL_SHCI_CMD_DBG_MSG(" status: 0x%02X", ((TL_CcEvt_t*)(p_cmd_rsp_packet->evt.payload))->payload[0]);
+          if((p_cmd_rsp_packet->evt.plen-4) != 0)
           {
             TL_SHCI_CMD_DBG_MSG(" payload:");
-            TL_SHCI_CMD_DBG_BUF(&((TL_CcEvt_t*)(p_evt_packet->evtserial.evt.payload))->payload[1], p_evt_packet->evtserial.evt.plen-4, "");
+            TL_SHCI_CMD_DBG_BUF(&((TL_CcEvt_t*)(p_cmd_rsp_packet->evt.payload))->payload[1], p_cmd_rsp_packet->evt.plen-4, "");
           }
           break;
 
         default:
-          TL_SHCI_CMD_DBG_MSG("unknown sys rsp received: %02X", p_evt_packet->evtserial.evt.evtcode);
+          TL_SHCI_CMD_DBG_MSG("unknown sys rsp received: %02X", p_cmd_rsp_packet->evt.evtcode);
           break;
       }
 
       TL_SHCI_CMD_DBG_MSG("\r\n");
 
-      TL_SHCI_CMD_DBG_RAW(&p_evt_packet->evtserial, p_evt_packet->evtserial.evt.plen+TL_EVT_HDR_SIZE);
+      TL_SHCI_CMD_DBG_RAW(&p_cmd_rsp_packet->evt, p_cmd_rsp_packet->evt.plen+TL_EVT_HDR_SIZE);
       break;
 
     case  TL_MB_SYS_ASYNCH_EVT:
