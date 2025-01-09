@@ -63,26 +63,7 @@ BLELocalDevice::~BLELocalDevice()
 
 int BLELocalDevice::begin()
 {
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
-  // reset the NINA in BLE mode
-  pinMode(SPIWIFI_SS, OUTPUT);
-  pinMode(NINA_RESETN, OUTPUT);
-  
-  digitalWrite(SPIWIFI_SS, LOW);
-#endif
-
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
-  digitalWrite(NINA_RESETN, HIGH);
-  delay(100);
-  digitalWrite(NINA_RESETN, LOW);
-  delay(750);
-#elif defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
-  // inverted reset
-  digitalWrite(NINA_RESETN, LOW);
-  delay(100);
-  digitalWrite(NINA_RESETN, HIGH);
-  delay(750);
-#elif defined(PORTENTA_H7_PINS) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
+#if defined(PORTENTA_H7_PINS) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
   // BT_REG_ON -> HIGH
   pinMode(BT_REG_ON, OUTPUT);
   digitalWrite(BT_REG_ON, LOW);
@@ -221,15 +202,9 @@ void BLELocalDevice::end()
 
   HCI.end();
 
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
-  // disable the NINA
-  digitalWrite(NINA_RESETN, HIGH);
-#elif defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
-  // disable the NINA
-  digitalWrite(NINA_RESETN, LOW);
-#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
+#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
   digitalWrite(BT_REG_ON, LOW);
-#endif 
+#endif
   _advertisingData.clear();
   _scanResponseData.clear();
 }
