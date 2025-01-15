@@ -17,15 +17,11 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#if !defined(ARDUINO_ARCH_MBED) && !defined(__ZEPHYR__) && !defined(ESP32) && !defined(ARDUINO_SILABS) && !defined(ARDUINO_UNOR4_WIFI) && !defined(__ZEPHYR__) || defined(TARGET_NANO_RP2040_CONNECT) //|| defined(CORE_CM4)
+#if defined(ARDUINO_PORTENTA_C33)
 
 #include "HCIUartTransport.h"
 
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
-#define SerialHCI Serial2
-#elif defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
-// SerialHCI is already defined in the variant
-#elif defined(ARDUINO_PORTENTA_H7_M4)
+#if defined(ARDUINO_PORTENTA_H7_M4)
 // SerialHCI is already defined in the variant
 #elif defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION)
 #define SerialHCI Serial2
