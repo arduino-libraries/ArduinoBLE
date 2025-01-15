@@ -187,10 +187,10 @@ int BLELocalDevice::begin()
   //     }
   //     Serial.println();
 
-  //     // save this 
+  //     // save this
   //     uint8_t zeros[16];
   //     for(int k=0; k<16; k++) zeros[15-k] = 0;
-      
+
   //     // HCI.leAddResolvingAddress((*BADDR_Type)[i],(*BADDRs)[i],(*IRKs)[i], zeros);
 
   //     delete[] (*BADDRs)[i];
@@ -202,7 +202,7 @@ int BLELocalDevice::begin()
   //   delete BADDRs;
   //   delete[] (*IRKs);
   //   delete IRKs;
-    
+
   //   memcheck = new uint8_t[1];
   //   Serial.print("nIRK location: 0x");
   //   Serial.println((int)memcheck,HEX);
@@ -315,7 +315,7 @@ bool BLELocalDevice::setManufacturerData(const uint16_t companyId, const uint8_t
 
 bool BLELocalDevice::setLocalName(const char *localName)
 {
-  return _scanResponseData.setLocalName(localName);  
+  return _scanResponseData.setLocalName(localName);
 }
 
 void BLELocalDevice::setAdvertisingData(BLEAdvertisingData& advertisingData)
@@ -360,7 +360,7 @@ int BLELocalDevice::advertise()
 {
   _advertisingData.updateData();
   _scanResponseData.updateData();
-  return GAP.advertise( _advertisingData.data(), _advertisingData.dataLength(), 
+  return GAP.advertise( _advertisingData.data(), _advertisingData.dataLength(),
                         _scanResponseData.data(), _scanResponseData.dataLength());
 }
 
