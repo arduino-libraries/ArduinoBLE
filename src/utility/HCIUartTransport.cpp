@@ -21,16 +21,8 @@
 
 #include "HCIUartTransport.h"
 
-#if defined(ARDUINO_PORTENTA_H7_M4)
-// SerialHCI is already defined in the variant
-#elif defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION)
-#define SerialHCI Serial2
-#elif defined(ARDUINO_OPTA)
-#define SerialHCI Serial3
-#elif defined(ARDUINO_PORTENTA_C33)
+#if defined(ARDUINO_PORTENTA_C33)
 #define SerialHCI Serial5
-#elif defined(ARDUINO_GIGA)
-arduino::UART SerialHCI(CYBSP_BT_UART_TX, CYBSP_BT_UART_RX, CYBSP_BT_UART_RTS, CYBSP_BT_UART_CTS);
 #else
 #error "Unsupported board selected!"
 #endif
