@@ -19,7 +19,7 @@
 
 #include "BLEStringCharacteristic.h"
 
-BLEStringCharacteristic::BLEStringCharacteristic(const char* uuid, unsigned char properties, int valueSize) :
+BLEStringCharacteristic::BLEStringCharacteristic(const char* uuid, unsigned int properties, int valueSize) :
   BLECharacteristic(uuid, properties, valueSize)
 {
 }
