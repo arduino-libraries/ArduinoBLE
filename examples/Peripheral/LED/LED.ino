@@ -48,7 +48,7 @@ void setup() {
   // add service
   BLE.addService(ledService);
 
-  // set the initial value for the characeristic:
+  // set the initial value for the characteristic:
   switchCharacteristic.writeValue(0);
 
   // start advertising

@@ -73,11 +73,11 @@ void loop() {
     // turn on the LED to indicate the connection:
     digitalWrite(LED_BUILTIN, HIGH);
 
-    // check the battery level every 200ms
+    // check the battery level every 200 ms
     // while the central is connected:
     while (central.connected()) {
       long currentMillis = millis();
-      // if 200ms have passed, check the battery level:
+      // if 200 ms have passed, check the battery level:
       if (currentMillis - previousMillis >= 200) {
         previousMillis = currentMillis;
         updateBatteryLevel();

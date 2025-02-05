@@ -80,7 +80,7 @@ Poll for Bluetooth® Low Energy radio events and handle them.
 #### Syntax
 
 ```
-BLE.poll() 
+BLE.poll()
 BLE.poll(timeout)
 
 ```
@@ -100,7 +100,6 @@ Nothing
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
   BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
 
-  
 
   BLE.poll();
 
@@ -142,7 +141,6 @@ Nothing.
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
   BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
 
-  
 
 
 void blePeripheralConnectHandler(BLEDevice central) {
@@ -176,7 +174,7 @@ BLE.connected()
 None
 
 #### Returns
-- **true** if another Bluetooth® Low Energy device is connected, 
+- **true** if another Bluetooth® Low Energy device is connected,
 - otherwise **false**.
 
 #### Example
@@ -208,7 +206,7 @@ BLE.disconnect()
 None
 
 #### Returns
-- **true** if any Bluetooth® Low Energy device that was previously connected was disconnected, 
+- **true** if any Bluetooth® Low Energy device that was previously connected was disconnected,
 - otherwise **false**.
 
 #### Example
@@ -216,8 +214,6 @@ None
 ```arduino
 
   if (BLE.connected()) {
-    
-
     BLE.disconnect();
   }
 
@@ -246,9 +242,9 @@ None
 
 ```arduino
 
-  **String** address = BLE.address();
+  String address = BLE.address();
 
-  Serial.print(“Local address is: “);
+  Serial.print("Local address is: ");
   Serial.println(address);
 
 
@@ -277,9 +273,7 @@ None
 ```arduino
 
   if (BLE.connected()) {
-    
-
-   Serial.print(“RSSI = “);
+    Serial.print("RSSI = ");
     Serial.println(BLE.rssi());
   }
 
@@ -315,9 +309,9 @@ Nothing
     while (1);
   }
 
-  BLE.setAdvertisedServiceUuid(“19B10000-E8F2-537E-4F6C-D104768A1214");
+  BLE.setAdvertisedServiceUuid("19B10000-E8F2-537E-4F6C-D104768A1214");
 
-  // ...  
+  // ...
 
   // start advertising
   BLE.advertise();
@@ -360,7 +354,7 @@ BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Lo
 
   BLE.setAdvertisedService(ledService);
 
-  // ...  
+  // ...
 
   // start advertising
   BLE.advertise();
@@ -402,7 +396,7 @@ Nothing
 
   BLE.setManufacturerData(data, 5);
 
-  // ...  
+  // ...
 
   // start advertising
   BLE.advertise();
@@ -442,7 +436,7 @@ Nothing
 
   BLE.setLocalName("LED");
 
-  // ...  
+  // ...
 
   // start advertising
   BLE.advertise();
@@ -453,7 +447,7 @@ Nothing
 
 ### `BLE.setDeviceName()`
 
-Set the device name in the built in device name characteristic. If not set, the value defaults “Arduino”.
+Set the device name in the built in device name characteristic. If not set, the value defaults to “Arduino”.
 
 #### Syntax
 
@@ -482,7 +476,7 @@ Nothing
 
   BLE.setDeviceName("LED");
 
-  // ...  
+  // ...
 
   // start advertising
   BLE.advertise();
@@ -493,7 +487,7 @@ Nothing
 
 ### `BLE.setAppearance()`
 
-Set the appearance in the built in appearance characteristic. If not set, the value defaults 0x0000.
+Set the appearance in the built in appearance characteristic. If not set, the value defaults to 0x0000.
 
 #### Syntax
 
@@ -522,7 +516,7 @@ Nothing
 
   BLE.setAppearance(0x8000);
 
-  // ...  
+  // ...
 
   // start advertising
   BLE.advertise();
@@ -568,7 +562,7 @@ BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Lo
 
   BLE.addService(ledService);
 
-  // ...  
+  // ...
 
 
 ```
@@ -607,7 +601,7 @@ None
 
   BLE.advertise();
 
-  // ...  
+  // ...
 
 
 ```
@@ -645,7 +639,7 @@ Nothing
 
   BLE.advertise();
 
-  // ...  
+  // ...
 
   BLE.stopAdvertise();
 
@@ -682,8 +676,6 @@ None
     Serial.print("Connected to central: ");
     // print the central's MAC address:
     Serial.println(central.address());
-
-    
   }
 
 
@@ -820,7 +812,7 @@ BLE.scan(withDuplicates)
 - **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered
 
 #### Returns
-- 1 on success, 
+- 1 on success,
 - 0 on failure.
 
 #### Example
@@ -839,7 +831,6 @@ BLE.scan(withDuplicates)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -887,7 +878,6 @@ BLE.scanForName(name, withDuplicates)
   // start scanning for peripheral
   BLE.scanForName("LED");
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -916,7 +906,7 @@ BLE.scanForAddress(address, withDuplicates)
 - **withDuplicates:** optional, defaults to **false**. If **true**, advertisements received more than once will not be filtered
 
 #### Returns
-- 1 on success, 
+- 1 on success,
 - 0 on failure.
 
 #### Example
@@ -935,7 +925,6 @@ BLE.scanForAddress(address, withDuplicates)
   // start scanning for peripheral
   BLE.scanForAddress("aa:bb:cc:ee:dd:ff");
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -983,7 +972,6 @@ BLE.scanForUuid(uuid, withDuplicates)
   // start scanning for peripheral
   BLE.scanForUuid("aa10");
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1028,7 +1016,6 @@ Nothing
   // start scanning for peripheral
   BLE.scan();
 
-  
   BLE.stopScan();
 
 
@@ -1068,7 +1055,6 @@ Nothing
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1111,8 +1097,6 @@ Nothing
 
   // if a central is connected to peripheral:
   if (central) {
-    
-
    central.poll();
 
     // ...
@@ -1182,7 +1166,6 @@ None
  // listen for Bluetooth® Low Energy centrals to connect:
   BLEDevice central = BLE.central();
 
-  
 
   central.disconnect();
 
@@ -1219,8 +1202,6 @@ None
     Serial.print("Connected to central: ");
     // print the central's MAC address:
     Serial.println(central.address());
-
-    .
   }
 
 
@@ -1249,9 +1230,7 @@ None
 ```arduino
 
   if (bleDevice.connected()) {
-    
-
-    Serial.print(“RSSI = “);
+    Serial.print("RSSI = ");
     Serial.println(bleDevice.rssi());
   }
 
@@ -1295,7 +1274,6 @@ bleDevice.characteristic(uuid, index)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1321,9 +1299,9 @@ bleDevice.characteristic(uuid, index)
       return;
     }
 
-    BLECharacteristic batteryLevelCharacterisic = peripheral.characteristic("2a19");
+    BLECharacteristic batteryLevelCharacteristic = peripheral.characteristic("2a19");
 
-    if (batteryLevelCharacterisic) {
+    if (batteryLevelCharacteristic) {
       // use the characteristic
     } else {
       Serial.println("Peripheral does NOT have battery level characteristic");
@@ -1351,7 +1329,7 @@ bleDevice.discoverAttributes()
 None
 
 #### Returns
-- **true**, if successful, 
+- **true**, if successful,
 - **false** on failure.
 
 #### Example
@@ -1370,7 +1348,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1437,7 +1414,6 @@ bleDevice.discoverService(serviceUuid)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1503,7 +1479,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1577,7 +1552,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1651,7 +1625,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1725,7 +1698,6 @@ bleDevice.hasService(uuid, index)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1798,7 +1770,6 @@ bleDevice.service(uuid, index)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1872,7 +1843,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1901,7 +1871,7 @@ None
     int characteristicCount = peripheral.characteristicCount();
 
     Serial.print(characteristicCount);
-    Serial.println(" characteristis discovered");
+    Serial.println(" characteristics discovered");
 
     // ...
   }
@@ -1927,7 +1897,7 @@ bleDevice.hasCharacteristic(uuid, index)
 - **index**: optional, index of characteristic to check if the device provides more than on. Defaults to 0, if not provided.
 
 #### Returns
-- **true**, if the device provides the characteristic, 
+- **true**, if the device provides the characteristic,
 - **false** otherwise.
 
 #### Example
@@ -1946,7 +1916,6 @@ bleDevice.hasCharacteristic(uuid, index)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -1998,7 +1967,7 @@ bleDevice.hasLocalName()
 Nothing
 
 #### Returns
-- **true**, if the device is advertising a local name, 
+- **true**, if the device is advertising a local name,
 - **false** otherwise.
 
 #### Example
@@ -2017,7 +1986,6 @@ Nothing
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2053,7 +2021,7 @@ bleDevice.hasAdvertisedServiceUuid(index)
 - **index**: optional, defaults to 0, the index of the service UUID, if the device is advertising more than one.
 
 #### Returns
-- **true**, if the device is advertising a service UUID, 
+- **true**, if the device is advertising a service UUID,
 - **false** otherwise.
 
 #### Example
@@ -2072,7 +2040,6 @@ bleDevice.hasAdvertisedServiceUuid(index)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2129,7 +2096,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2186,7 +2152,6 @@ Nothing
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2240,7 +2205,6 @@ bleDevice.advertisedServiceUuid(index)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2279,7 +2243,7 @@ bleDevice.connect()
 None
 
 #### Returns
-- **true**, if the connection was successful, 
+- **true**, if the connection was successful,
 - **false** otherwise.
 
 #### Example
@@ -2298,7 +2262,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2376,7 +2339,7 @@ None
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 
 
-Serial.print(“LED service UUID = “);
+Serial.print("LED service UUID = ");
 Serial.println(ledService.uuid());
 
 
@@ -2385,7 +2348,7 @@ Serial.println(ledService.uuid());
 
 ### `bleService.addCharacteristic()`
 
-Add a BLECharateristic to the Bluetooth® Low Energy service.
+Add a BLECharacteristic to the Bluetooth® Low Energy service.
 
 #### Syntax
 
@@ -2454,7 +2417,6 @@ None
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2535,7 +2497,6 @@ bleService.hasCharacteristic(uuid, index)
   // start scanning for peripheral
   BLE.scan();
 
-  
   BLEDevice peripheral = BLE.available();
 
   if (peripheral) {
@@ -2614,7 +2575,6 @@ bleService.characteristic(uuid, index)
   // start scanning for peripheral
   BLE.scan();
 
-  
 
   BLEDevice peripheral = BLE.available();
 
@@ -2644,9 +2604,9 @@ bleService.characteristic(uuid, index)
 
     if (batteryService) {
       // use the service
-      BLECharacteristic batteryLevelCharacterisic = peripheral.characteristic("2a19");
+      BLECharacteristic batteryLevelCharacteristic = peripheral.characteristic("2a19");
 
-      if (batteryLevelCharacterisic) {
+      if (batteryLevelCharacteristic) {
         // use the characteristic
       } else {
         Serial.println("Peripheral does NOT have battery level characteristic");
@@ -2739,7 +2699,7 @@ None
 BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
-Serial.print(“Switch characteristic UUID = “);
+Serial.print("Switch characteristic UUID = ");
 Serial.println(switchCharacteristic.uuid());
 
 
@@ -2812,7 +2772,7 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
 
 
 
-Serial.print(“value size = “);
+Serial.print("value size = ");
 Serial.println(switchCharacteristic.valueSize());
 
 
@@ -2845,13 +2805,13 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
 
 
 
-      if (switchCharacteristic.value()) {   // any value other than 0
-          Serial.println("LED on");
-          digitalWrite(ledPin, HIGH);         // will turn the LED on
-        } else {                              // a 0 value
-          Serial.println(F("LED off"));
-          digitalWrite(ledPin, LOW);          // will turn the LED off
-        }
+  if (switchCharacteristic.value()) {  // any value other than 0
+    Serial.println("LED on");
+    digitalWrite(ledPin, HIGH);  // will turn the LED on
+  } else {                       // a 0 value
+    Serial.println(F("LED off"));
+    digitalWrite(ledPin, LOW);  // will turn the LED off
+  }
 
 
 
@@ -2884,7 +2844,7 @@ BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214
 
 
 
-Serial.print(“value length = “);
+Serial.print("value length = ");
 Serial.println(switchCharacteristic.valueLength());
 
 
@@ -2904,7 +2864,7 @@ bleCharacteristic.readValue(value)
 
 #### Parameters
 
-- **buffer:** byte array to read value into length: size of buffer argument in bytes 
+- **buffer:** byte array to read value into length: size of buffer argument in bytes
 - **value**: variable to read value into (by reference)
 
 #### Returns
@@ -2958,7 +2918,7 @@ bleCharacteristic.writeValue(value)
 - **value**: value to write
 
 #### Returns
-- 1 on success, 
+- 1 on success,
 - 0 on failure
 
 #### Example
@@ -3001,7 +2961,7 @@ bleCharacteristic.setEventHandler(eventType, callback)
 
 #### Parameters
 
-- **eventType**: event type (BLESubscribed, BLEUnsubscribed, BLERead, BLEWritten) 
+- **eventType**: event type (BLESubscribed, BLEUnsubscribed, BLERead, BLEWritten)
 - **callback**: function to call when the event occurs
 
 #### Returns
@@ -3035,7 +2995,6 @@ void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteri
   }
 }
 
-  
 
 ```
 
@@ -3324,7 +3283,7 @@ bleCharacteristic.canRead()
 None
 
 #### Returns
-- **true**, if characteristic is readable, 
+- **true**, if characteristic is readable,
 - **false** otherwise
 
 #### Example
@@ -3354,7 +3313,7 @@ bleCharacteristic.read()
 None
 
 #### Returns
-- **true**, if successful, 
+- **true**, if successful,
 - **false** on failure
 
 #### Example
@@ -3669,7 +3628,7 @@ None
 BLEDescriptor millisLabelDescriptor("2901", "millis");
 
 
-Serial.print(“millis label descriptor UUID = “);
+Serial.print("millis label descriptor UUID = ");
 Serial.println(millisLabelDescriptor.uuid());
 
 
@@ -3701,7 +3660,7 @@ None
 BLEDescriptor millisLabelDescriptor("2901", "millis");
 
 
-Serial.print(“millis label descriptor value size = “);
+Serial.print("millis label descriptor value size = ");
 Serial.println(millisLabelDescriptor.valueSize());
 
 
@@ -3819,7 +3778,7 @@ bleDescriptor.readValue(value)
 
   byte value = 0;
 
-  /get the value, descriptor is 1 byte so use byte value    
+  // get the value, descriptor is 1 byte so use byte value
   descriptor.readValue(value);
 
 

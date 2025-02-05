@@ -2,7 +2,7 @@ ArduinoBLE ?.?.? - ????.??.??
 
 ArduinoBLE 1.1.2 - 2019.11.12
 
-* cordio: switch to lower power when polling with timeout 
+* cordio: switch to lower power when polling with timeout
 * Fixed issue with wrong types for disconnection event handling. Thanks @cparata
 
 ArduinoBLE 1.1.1 - 2019.09.05
