@@ -54,7 +54,7 @@ void setup() {
 
 
   Serial.println("Serial connected");
-  
+
   // Callback function with confirmation code when new device is pairing.
   BLE.setDisplayCode([](uint32_t confirmCode){
     Serial.println("New device pairing request.");
@@ -63,7 +63,7 @@ void setup() {
     sprintf(code, "%06d", confirmCode);
     Serial.println(code);
   });
-  
+
   // Callback to allow accepting or rejecting pairing
   BLE.setBinaryConfirmPairing([&acceptOrReject](){
     Serial.print("Should we confirm pairing? ");
@@ -98,7 +98,7 @@ void setup() {
 
 
     (*BDaddrTypes)[0] = 0; // Type 0 is for pubc address, type 1 is for static random
-    (*BDAddrs)[0] = new uint8_t[6]; 
+    (*BDAddrs)[0] = new uint8_t[6];
     (*IRKs)[0]    = new uint8_t[16];
     memcpy((*IRKs)[0]   , device1IRK,16);
     memcpy((*BDAddrs)[0], device1Mac, 6);
@@ -124,7 +124,7 @@ void setup() {
     uint8_t device1LTK[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     uint8_t device2Mac[6]  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     uint8_t device2LTK[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    
+
 
     if(memcmp(device1Mac, address, 6) == 0) {
       memcpy(LTK, device1LTK, 16);
@@ -159,7 +159,7 @@ void setup() {
     }
     Serial.println("BT init");
     delay(200);
-    
+
     /* Set a local name for the BLE device
        This name will appear in advertising packets
        and can be used by remote devices to identify this BLE device
@@ -180,16 +180,16 @@ void setup() {
     stringCharValue = "string";
     stringcharacteristic.writeValue(stringCharValue);
     secretValue.writeValue(0);
-    
+
     delay(1000);
 
     // prevent pairing until button is pressed (will show a pairing rejected message)
     BLE.setPairable(false);
-  
+
     /* Start advertising BLE.  It will start continuously transmitting BLE
        advertising packets and will be visible to remote BLE central devices
        until it receives a new connection */
-  
+
     // start advertising
     if(!BLE.advertise()){
       Serial.println("failed to advertise bluetooth.");
@@ -214,13 +214,13 @@ void loop() {
   if (!BLE.pairable() && digitalRead(PAIR_BUTTON) == LOW){
     pairingStarted = millis();
     BLE.setPairable(Pairable::ONCE);
-    Serial.println("Accepting pairing for 30s");
+    Serial.println("Accepting pairing for 30 s");
   } else if (BLE.pairable() && millis() > pairingStarted + PAIR_INTERVAL){
     BLE.setPairable(false);
     Serial.println("No longer accepting pairing");
   }
   // Make LED blink while pairing is allowed
-  digitalWrite(PAIR_LED, (BLE.pairable() ? (millis()%400)<200 : BLE.paired()) ? PAIR_LED_ON : !PAIR_LED_ON); 
+  digitalWrite(PAIR_LED, (BLE.pairable() ? (millis()%400)<200 : BLE.paired()) ? PAIR_LED_ON : !PAIR_LED_ON);
 
 
   // if a central is connected to the peripheral:
@@ -246,7 +246,7 @@ void loop() {
     Serial.print("Disconnected from central: ");
     Serial.println(central.address());
   }
-    
+
 }
 
 void updateBatteryLevel() {
