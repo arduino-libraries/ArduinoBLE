@@ -105,6 +105,8 @@ public:
   virtual int leStartResolvingAddresses();
   virtual int leReadPeerResolvableAddress(uint8_t peerAddressType, uint8_t* peerIdentityAddress, uint8_t* peerResolvableAddress);
 
+  virtual void leSetLPMode(bool status);
+
   virtual void readStoredLKs();
   virtual int readStoredLK(uint8_t BD_ADDR[], uint8_t read_all = 0);
   virtual void writeLK(uint8_t peerAddress[], uint8_t LK[]);

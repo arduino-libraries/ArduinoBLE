@@ -99,6 +99,11 @@ size_t HCIUartTransportClass::write(const uint8_t* data, size_t length)
   return result;
 }
 
+void HCIUartTransportClass::setLPMode(bool status) 
+{
+  (void)status;
+}
+
 #if defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_NANO_RP2040_CONNECT)
 HCIUartTransportClass HCIUartTransport(SerialHCI, 119600);
 #else
