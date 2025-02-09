@@ -105,9 +105,9 @@ public:
   bool read();
   bool canWrite();
   bool canSubscribe();
-  bool subscribe();
+  int subscribe();
   bool canUnsubscribe();
-  bool unsubscribe();
+  int unsubscribe();
 
 protected:
   friend class BLELocalCharacteristic;
