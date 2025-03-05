@@ -122,6 +122,8 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
 #ifdef _BLE_TRACE_
   Serial.print("dlen: ");
   Serial.println(dlen);
+#else
+  (void)dlen;
 #endif
   uint8_t code = l2capSignalingHdr->code;
 
@@ -310,8 +312,8 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       uint8_t x[32];
       uint8_t y[32];
     } generateDHKeyCommand = {
-      0x00,
-      0x00,
+      {0x00},
+      {0x00},
     };
     memcpy(generateDHKeyCommand.x,connectionPairingPublicKey->x,32);
     memcpy(generateDHKeyCommand.y,connectionPairingPublicKey->y,32);
@@ -415,7 +417,7 @@ void L2CAPSignalingClass::smCalculateLTKandConfirm(uint16_t handle, uint8_t expe
     // Send our confirmation value to complete authentication stage 2
     uint8_t ret[17];
     ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
-    for(int i=0; i<sizeof(Eb); i++){
+    for(unsigned int i=0; i<sizeof(Eb); i++){
       ret[sizeof(Eb)-i] = Eb[i];
     }
     HCI.sendAclPkt(handle, SECURITY_CID, sizeof(ret), ret );

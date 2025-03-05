@@ -138,7 +138,7 @@ void HCIClass::poll(unsigned long timeout)
   while (HCITransport.available()) {
     byte b = HCITransport.read();
 
-    if (_recvIndex >= sizeof(_recvBuffer)) {
+    if (_recvIndex >= (int)sizeof(_recvBuffer)) {
         _recvIndex = 0;
         if (_debug) {
             _debug->println("_recvBuffer overflow");
@@ -461,6 +461,8 @@ int HCIClass::leConnUpdate(uint16_t handle, uint16_t minInterval, uint16_t maxIn
   return sendCommand(OGF_LE_CTL << 10 | OCF_LE_CONN_UPDATE, sizeof(leConnUpdateData), &leConnUpdateData);
 }
 void HCIClass::saveNewAddress(uint8_t addressType, uint8_t* address, uint8_t* peerIrk, uint8_t* localIrk){
+  (void)addressType;
+  (void)localIrk;
   if(_storeIRK!=0){
     _storeIRK(address, peerIrk);
   }
@@ -503,6 +505,7 @@ int HCIClass::leStartResolvingAddresses(){
   return HCI.sendCommand(OGF_LE_CTL << 10 | 0x2D, 1,&enable); // Disable address resolution
 }
 int HCIClass::leReadPeerResolvableAddress(uint8_t peerAddressType, uint8_t* peerIdentityAddress, uint8_t* peerResolvableAddress){
+  (void)peerResolvableAddress;
   struct __attribute__ ((packed)) Request {
     uint8_t addressType;
     uint8_t identityAddress[6];
@@ -546,7 +549,7 @@ int HCIClass::readStoredLK(uint8_t BD_ADDR[], uint8_t read_all ){
   struct __attribute__ ((packed)) Request {
     uint8_t BD_ADDR[6];
     uint8_t read_a;
-  } request = {0,0};
+  } request = {{0},0};
   for(int i=0; i<6; i++) request.BD_ADDR[5-i] = BD_ADDR[i];
   request.read_a = read_all;
   return sendCommand(OGF_HOST_CTL << 10 | 0xD, sizeof(request), &request);
@@ -1271,7 +1274,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
             uint8_t U[32];
             uint8_t V[32];
             uint8_t Z;
-          } f4Params = {0,0,Z};
+          } f4Params = {{0},{0},Z};
           for(int i=0; i<32; i++){
             f4Params.U[31-i] = pairingPublicKey.publicKey[i];
             f4Params.V[31-i] = HCI.remotePublicKeyBuffer[i];
@@ -1291,7 +1294,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
 #endif
 
           uint8_t cb_temp[sizeof(pairingConfirm.cb)];
-          for(int i=0; i<sizeof(pairingConfirm.cb);i++){
+          for(unsigned int i=0; i<sizeof(pairingConfirm.cb);i++){
             cb_temp[sizeof(pairingConfirm.cb)-1-i] = pairingConfirm.cb[i];
           }
           /// cb wa back to front.
@@ -1375,11 +1378,12 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
   }
 }
 int HCIClass::leEncrypt(uint8_t* key, uint8_t* plaintext, uint8_t* status, uint8_t* ciphertext){
+  (void)status;
   struct __attribute__ ((packed)) LeEncryptCommand
   {
     uint8_t key[16];
     uint8_t plaintext[16];
-  } leEncryptCommand = {0,0};
+  } leEncryptCommand = {{0},{0}};
   for(int i=0; i<16; i++){
     leEncryptCommand.key[15-i] = key[i];
     leEncryptCommand.plaintext[15-i] = plaintext[i];
