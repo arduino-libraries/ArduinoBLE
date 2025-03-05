@@ -5,7 +5,7 @@
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2024 STMicroelectronics.
+ * Copyright (c) 2018-2025 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -97,7 +97,7 @@
  *   mentioned parameters.
 */
 #if (BEACON_ONLY != 0)
-#define BLE_FIXED_BUFFER_SIZE_BYTES  4100   /* Beacon only */
+#define BLE_FIXED_BUFFER_SIZE_BYTES  4200   /* Beacon only */
 #elif (LL_ONLY_BASIC != 0)
 #define BLE_FIXED_BUFFER_SIZE_BYTES  6040   /* LL only Basic*/
 #elif (LL_ONLY != 0)
@@ -114,7 +114,7 @@
  * BLE_PER_LINK_SIZE_BYTES: additional memory size used per link
  */
 #if (BEACON_ONLY != 0)
-#define BLE_PER_LINK_SIZE_BYTES       108   /* Beacon only */
+#define BLE_PER_LINK_SIZE_BYTES        76   /* Beacon only */
 #elif (LL_ONLY_BASIC != 0)
 #define BLE_PER_LINK_SIZE_BYTES       244   /* LL only Basic */
 #elif (LL_ONLY != 0)
