@@ -19,7 +19,14 @@
 
 #include "HCISpiTransport.h"
 
-#if defined(ARDUINO_STEVAL_MKBOXPRO)
+#if __has_include("ble_spi_conf.h")
+  #include "ble_spi_conf.h"
+#endif
+
+#if defined(CUSTOM_BLE_SPI)
+SPIClass SpiHCI(BLE_SPI_MOSI, BLE_SPI_MISO, BLE_SPI_CLK);
+HCISpiTransportClass HCISpiTransport(SpiHCI, BLE_CHIP_TYPE, BLE_SPI_CS, BLE_SPI_IRQ, BLE_RESET, BLE_SPI_FREQ, BLE_SPI_MODE);
+#elif defined(ARDUINO_STEVAL_MKBOXPRO)
 /* STEVAL-MKBOXPRO */
 SPIClass SpiHCI(PA7, PA6, PA5);
 HCISpiTransportClass HCISpiTransport(SpiHCI, BLUENRG_LP, PA2, PB11, PD4, 1000000, SPI_MODE3);
