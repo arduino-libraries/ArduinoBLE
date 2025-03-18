@@ -31,6 +31,7 @@ BLEDoubleCharacteristic	KEYWORD1
 BLEStringCharacteristic	KEYWORD1
 
 HCISpiTransportClass	KEYWORD1
+HCISharedMemTransportClass	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
