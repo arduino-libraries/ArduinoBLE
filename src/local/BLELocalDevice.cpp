@@ -142,9 +142,21 @@ int BLELocalDevice::begin()
   randomAddress [4] = randomNumber[4];
   randomAddress [5] = randomNumber[5];
 
-  if (HCI.leSetRandomAddress((uint8_t*)randomNumber) != 0) {
+  // Set Random address only when type is STATIC_RANDOM_ADDR
+  if ((_ownBdaddrType == STATIC_RANDOM_ADDR) && (HCI.leSetRandomAddress((uint8_t*)randomNumber) != 0)) {
     end();
     return 0;
+  }
+  // Save address to HCI.localAddr variable, which is used to encryption in pairing
+  if(_ownBdaddrType == PUBLIC_ADDR){
+    if (HCI.readBdAddr() != 0) {
+      end();
+      return 0;
+    }
+  } else {
+    for(int k=0; k<6; k++){
+      HCI.localAddr[5-k] = randomAddress[k];
+    }
   }
 
   uint8_t hciVer;
@@ -301,7 +313,14 @@ bool BLELocalDevice::disconnect()
 String BLELocalDevice::address() const
 {
   uint8_t addr[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-  HCI.readBdAddr(addr);
+  // return correct device address when is set to STATIC RANDOM (set by HCI)
+  if(_ownBdaddrType == PUBLIC_ADDR) {
+    HCI.readBdAddr(addr);
+  } else {
+    for(int k=0; k<6; k++) {
+        addr[k]=HCI.localAddr[5-k];
+    }
+  }
 
   char result[18];
   sprintf(result, "%02x:%02x:%02x:%02x:%02x:%02x", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0]);
