@@ -6,9 +6,7 @@
   it will remotely control the Bluetooth® Low Energy peripheral's LED, when the button is pressed or released.
 
   The circuit:
-  - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
-    Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
-  - Button with pull-up resistor connected to pin 2.
+  - Board with supported BLE modules.
 
   You can use it with another board that is compatible with this library and the
   Peripherals -> LED example.
@@ -16,7 +14,7 @@
   This example code is in the public domain.
 */
 
-#include <ArduinoBLE.h>
+#include <STM32duinoBLE.h>
 
 // variables for button
 const int buttonPin = 2;

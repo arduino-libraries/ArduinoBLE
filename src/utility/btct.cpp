@@ -1,7 +1,7 @@
 #include "btct.h"
 #include <Arduino.h>
 #include "HCI.h"
-#include "ArduinoBLE.h"
+#include "STM32duinoBLE.h"
 BluetoothCryptoToolbox::BluetoothCryptoToolbox(){}
 //    In step 1, AES-128 with key K is applied to an all-zero input block.
 //    In step 2, K1 is derived through the following operation:

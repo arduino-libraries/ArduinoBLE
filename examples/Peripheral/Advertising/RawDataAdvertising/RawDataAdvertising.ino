@@ -1,4 +1,4 @@
-#include <ArduinoBLE.h>
+#include <STM32duinoBLE.h>
 
 BLEService myService("fff0");
 BLEIntCharacteristic myCharacteristic("fff1", BLERead | BLEBroadcast);

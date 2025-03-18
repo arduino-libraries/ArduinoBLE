@@ -8,14 +8,13 @@
   outputted to the Serial Monitor when one is pressed.
 
   The circuit:
-  - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
-    Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
+  - Board with supported BLE modules.
   - TI SensorTag
 
   This example code is in the public domain.
 */
 
-#include <ArduinoBLE.h>
+#include <STM32duinoBLE.h>
 
 void setup() {
   Serial.begin(9600);

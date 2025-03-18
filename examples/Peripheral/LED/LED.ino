@@ -5,8 +5,7 @@
   characteristic to control an LED.
 
   The circuit:
-  - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
-    Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
+  - Board with supported BLE modules.
 
   You can use a generic Bluetooth® Low Energy central app, like LightBlue (iOS and Android) or
   nRF Connect (Android), to interact with the services and characteristics
@@ -15,7 +14,7 @@
   This example code is in the public domain.
 */
 
-#include <ArduinoBLE.h>
+#include <STM32duinoBLE.h>
 
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Bluetooth® Low Energy LED Service
 

@@ -1,22 +1,25 @@
-# ArduinoBLE
+# STM32duinoBLE
 
-[![Compile Examples Status](https://github.com/arduino-libraries/ArduinoBLE/workflows/Compile%20Examples/badge.svg)](https://github.com/arduino-libraries/ArduinoBLE/actions?workflow=Compile+Examples) [![Spell Check Status](https://github.com/arduino-libraries/ArduinoBLE/workflows/Spell%20Check/badge.svg)](https://github.com/arduino-libraries/ArduinoBLE/actions?workflow=Spell+Check)
+This library is a fork of ArduinoBLE library to add the support of SPBTLE-RF, SPBTLE-1S, BLUENRG-M2SP, BLUENRG-LP and BLUENRG-M0 BLE modules.
 
-Enables Bluetooth® Low Energy connectivity on the Arduino MKR WiFi 1010, Arduino UNO WiFi Rev2, Arduino Nano 33 IoT, Arduino Nano 33 BLE, Arduino Portenta H7, Arduino Giga R1 and Arduino UNO R4 WiFi.
+It was successfully tested with the X-NUCLEO-IDB05A1 or X-NUCLEO-IDB05A2 or X-NUCLEO-BNRG2A1 expansion board and
+a NUCLEO-F401RE or NUCLEO-L476RG or NUCLEO-L053R8, with B-L475E-IOT01A and with STEVAL-MKSBOX1V1.
 
-This library supports creating a Bluetooth® Low Energy peripheral & central mode.
+ - In order to use this library with STEVAL-MKSBOX1V1, you need to update the firmware of the SPBTLE-1S BLE module mounted on that board as described in the following wiki page:
 
-For the Arduino MKR WiFi 1010, Arduino UNO WiFi Rev2, and Arduino Nano 33 IoT boards, it requires the NINA module to be running [Arduino NINA-W102 firmware](https://github.com/arduino/nina-fw) v1.2.0 or later.
+https://github.com/stm32duino/Arduino_Core_STM32/wiki/STM32duinoBLE#stm32duinoble-with-steval_mksbox1v1
 
-For the Arduino UNO R4 WiFi, it requires the ESP32-S3 module to be running [firmware](https://github.com/arduino/uno-r4-wifi-usb-bridge) v0.2.0 or later.
+- In order to use this library with X-NUCLEO-BNRG2A1, you need to update the firmware of the BLUENRG-M2SP BLE module mounted on that expansion board as described in the following wiki page:
 
+https://github.com/stm32duino/Arduino_Core_STM32/wiki/STM32duinoBLE#stm32duinoble-with-x-nucleo-bnrg2a1
 
-For more information about this library please visit us at:
+For more information about ArduinoBLE library please visit the official web page at:
 https://www.arduino.cc/en/Reference/ArduinoBLE
 
 ## License
 
 ```
+Copyright (c) 2019 STMicroelectronics. All rights reserved.
 Copyright (c) 2019 Arduino SA. All rights reserved.
 
 This library is free software; you can redistribute it and/or

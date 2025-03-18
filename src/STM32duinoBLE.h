@@ -17,34 +17,13 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "HCITransport.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
+#ifndef _STM32DUINO_BLE_H_
+#define _STM32DUINO_BLE_H_
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/stream_buffer.h"
+#include "local/BLELocalDevice.h"
+#include "BLEProperty.h"
+#include "BLEStringCharacteristic.h"
+#include "BLETypedCharacteristics.h"
+#include "utility/btct.h"
 
-#include "esp_bt.h"
-#include "nvs_flash.h"
-
-#include "esp32-hal-bt.h" // this is needed to disable bluedroid
-
-
-class HCIVirtualTransportClass : public HCITransportInterface {
-public:
-  HCIVirtualTransportClass();
-  virtual ~HCIVirtualTransportClass();
-
-  virtual int begin();
-  virtual void end();
-
-  virtual void wait(unsigned long timeout);
-
-  virtual int available();
-  virtual int peek();
-  virtual int read();
-
-  virtual size_t write(const uint8_t* data, size_t length);
-};
+#endif

@@ -5,8 +5,7 @@
   is found. Then connects, and discovers + prints all the peripheral's attributes.
 
   The circuit:
-  - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
-    Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
+  - Board with supported BLE modules.
 
   You can use it with another board that is compatible with this library and the
   Peripherals -> LED example.
@@ -14,7 +13,7 @@
   This example code is in the public domain.
 */
 
-#include <ArduinoBLE.h>
+#include <STM32duinoBLE.h>
 
 void setup() {
   Serial.begin(9600);
