@@ -1,0 +1,26 @@
+[*]
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace =  true
+
+[*.patch]
+insert_final_newline = unset
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace =  unset
+
+[*.md]
+trim_trailing_whitespace =  false
+
+[*.sh]
+# like -i=2
+indent_style = space
+indent_size = 2
+
+#shell_variant      = posix # like -ln=posix
+#binary_next_line   = true  # like -bn
+switch_case_indent = true  # like -ci
+space_redirects    = true  # like -sr
+#keep_padding       = true  # like -kp
