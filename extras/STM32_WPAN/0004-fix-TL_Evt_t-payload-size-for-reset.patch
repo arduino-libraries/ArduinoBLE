@@ -1,0 +1,30 @@
+From 324eef795bfd0a754aae4d5f9b528d4c8ad706c8 Mon Sep 17 00:00:00 2001
+From: Frederic Pillon <frederic.pillon@st.com>
+Date: Mon, 24 Jul 2023 10:55:20 +0200
+Subject: [PATCH 4/4] fix: TL_Evt_t payload size for reset
+
+Within STM32CubeWB v1.17.0 update TL_Evt_t payload size was reduced.
+This produce a warning -Warray-bounds due to the reset management
+which require 4 bytes.
+
+Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
+---
+ src/utility/STM32_WPAN/tl.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/utility/STM32_WPAN/tl.h b/src/utility/STM32_WPAN/tl.h
+index 8e8c6cb..7452087 100644
+--- a/src/utility/STM32_WPAN/tl.h
++++ b/src/utility/STM32_WPAN/tl.h
+@@ -108,7 +108,7 @@ typedef PACKED_STRUCT
+ {
+   uint8_t   evtcode;
+   uint8_t   plen;
+-  uint8_t   payload[2];
++  uint8_t   payload[4];
+ } TL_Evt_t;
+ 
+ typedef PACKED_STRUCT
+-- 
+2.34.1
+

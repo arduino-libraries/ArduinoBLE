@@ -1,0 +1,41 @@
+From a33328182e334e1ddedd368a047d75cf1662e330 Mon Sep 17 00:00:00 2001
+From: Frederic Pillon <frederic.pillon@st.com>
+Date: Thu, 13 Jul 2023 17:16:40 +0200
+Subject: [PATCH 2/4] fix: include a timeout when waiting for the cmd_resp
+
+Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
+---
+ src/utility/STM32_WPAN/shci_tl.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/src/utility/STM32_WPAN/shci_tl.c b/src/utility/STM32_WPAN/shci_tl.c
+index daa988c..25e1a21 100644
+--- a/src/utility/STM32_WPAN/shci_tl.c
++++ b/src/utility/STM32_WPAN/shci_tl.c
+@@ -24,6 +24,7 @@
+ #include "stm_list.h"
+ #include "shci_tl.h"
+ #include "stm32_def.h"
++#include "wiring_time.h"
+ 
+ /* Private typedef -----------------------------------------------------------*/
+ typedef enum
+@@ -251,10 +252,11 @@ static void TlUserEvtReceived(TL_EvtPacket_t *shcievt)
+ /* Weak implementation ----------------------------------------------------------------*/
+ __WEAK void shci_cmd_resp_wait(uint32_t timeout)
+ {
+-  (void)timeout;
+-
+-  while(CmdRspStatusFlag != SHCI_TL_CMD_RESP_RELEASE);
+-
++  for (unsigned long start = millis(); (millis() - start) < timeout;) {
++    if (CmdRspStatusFlag == SHCI_TL_CMD_RESP_RELEASE) {
++      break;
++    }
++  }
+   return;
+ }
+ 
+-- 
+2.34.1
+

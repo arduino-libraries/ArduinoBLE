@@ -1,0 +1,135 @@
+From a973b405bf34a93b0c300c8bbc4aa5d59fa182e5 Mon Sep 17 00:00:00 2001
+From: Frederic Pillon <frederic.pillon@st.com>
+Date: Wed, 10 Jan 2024 18:45:17 +0100
+Subject: [PATCH 3/4] chore: add support for customize app_conf_default.h
+
+Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
+---
+ src/utility/STM32_WPAN/app_conf_default.h | 58 ++++++++++++++++++-----
+ 1 file changed, 45 insertions(+), 13 deletions(-)
+
+diff --git a/src/utility/STM32_WPAN/app_conf_default.h b/src/utility/STM32_WPAN/app_conf_default.h
+index bf2274a..ff2dc01 100644
+--- a/src/utility/STM32_WPAN/app_conf_default.h
++++ b/src/utility/STM32_WPAN/app_conf_default.h
+@@ -50,7 +50,9 @@
+ /**
+  * Define Tx Power
+  */
+-#define CFG_TX_POWER                      (0x18) /* -0.15dBm */
++#ifndef CFG_TX_POWER
++  #define CFG_TX_POWER                        (0x18) /* -0.15dBm */
++#endif
+ 
+ #if 0
+ /**
+@@ -135,13 +137,25 @@
+  * Maximum number of simultaneous connections that the device will support.
+  * Valid values are from 1 to 8
+  */
+-#define CFG_BLE_NUM_LINK            8
++#ifndef CFG_BLE_NUM_LINK
++#ifdef STM32WB15xx
++  #define CFG_BLE_NUM_LINK            3
++#else
++  #define CFG_BLE_NUM_LINK            8
++#endif
++#endif
+ 
+ /**
+  * Maximum number of Services that can be stored in the GATT database.
+  * Note that the GAP and GATT services are automatically added so this parameter should be 2 plus the number of user services
+  */
+-#define CFG_BLE_NUM_GATT_SERVICES   8
++#ifndef CFG_BLE_NUM_GATT_SERVICES
++#ifdef STM32WB15xx
++  #define CFG_BLE_NUM_GATT_SERVICES   4
++#else
++  #define CFG_BLE_NUM_GATT_SERVICES   8
++#endif
++#endif
+ 
+ /**
+  * Maximum number of Attributes
+@@ -150,7 +164,13 @@
+  * Note that certain characteristics and relative descriptors are added automatically during device initialization
+  * so this parameters should be 9 plus the number of user Attributes
+  */
+-#define CFG_BLE_NUM_GATT_ATTRIBUTES 68
++#ifndef CFG_BLE_NUM_GATT_ATTRIBUTES
++#ifdef STM32WB15xx
++  #define CFG_BLE_NUM_GATT_ATTRIBUTES 30
++#else
++  #define CFG_BLE_NUM_GATT_ATTRIBUTES 68
++#endif
++#endif
+ 
+ /**
+  * Maximum supported ATT_MTU size
+@@ -186,12 +206,16 @@
+ /**
+  * Enable or disable the Extended Packet length feature. Valid values are 0 or 1.
+  */
+-#define CFG_BLE_DATA_LENGTH_EXTENSION   1
++#ifndef CFG_BLE_DATA_LENGTH_EXTENSION
++  #define CFG_BLE_DATA_LENGTH_EXTENSION   1
++#endif
+ 
+ /**
+  * Sleep clock accuracy in Peripheral mode (ppm value)
+  */
+-#define CFG_BLE_PERIPHERAL_SCA   500
++#ifndef CFG_BLE_PERIPHERAL_SCA
++  #define CFG_BLE_PERIPHERAL_SCA   500
++#endif
+ 
+ /**
+  * Sleep clock accuracy in Central mode
+@@ -204,7 +228,9 @@
+  * 6 : 21 ppm to 30 ppm
+  * 7 : 0 ppm to 20 ppm
+  */
+-#define CFG_BLE_CENTRAL_SCA   0
++#ifndef CFG_BLE_CENTRAL_SCA
++  #define CFG_BLE_CENTRAL_SCA   0
++#endif
+ 
+ /**
+  * LsSource
+@@ -213,21 +239,27 @@
+  * - bit 1:   1: STM32WB5M Module device                             0: Other devices as STM32WBxx SOC, STM32WB1M module
+  * - bit 2:   1: HSE/1024 Clock config                               0: LSE Clock config
+  */
+-#if defined(STM32WB5Mxx)
+-  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
+-#else
+-  #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
++#ifndef CFG_BLE_LS_SOURCE
++  #if defined(STM32WB5Mxx)
++    #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_MOD5MM_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
++  #else
++    #define CFG_BLE_LS_SOURCE  (SHCI_C2_BLE_INIT_CFG_BLE_LS_NOCALIB | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE)
++  #endif
+ #endif
+ 
+ /**
+  * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
+  */
+-#define CFG_BLE_HSE_STARTUP_TIME  0x148
++#ifndef CFG_BLE_HSE_STARTUP_TIME
++  #define CFG_BLE_HSE_STARTUP_TIME  0x148
++#endif
+ 
+ /**
+  * Maximum duration of the connection event when the device is in Peripheral mode in units of 625/256 us (~2.44 us)
+  */
+-#define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
++#ifndef CFG_BLE_MAX_CONN_EVENT_LENGTH
++  #define CFG_BLE_MAX_CONN_EVENT_LENGTH  (0xFFFFFFFF)
++#endif
+ 
+ /**
+  * Viterbi Mode
+-- 
+2.34.1
+

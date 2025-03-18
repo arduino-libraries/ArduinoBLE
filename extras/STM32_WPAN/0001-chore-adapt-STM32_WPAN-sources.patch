@@ -1,0 +1,310 @@
+From 7f99c89e8a6f834daf4a76bf98307e9ebcd01c91 Mon Sep 17 00:00:00 2001
+From: Frederic Pillon <frederic.pillon@st.com>
+Date: Wed, 10 Jan 2024 18:16:01 +0100
+Subject: [PATCH 1/4] chore: adapt STM32_WPAN sources
+
+Signed-off-by: Frederic Pillon <frederic.pillon@st.com>
+---
+ src/utility/STM32_WPAN/app_conf_default.h | 49 +++++++++++++++++++----
+ src/utility/STM32_WPAN/hw.h               | 13 +++++-
+ src/utility/STM32_WPAN/hw_ipcc.c          |  4 +-
+ src/utility/STM32_WPAN/shci.c             |  2 +
+ src/utility/STM32_WPAN/shci_tl.c          | 17 ++++++++
+ src/utility/STM32_WPAN/stm_list.c         |  6 ++-
+ src/utility/STM32_WPAN/tl_mbox.c          |  6 +++
+ 7 files changed, 85 insertions(+), 12 deletions(-)
+
+diff --git a/src/utility/STM32_WPAN/app_conf_default.h b/src/utility/STM32_WPAN/app_conf_default.h
+index 71fc107..bf2274a 100644
+--- a/src/utility/STM32_WPAN/app_conf_default.h
++++ b/src/utility/STM32_WPAN/app_conf_default.h
+@@ -1,9 +1,9 @@
+ /* USER CODE BEGIN Header */
+ /**
+   ******************************************************************************
+-  * @file    app_conf.h
++  * @file    app_conf_default.h
+   * @author  MCD Application Team
+-  * @brief   Application configuration file for STM32WPAN Middleware.
++  * @brief   Default application configuration file for STM32WPAN Middleware.
+   ******************************************************************************
+   * @attention
+   *
+@@ -19,18 +19,40 @@
+ /* USER CODE END Header */
+ 
+ /* Define to prevent recursive inclusion -------------------------------------*/
+-#ifndef APP_CONF_H
+-#define APP_CONF_H
++#ifndef APP_CONF_DEFAULT_H
++#define APP_CONF_DEFAULT_H
+ 
++#if 0
+ #include "hw.h"
+ #include "hw_conf.h"
+ #include "hw_if.h"
+ #include "ble_bufsize.h"
++#endif
+ 
+ /******************************************************************************
+  * Application Config
+  ******************************************************************************/
+ 
++/**< generic parameters ******************************************************/
++/* HCI related defines */
++
++#define ACI_HAL_SET_TX_POWER_LEVEL 0xFC0F
++#define ACI_WRITE_CONFIG_DATA_OPCODE 0xFC0C
++#define ACI_READ_CONFIG_DATA_OPCODE 0xFC0D
++#define MAX_HCI_ACL_PACKET_SIZE (sizeof(TL_PacketHeader_t) + 5 + 251)
++#define HCI_RESET 0x0C03
++
++#ifndef BLE_SHARED_MEM_BYTE_ORDER
++  #define BLE_SHARED_MEM_BYTE_ORDER  MSBFIRST
++#endif
++#define BLE_MODULE_SHARED_MEM_BUFFER_SIZE 128
++
++/**
++ * Define Tx Power
++ */
++#define CFG_TX_POWER                      (0x18) /* -0.15dBm */
++
++#if 0
+ /**
+  * Define Secure Connections Support
+  */
+@@ -104,6 +126,7 @@
+ #define CFG_FW_SUBVERSION         (1)
+ #define CFG_FW_BRANCH             (0)
+ #define CFG_FW_BUILD              (0)
++#endif
+ 
+ /******************************************************************************
+  * BLE Stack
+@@ -250,7 +273,7 @@
+  *          0: LE Power Class 2-3
+  * other bits: complete with Options_extension flag
+  */
+-#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
++#define CFG_BLE_OPTIONS  (SHCI_C2_BLE_INIT_OPTIONS_LL_ONLY | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
+ 
+ /**
+  * BLE stack Options_extension flags to be configured with:
+@@ -292,7 +315,11 @@
+  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
+  */
+ 
+-#define CFG_BLE_MAX_ADV_SET_NBR     (8)
++#if defined(STM32WB15xx)
++  #define CFG_BLE_MAX_ADV_SET_NBR     (3)
++#else
++  #define CFG_BLE_MAX_ADV_SET_NBR     (8)
++#endif
+ 
+  /* Maximum advertising data length (in bytes)
+  * Range: 31 .. 1650 with limitation:
+@@ -301,7 +328,11 @@
+  * This parameter is considered by the CPU2 when CFG_BLE_OPTIONS has SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV flag set
+  */
+ 
+-#define CFG_BLE_MAX_ADV_DATA_LEN    (207)
++#if defined(STM32WB15xx)
++  #define CFG_BLE_MAX_ADV_DATA_LEN    (414)
++#else
++  #define CFG_BLE_MAX_ADV_DATA_LEN    (207)
++#endif
+ 
+  /* RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+   * Range: -1280 .. 1280
+@@ -324,6 +355,7 @@
+ 
+ #define CFG_BLE_CORE_VERSION   (SHCI_C2_BLE_INIT_BLE_CORE_5_4)
+ 
++#if 0
+ /******************************************************************************
+  * Transport Layer
+  ******************************************************************************/
+@@ -660,4 +692,5 @@ typedef enum
+ 
+ #define CFG_OTP_END_ADRESS      OTP_AREA_END_ADDR
+ 
+-#endif /*APP_CONF_H */
++#endif
++#endif /*APP_CONF_DEFAULT_H */
+diff --git a/src/utility/STM32_WPAN/hw.h b/src/utility/STM32_WPAN/hw.h
+index 651e1f1..1472a5e 100644
+--- a/src/utility/STM32_WPAN/hw.h
++++ b/src/utility/STM32_WPAN/hw.h
+@@ -26,14 +26,23 @@ extern "C" {
+ #endif
+ 
+   /* Includes ------------------------------------------------------------------*/
++#include "stm32_def.h"
++#include "stm32wbxx_ll_bus.h"
++#include "stm32wbxx_ll_exti.h"
++#include "stm32wbxx_ll_system.h"
++#include "stm32wbxx_ll_rcc.h"
++#include "stm32wbxx_ll_ipcc.h"
++#include "stm32wbxx_ll_cortex.h"
++#include "stm32wbxx_ll_utils.h"
++#include "stm32wbxx_ll_pwr.h"
+ 
+   /******************************************************************************
+    * HW IPCC
+    ******************************************************************************/
+   void HW_IPCC_Enable( void );
+   void HW_IPCC_Init( void );
+-  void HW_IPCC_Rx_Handler( void );
+-  void HW_IPCC_Tx_Handler( void );
++#define HW_IPCC_Rx_Handler IPCC_C1_RX_IRQHandler
++#define HW_IPCC_Tx_Handler IPCC_C1_TX_IRQHandler
+ 
+   void HW_IPCC_BLE_Init( void );
+   void HW_IPCC_BLE_SendCmd( void );
+diff --git a/src/utility/STM32_WPAN/hw_ipcc.c b/src/utility/STM32_WPAN/hw_ipcc.c
+index 6a311b1..ad3c9d4 100644
+--- a/src/utility/STM32_WPAN/hw_ipcc.c
++++ b/src/utility/STM32_WPAN/hw_ipcc.c
+@@ -18,8 +18,9 @@
+   */
+ /* USER CODE END Header */
+ 
++#if defined(STM32WBxx)
+ /* Includes ------------------------------------------------------------------*/
+-#include "app_common.h"
++#include "hw.h"
+ #include "mbox_def.h"
+ #include "utilities_conf.h"
+ 
+@@ -745,3 +746,4 @@ static void HW_IPCC_TRACES_EvtHandler( void )
+ }
+ 
+ __weak void HW_IPCC_TRACES_EvtNot( void ){};
++#endif /* STM32WBxx */
+diff --git a/src/utility/STM32_WPAN/shci.c b/src/utility/STM32_WPAN/shci.c
+index 5c32555..40110f4 100644
+--- a/src/utility/STM32_WPAN/shci.c
++++ b/src/utility/STM32_WPAN/shci.c
+@@ -17,6 +17,7 @@
+  */
+ 
+ 
++#if defined(STM32WBxx)
+ /* Includes ------------------------------------------------------------------*/
+ #include "stm32_wpan_common.h"
+ 
+@@ -759,3 +760,4 @@ SHCI_CmdStatus_t SHCI_GetWirelessFwInfo( WirelessFwInfo_t* pWirelessInfo )
+ 
+   return (SHCI_Success);
+ }
++#endif /* STM32WBxx */
+diff --git a/src/utility/STM32_WPAN/shci_tl.c b/src/utility/STM32_WPAN/shci_tl.c
+index 0f60430..daa988c 100644
+--- a/src/utility/STM32_WPAN/shci_tl.c
++++ b/src/utility/STM32_WPAN/shci_tl.c
+@@ -17,11 +17,13 @@
+  */
+ 
+ 
++#if defined(STM32WBxx)
+ /* Includes ------------------------------------------------------------------*/
+ #include "stm32_wpan_common.h"
+ 
+ #include "stm_list.h"
+ #include "shci_tl.h"
++#include "stm32_def.h"
+ 
+ /* Private typedef -----------------------------------------------------------*/
+ typedef enum
+@@ -168,6 +170,20 @@ void shci_send( uint16_t cmd_code, uint8_t len_cmd_payload, uint8_t * p_cmd_payl
+   return;
+ }
+ 
++void shci_notify_asynch_evt(void *pdata)
++{
++  UNUSED(pdata);
++  /* Need to parse data in future version */
++  shci_user_evt_proc();
++}
++
++void shci_register_io_bus(tSHciIO *fops)
++{
++  /* Register IO bus services */
++  fops->Init    = TL_SYS_Init;
++  fops->Send    = TL_SYS_SendCmd;
++}
++
+ /* Private functions ---------------------------------------------------------*/
+ static void TlInit( TL_CmdPacket_t * p_cmdbuffer )
+ {
+@@ -250,3 +266,4 @@ __WEAK void shci_cmd_resp_release(uint32_t flag)
+ 
+   return;
+ }
++#endif /* STM32WBxx */
+diff --git a/src/utility/STM32_WPAN/stm_list.c b/src/utility/STM32_WPAN/stm_list.c
+index 4c92864..df6c215 100644
+--- a/src/utility/STM32_WPAN/stm_list.c
++++ b/src/utility/STM32_WPAN/stm_list.c
+@@ -17,10 +17,13 @@
+   */
+ 
+ 
++#if defined(STM32WBxx)
+ /******************************************************************************
+  * Include Files
+  ******************************************************************************/
+-#include "utilities_common.h"
++#include "stdint.h"
++#include "cmsis_gcc.h"
++#include "stm32_wpan_common.h"
+ 
+ #include "stm_list.h"
+ 
+@@ -204,3 +207,4 @@ void LST_get_prev_node (tListNode * ref_node, tListNode ** node)
+ 
+   __set_PRIMASK(primask_bit);      /**< Restore PRIMASK bit*/
+ }
++#endif /* STM32WBxx */
+diff --git a/src/utility/STM32_WPAN/tl_mbox.c b/src/utility/STM32_WPAN/tl_mbox.c
+index df07a19..9a2a297 100644
+--- a/src/utility/STM32_WPAN/tl_mbox.c
++++ b/src/utility/STM32_WPAN/tl_mbox.c
+@@ -16,6 +16,7 @@
+  ******************************************************************************
+  */
+ 
++#if defined(STM32WBxx)
+ /* Includes ------------------------------------------------------------------*/
+ #include "stm32_wpan_common.h"
+ #include "hw.h"
+@@ -51,8 +52,10 @@ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_BleLldTable_t TL_BleLldTable;
+ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_SysTable_t TL_SysTable;
+ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_MemManagerTable_t TL_MemManagerTable;
+ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_TracesTable_t TL_TracesTable;
++#if 0
+ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_Mac_802_15_4_t TL_Mac_802_15_4_Table;
+ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_ZigbeeTable_t TL_Zigbee_Table;
++#endif
+ 
+ /**< tables */
+ PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static tListNode  FreeBufQueue;
+@@ -97,8 +100,10 @@ void TL_Init( void )
+   TL_RefTable.p_sys_table = &TL_SysTable;
+   TL_RefTable.p_mem_manager_table = &TL_MemManagerTable;
+   TL_RefTable.p_traces_table = &TL_TracesTable;
++#if 0
+   TL_RefTable.p_mac_802_15_4_table = &TL_Mac_802_15_4_Table;
+   TL_RefTable.p_zigbee_table = &TL_Zigbee_Table;
++#endif
+   HW_IPCC_Init();
+ 
+   return;
+@@ -847,3 +852,4 @@ static void OutputDbgTrace(TL_MB_PacketType_t packet_type, uint8_t* buffer)
+ 
+   return;
+ }
++#endif /* STM32WBxx */
+-- 
+2.34.1
+
