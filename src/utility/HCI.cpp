@@ -820,7 +820,10 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
     ATT.removeConnection(disconnComplete->handle, disconnComplete->reason);
     L2CAPSignaling.removeConnection(disconnComplete->handle, disconnComplete->reason);
 
-    HCI.leSetAdvertiseEnable(0x01);
+    if (GAP.advertising())
+    {
+      HCI.leSetAdvertiseEnable(0x01);
+    }
   }
   else if (eventHdr->evt == EVT_ENCRYPTION_CHANGE)
   {
