@@ -1728,8 +1728,8 @@ bool ATTClass::discoverDescriptors(uint16_t connectionHandle, BLERemoteDevice* d
         }
 
         if (responseBuffer[0] == ATT_OP_FIND_INFO_RESP) {
-          uint16_t lengthPerDescriptor = responseBuffer[1] * 4;
-          uint8_t uuidLen = 2;
+          uint8_t uuidLen = responseBuffer[1] == 1 ? 2 : 16;
+          uint16_t lengthPerDescriptor = uuidLen + 2;
 
           for (int i = 2; i < respLength; i += lengthPerDescriptor) {
             struct __attribute__ ((packed)) RawDescriptor {
