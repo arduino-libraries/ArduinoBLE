@@ -232,9 +232,9 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     Serial.print("V      : ");
     btct.printBytes(V,32);
     Serial.print("X      : ");
-    btct.printBytes(X,16);
+    btct.printBytes(HCI.Na,16);
     Serial.print("Y      : ");
-    btct.printBytes(Y,16);
+    btct.printBytes(HCI.Nb,16);
     Serial.print("g2res  : ");
     btct.printBytes(g2Result,4);
     Serial.print("Result : ");
