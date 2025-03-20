@@ -17,18 +17,27 @@
 #include <STM32duinoBLE.h>
 
 // variables for button
-const int buttonPin = 2;
+#ifdef USER_BTN
+const int buttonPin = USER_BTN; // set buttonPin to on-board button
+#else
+const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
+#endif
 int oldButtonState = LOW;
+int initialButtonState = LOW;
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
 
   // configure the button pin as input
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
 
   // initialize the Bluetooth® Low Energy hardware
   BLE.begin();
+
+  // Get initial button state
+  initialButtonState = digitalRead(buttonPin);
+  oldButtonState = initialButtonState;
 
   Serial.println("Bluetooth® Low Energy Central - LED control");
 
@@ -108,7 +117,7 @@ void controlLed(BLEDevice peripheral) {
       // button changed
       oldButtonState = buttonState;
 
-      if (buttonState) {
+      if (buttonState != initialButtonState) {
         Serial.println("button pressed");
 
         // button is pressed, write 0x01 to turn the LED on

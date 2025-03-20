@@ -18,7 +18,11 @@
 #include <STM32duinoBLE.h>
 
 const int ledPin = LED_BUILTIN; // set ledPin to on-board LED
-const int buttonPin = 4; // set buttonPin to digital pin 4
+#ifdef USER_BTN
+const int buttonPin = USER_BTN; // set buttonPin to on-board button
+#else
+const int buttonPin = PC13; // set buttonPin to digital pin PC13 */
+#endif
 
 BLEService ledService("19B10010-E8F2-537E-4F6C-D104768A1214"); // create service
 
@@ -32,7 +36,7 @@ void setup() {
   while (!Serial);
 
   pinMode(ledPin, OUTPUT); // use the LED as an output
-  pinMode(buttonPin, INPUT); // use button pin as an input
+  pinMode(buttonPin, INPUT_PULLUP); // use button pin as an input
 
   // begin initialization
   if (!BLE.begin()) {
