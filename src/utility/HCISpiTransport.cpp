@@ -17,11 +17,8 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#if !defined(STM32WBxx) || defined(USE_BLE_SPI)
 #include "HCISpiTransport.h"
-
-#if __has_include("ble_spi_conf.h")
-  #include "ble_spi_conf.h"
-#endif
 
 #if defined(CUSTOM_BLE_SPI)
 SPIClass SpiHCI(BLE_SPI_MOSI, BLE_SPI_MISO, BLE_SPI_CLK);
@@ -1400,3 +1397,4 @@ void HCISpiTransportClass::wait_for_set_address()
 }
 
 HCITransportInterface& HCITransport = HCISpiTransport;
+#endif // !STM32WBxx || USE_BLE_SPI

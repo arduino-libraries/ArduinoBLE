@@ -24,6 +24,8 @@ jobs:
           - STMicroelectronics:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen
           - STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_L476RG
           - STMicroelectronics:stm32:Disco:pnum=B_L475E_IOT01A
+          - STMicroelectronics:stm32:Nucleo_64:pnum=P_NUCLEO_WB55RG
+          - STMicroelectronics:stm32:Nucleo_64:pnum=P_NUCLEO_WB55_USB_DONGLE
 
     steps:
       - uses: actions/checkout@v4

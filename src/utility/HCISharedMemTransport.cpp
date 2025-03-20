@@ -16,7 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#if defined(STM32WBxx)
+#if defined(STM32WBxx) && !defined(USE_BLE_SPI)
 
 #include "HCISharedMemTransport.h"
 #include "STM32_WPAN/hw.h"
@@ -779,4 +779,4 @@ int HCISharedMemTransportClass::bt_ipm_set_power(void)
 }
 
 HCITransportInterface& HCITransport = HCISharedMemTransport;
-#endif /* STM32WBxx */
+#endif /* STM32WBxx && !USE_BLE_SPI */

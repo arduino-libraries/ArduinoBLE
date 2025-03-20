@@ -22,6 +22,10 @@
 
 #include <Arduino.h>
 
+#if __has_include("ble_spi_conf.h")
+  #include "ble_spi_conf.h"
+#endif
+
 class HCITransportInterface {
 public:
   virtual int begin() = 0;

@@ -23,3 +23,10 @@ jobs:
 
       - name: Spell check
         uses: codespell-project/actions-codespell@v2
+        with:
+          check_filenames: true
+          check_hidden: true
+          # In the event of a false positive, add the word in all lower case to this file:
+          # ignore_words_file: ./extras/codespell-ignore-words-list.txt
+          skip: src/utility/STM32_WPAN
+          path: src
