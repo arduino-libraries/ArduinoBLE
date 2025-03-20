@@ -58,7 +58,7 @@ int HCIVirtualTransportZephyrClass::available()
   }
 
   static struct net_buf *buf;
-	buf = net_buf_get(__rx_queue, K_MSEC(10));
+	buf = (struct net_buf*)k_fifo_get(__rx_queue, K_MSEC(10));
   if (!buf) {
     return 0;
   }

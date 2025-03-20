@@ -28,7 +28,7 @@ void set_public_address(struct k_fifo *rx_queue)
 	err = bt_send(buf);
 	__ASSERT_NO_MSG(err == 0);
 	/* Pull out the command complete. */
-	buf = net_buf_get(rx_queue, K_SECONDS(10)); /* 10s == HCI_CMD_TIMEOUT */
+	buf = (struct net_buf*)k_fifo_get(rx_queue, K_SECONDS(10)); /* 10s == HCI_CMD_TIMEOUT */
 	struct bt_hci_evt_hdr *hdr;
 	__ASSERT_NO_MSG(buf != NULL);
 	__ASSERT_NO_MSG(buf->len >= sizeof(*hdr));
