@@ -42,7 +42,16 @@ void setup() {
   Serial.println("Bluetooth® Low Energy Central - LED control");
 
   // start scanning for peripherals
-  BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1214");
+  int ret = 1;
+  do
+  {
+    ret = BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1214");
+    if (ret == 0)
+    {
+      BLE.end();
+      BLE.begin();
+    }
+  } while(ret == 0);
 }
 
 void loop() {
@@ -64,12 +73,30 @@ void loop() {
     }
 
     // stop scanning
-    BLE.stopScan();
+    int ret = 1;
+    do
+    {
+      ret = BLE.stopScan();
+      if (ret == 0)
+      {
+        BLE.end();
+        BLE.begin();
+      }
+    } while(ret == 0);
 
     controlLed(peripheral);
 
     // peripheral disconnected, start scanning again
-    BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1214");
+    ret = 1;
+    do
+    {
+      ret = BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1214");
+      if (ret == 0)
+      {
+        BLE.end();
+        BLE.begin();
+      }
+    } while(ret == 0);
   }
 }
 

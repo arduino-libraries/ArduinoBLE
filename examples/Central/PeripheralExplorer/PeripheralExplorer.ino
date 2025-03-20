@@ -29,7 +29,16 @@ void setup() {
   Serial.println("Bluetooth® Low Energy Central - Peripheral Explorer");
 
   // start scanning for peripherals
-  BLE.scan();
+  int ret = 1;
+  do
+  {
+    ret = BLE.scan();
+    if (ret == 0)
+    {
+      BLE.end();
+      BLE.begin();
+    }
+  } while(ret == 0);
 }
 
 void loop() {
@@ -49,7 +58,16 @@ void loop() {
     // see if peripheral is a LED
     if (peripheral.localName() == "LED") {
       // stop scanning
-      BLE.stopScan();
+      int ret = 1;
+      do
+      {
+        ret = BLE.stopScan();
+        if (ret == 0)
+        {
+          BLE.end();
+          BLE.begin();
+        }
+      } while(ret == 0);
 
       explorerPeripheral(peripheral);
 

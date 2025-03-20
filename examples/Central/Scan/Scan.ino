@@ -25,8 +25,17 @@ void setup() {
 
   Serial.println("Bluetooth® Low Energy Central scan");
 
-  // start scanning for peripheral
-  BLE.scan();
+  // start scanning for peripherals
+  int ret = 1;
+  do
+  {
+    ret = BLE.scan();
+    if (ret == 0)
+    {
+      BLE.end();
+      BLE.begin();
+    }
+  } while(ret == 0);
 }
 
 void loop() {

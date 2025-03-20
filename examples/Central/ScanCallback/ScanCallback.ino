@@ -31,7 +31,16 @@ void setup() {
   BLE.setEventHandler(BLEDiscovered, bleCentralDiscoverHandler);
 
   // start scanning for peripherals with duplicates
-  BLE.scan(true);
+  int ret = 1;
+  do
+  {
+    ret = BLE.scan(true);
+    if (ret == 0)
+    {
+      BLE.end();
+      BLE.begin();
+    }
+  } while(ret == 0);
 }
 
 void loop() {

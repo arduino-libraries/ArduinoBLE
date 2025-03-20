@@ -30,8 +30,17 @@ void setup() {
   Serial.println("Bluetooth® Low Energy Central - SensorTag button");
   Serial.println("Make sure to turn on the device.");
 
-  // start scanning for peripheral
-  BLE.scan();
+  // start scanning for peripherals
+  int ret = 1;
+  do
+  {
+    ret = BLE.scan();
+    if (ret == 0)
+    {
+      BLE.end();
+      BLE.begin();
+    }
+  } while(ret == 0);
 }
 
 void loop() {
@@ -52,12 +61,30 @@ void loop() {
     // "CC2650 SensorTag"
     if (peripheral.localName() == "CC2650 SensorTag") {
       // stop scanning
-      BLE.stopScan();
+      int ret = 1;
+      do
+      {
+        ret = BLE.stopScan();
+        if (ret == 0)
+        {
+          BLE.end();
+          BLE.begin();
+        }
+      } while(ret == 0);
 
       monitorSensorTagButtons(peripheral);
 
       // peripheral disconnected, start scanning again
-      BLE.scan();
+      ret = 1;
+      do
+      {
+        ret = BLE.scan();
+        if (ret == 0)
+        {
+          BLE.end();
+          BLE.begin();
+         }
+      } while(ret == 0);
     }
   }
 }
