@@ -83,7 +83,9 @@ public:
 
   virtual BLEDevice central();
 
+  virtual bool handleNotify(uint16_t handle, const uint8_t* value, int length);
   virtual bool handleNotify(uint16_t handle, const uint8_t* value, uint16_t *length);
+  virtual bool handleInd(uint16_t handle, const uint8_t* value, int length);
   virtual bool handleInd(uint16_t handle, const uint8_t* value, uint16_t *length);
 
   virtual void setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler eventHandler);

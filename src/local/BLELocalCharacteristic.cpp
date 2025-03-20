@@ -119,9 +119,9 @@ int BLELocalCharacteristic::writeValue(const uint8_t value[], int length)
   }
 
   if ((_properties & BLEIndicate) && (_cccdValue & 0x0002)) {
-    return ATT.handleInd(valueHandle(), _value,&_valueLength);
+    return ATT.handleInd(valueHandle(), _value, _valueLength);
   } else if ((_properties & BLENotify) && (_cccdValue & 0x0001)) {
-    return ATT.handleNotify(valueHandle(), _value, &_valueLength);
+    return ATT.handleNotify(valueHandle(), _value, _valueLength);
   }
 
   if (_broadcast) {
@@ -169,7 +169,7 @@ int BLELocalCharacteristic::write(const uint8_t value[], int length)
     uint16_t serviceUuid = GATT.serviceUuidForCharacteristic(this);
 
     BLE.setAdvertisedServiceData(serviceUuid, value, length);
-  
+
     if (!ATT.connected() && GAP.advertising()) {
       BLE.advertise();
     }
