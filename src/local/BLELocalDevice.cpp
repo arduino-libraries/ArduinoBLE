@@ -174,7 +174,7 @@ int BLELocalDevice::begin()
     end();
     return 0;
   }
-  if (HCI.setLeEventMask(0x00000000000003FF) != 0) {
+  if (HCI.setLeEventMask(0x00000000000003B3) != 0) {
     end();
     return 0;
   }
