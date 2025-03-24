@@ -413,7 +413,7 @@ void L2CAPSignalingClass::smCalculateLTKandConfirm(uint16_t handle, uint8_t expe
     // Send our confirmation value to complete authentication stage 2
     uint8_t ret[17];
     ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
-    for(uint i=0; i<sizeof(Eb); i++){
+    for(uint32_t i=0; i<sizeof(Eb); i++){
       ret[sizeof(Eb)-i] = Eb[i];
     }
     HCI.sendAclPkt(handle, SECURITY_CID, sizeof(ret), ret );
