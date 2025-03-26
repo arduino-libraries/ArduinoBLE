@@ -82,6 +82,7 @@ String metaEventToString(LE_META_EVENT event)
     case LONG_TERM_KEY_REQUEST: return F("LE_LONG_TERM_KEY_REQUEST");
     case READ_LOCAL_P256_COMPLETE: return F("READ_LOCAL_P256_COMPLETE");
     case GENERATE_DH_KEY_COMPLETE: return F("GENERATE_DH_KEY_COMPLETE");
+    case ENHANCED_CONN_COMPLETE: return F("ENHANCED_CONN_COMPLETE");
     default: return "event unknown";
   }
 }
@@ -987,7 +988,7 @@ void HCIClass::handleEventPkt(uint8_t /*plen*/, uint8_t pdata[])
     Serial.println(leMetaHeader->subevent,HEX);
 #endif
     switch((LE_META_EVENT)leMetaHeader->subevent){
-      case 0x0A:{
+      case ENHANCED_CONN_COMPLETE:{
         struct __attribute__ ((packed)) EvtLeConnectionComplete {
           uint8_t status;
           uint16_t handle;
