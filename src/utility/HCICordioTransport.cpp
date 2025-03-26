@@ -55,6 +55,7 @@
 #include "CordioHCICustomDriver.h"
 
 extern BLE_NAMESPACE::CordioHCIDriver& ble_cordio_get_hci_driver();
+extern "C" void hciTrSerialRxIncoming(uint8_t *pBuf, uint8_t len);
 
 namespace BLE_NAMESPACE {
   struct CordioHCIHook {
@@ -236,6 +237,13 @@ void HCICordioTransportClass::end()
     delete bleLoopThread;
     bleLoopThread = NULL;
   }
+  // Reset the callback with the mbed-os default handler to properly handle the following CYW43xxx chip initializations and begins
+  CordioHCIHook::setDataReceivedHandler(hciTrSerialRxIncoming);
+
+#if (defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)) && !defined(CUSTOM_HCI_DRIVER)
+  BLE &ble = BLE::Instance();
+  ble.shutdown();
+#endif
 
 #if !defined(TARGET_STM32H7)
   CordioHCIHook::getDriver().terminate();
