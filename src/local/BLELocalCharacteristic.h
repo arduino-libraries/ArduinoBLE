@@ -49,6 +49,8 @@ public:
 
   int writeValue(const uint8_t value[], int length);
   int writeValue(const char* value);
+  int write(const uint8_t value[], int length);
+  int write(const char* value);
 
   int broadcast();
 
