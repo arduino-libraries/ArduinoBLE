@@ -10,17 +10,18 @@
 
 #if defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_NANO_33_IOT) || defined(TARGET_NANO_RP2040_CONNECT)
 #include "HCINinaSpiTransport.h"
-#include <WiFiNINA.h>
+#include "spi_drv.h"
+#include "ble_drv.h"
 
 int HCINinaSpiTransportClass::begin()
 {
-  WiFiDrv::wifiDriverInit();
-  return WiFiDrv::bleBegin();
+  SpiDrv::begin();
+  return BleDrv::bleBegin();
 }
 
 void HCINinaSpiTransportClass::end()
 {
-  WiFiDrv::bleEnd();
+  BleDrv::bleEnd();
 }
 
 void HCINinaSpiTransportClass::wait(unsigned long timeout)
@@ -34,13 +35,13 @@ void HCINinaSpiTransportClass::wait(unsigned long timeout)
 
 int HCINinaSpiTransportClass::available()
 {
-  return WiFiDrv::bleAvailable();
+  return BleDrv::bleAvailable();
 }
 
 int HCINinaSpiTransportClass::peek()
 {
   int res=-1;
-  WiFiDrv::blePeek((uint8_t*)&res, 1); // read a single byte, if nothing is returned we return -1
+  BleDrv::blePeek((uint8_t*)&res, 1); // read a single byte, if nothing is returned we return -1
 
   return res;
 }
@@ -48,14 +49,14 @@ int HCINinaSpiTransportClass::peek()
 int HCINinaSpiTransportClass::read()
 {
   int res=-1;
-  WiFiDrv::bleRead((uint8_t*)&res, 1); // read a single byte, if nothing is returned we return -1
+  BleDrv::bleRead((uint8_t*)&res, 1); // read a single byte, if nothing is returned we return -1
 
   return res;
 }
 
 size_t HCINinaSpiTransportClass::write(const uint8_t* data, size_t length)
 {
-  return WiFiDrv::bleWrite(data, length);
+  return BleDrv::bleWrite(data, length);
 }
 
 HCINinaSpiTransportClass HCINinaSpiTransport;
