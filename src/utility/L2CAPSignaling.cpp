@@ -122,6 +122,8 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
 #ifdef _BLE_TRACE_
   Serial.print("dlen: ");
   Serial.println(dlen);
+#else
+  (void)dlen;
 #endif
   uint8_t code = l2capSignalingHdr->code;
 
@@ -310,8 +312,8 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
       uint8_t x[32];
       uint8_t y[32];
     } generateDHKeyCommand = {
-      0x00,
-      0x00,
+      {0x00},
+      {0x00},
     };
     memcpy(generateDHKeyCommand.x,connectionPairingPublicKey->x,32);
     memcpy(generateDHKeyCommand.y,connectionPairingPublicKey->y,32);

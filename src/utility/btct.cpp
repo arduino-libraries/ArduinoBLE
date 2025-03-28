@@ -71,7 +71,7 @@ int BluetoothCryptoToolbox::f5(uint8_t DHKey[],uint8_t N_master[], uint8_t N_sla
         uint8_t A1[7];
         uint8_t A2[7];
         uint8_t length[2];
-    } cmacInput = {0,0,0,0,0,0,0};
+    } cmacInput = {0,{0},{0},{0},{0},{0},{0}};
     cmacInput.counter = 0;
     memcpy(cmacInput.keyID, keyID, 4);
     memcpy(cmacInput.N1,N_master,16);
@@ -97,7 +97,7 @@ int BluetoothCryptoToolbox::f6(uint8_t W[], uint8_t N1[],uint8_t N2[],uint8_t R[
         uint8_t IOCap[3];
         uint8_t A1[7];
         uint8_t A2[7];
-    } f6Input = {0,0,0,0,0,0};
+    } f6Input = {{0},{0},{0},{0},{0},{0}};
 
     memcpy(f6Input.N1, N1, 16);
     memcpy(f6Input.N2, N2, 16);
@@ -145,7 +145,7 @@ int BluetoothCryptoToolbox::g2(uint8_t U[], uint8_t V[], uint8_t X[], uint8_t Y[
         uint8_t U[32];
         uint8_t V[32];
         uint8_t Y[16];
-    } cmacInput= {0,0,0};
+    } cmacInput= {{0},{0},{0}};
     memcpy(cmacInput.U,U,32);
     memcpy(cmacInput.V,V,32);
     memcpy(cmacInput.Y,Y,16);
