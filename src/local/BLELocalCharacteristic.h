@@ -42,6 +42,7 @@ public:
   uint8_t properties() const;
   uint8_t permissions() const;
 
+  bool setValueSize(uint16_t valueSize);
   int valueSize() const;
   const uint8_t* value() const;
   int valueLength() const;
