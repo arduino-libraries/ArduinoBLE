@@ -132,7 +132,7 @@ int BLELocalCharacteristic::writeValue(const uint8_t value[], int length)
     }
   }
 
-  return 1;
+  return _valueLength;
 }
 
 int BLELocalCharacteristic::writeValue(const char* value)
