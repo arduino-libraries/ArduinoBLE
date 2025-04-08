@@ -68,6 +68,7 @@ public:
   int manufacturerData(uint8_t value[], int length) const;
 
   virtual int rssi();
+  virtual uint16_t getMTU() const;
 
   bool connect();
   bool discoverAttributes();

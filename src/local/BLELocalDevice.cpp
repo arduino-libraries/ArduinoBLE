@@ -283,6 +283,17 @@ int BLELocalDevice::rssi()
   return 127;
 }
 
+uint16_t BLELocalDevice::getMTU()
+{
+  BLEDevice central = ATT.central();
+
+  if (central) {
+    return central.getMTU();
+  }
+
+  return -1;
+}
+
 bool BLELocalDevice::setAdvertisedServiceUuid(const char* advertisedServiceUuid)
 {
   return _advertisingData.setAdvertisedServiceUuid(advertisedServiceUuid);
