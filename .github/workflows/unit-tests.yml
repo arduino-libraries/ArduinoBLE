@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - uses: arduino/cpp-test-action@main
         with:
@@ -36,10 +36,23 @@ jobs:
             - '/usr/*'
           coverage-data-path: ${{ env.COVERAGE_DATA_PATH }}
 
+      # A token is used to avoid intermittent spurious job failures caused by rate limiting.
+      - name: Set up Codecov upload token
+        run: |
+          if [[ "${{ github.repository }}" == "arduino-libraries/ArduinoBLE" ]]; then
+            # In order to avoid uploads of data from forks, only use the token for runs in the parent repo.
+            # Token is intentionally exposed.
+            # See: https://community.codecov.com/t/upload-issues-unable-to-locate-build-via-github-actions-api/3954
+            CODECOV_TOKEN="8118de48-b2af-48b4-a66a-26026847bfc5"
+          else
+            # codecov/codecov-action does unauthenticated upload if empty string is passed via the `token` input.
+            CODECOV_TOKEN=""
+          fi
+          echo "CODECOV_TOKEN=$CODECOV_TOKEN" >> "$GITHUB_ENV"
+
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           file: "${{ env.COVERAGE_DATA_PATH }}"
           fail_ci_if_error: true
-
-          
+          token: ${{ env.CODECOV_TOKEN }}
