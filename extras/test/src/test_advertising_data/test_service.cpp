@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #define private public
 #define protected public

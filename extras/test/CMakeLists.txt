@@ -1,11 +1,21 @@
 ##########################################################################
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 
 ##########################################################################
 
 project(testArduinoBLE)
+
+Include(FetchContent)
+
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.4.0
+)
+
+FetchContent_MakeAvailable(Catch2)
 
 ##########################################################################
 
@@ -35,6 +45,9 @@ set(DUT_SRCS
   ../../src/utility/HCI.cpp
   ../../src/utility/GATT.cpp
   ../../src/utility/L2CAPSignaling.cpp
+  ../../src/utility/keyDistribution.cpp
+  ../../src/utility/bitDescriptions.cpp
+  ../../src/utility/btct.cpp
   ../../src/local/BLELocalAttribute.cpp
   ../../src/local/BLELocalCharacteristic.cpp
   ../../src/local/BLELocalDescriptor.cpp
@@ -102,7 +115,6 @@ include_directories(../../src)
 include_directories(../../src/local)
 include_directories(../../src/remote)
 include_directories(../../src/utility)
-include_directories(external/catch/v2.12.1/include)
 
 target_include_directories(TEST_TARGET_DISC_DEVICE PUBLIC include/test_discovered_device)
 target_include_directories(TEST_TARGET_ADVERTISING_DATA PUBLIC include/test_advertising_data)
@@ -124,3 +136,7 @@ add_custom_command(TARGET TEST_TARGET_DISC_DEVICE POST_BUILD
 add_custom_command(TARGET TEST_TARGET_ADVERTISING_DATA POST_BUILD
   COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/TEST_TARGET_ADVERTISING_DATA
 )
+
+target_link_libraries( TEST_TARGET_UUID Catch2WithMain )
+target_link_libraries( TEST_TARGET_DISC_DEVICE Catch2WithMain )
+target_link_libraries( TEST_TARGET_ADVERTISING_DATA Catch2WithMain )
