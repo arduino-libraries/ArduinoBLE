@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #define private public
 #define protected public
@@ -35,8 +35,15 @@ TEST_CASE("Test local name setting", "[ArduinoBLE::BLEAdvertisingData]")
   {
     const char* name = "test";
     retVal = advData.setLocalName(name);
-    REQUIRE(retVal);
-    REQUIRE( (strlen(name) + 2) == (oldRemainingLength - advData.remainingLength()) );
+    THEN("Set local name should return true. The name parameter should be correctly set")
+    {
+      REQUIRE(retVal);
+    }
+
+    THEN("Check the exact number of bytes occupied by the name just set")
+    {
+      REQUIRE( (strlen(name) + 2) == (oldRemainingLength - advData.remainingLength()) );
+    }
     oldRemainingLength = advData.remainingLength();
 
     advData.updateData();
@@ -47,30 +54,36 @@ TEST_CASE("Test local name setting", "[ArduinoBLE::BLEAdvertisingData]")
   {
     const char* name = "way too long local name (len 32)";
     retVal = advData.setLocalName(name);
-    REQUIRE(!retVal);
-    REQUIRE( oldRemainingLength == advData.remainingLength() );
-    advData.updateData();
-    REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH - oldRemainingLength) );
+    THEN("Set local name should return false. The name parameter should not be set")
+    {
+      REQUIRE(!retVal);
+      REQUIRE( oldRemainingLength == advData.remainingLength() );
+      advData.updateData();
+      REQUIRE( advData.dataLength() == (MAX_AD_DATA_LENGTH - oldRemainingLength) );
+    }
   }
 
   WHEN("Overwrite local name with a name as long as max data length")
   {
     const char* name = "local name with full length  ";
     retVal = advData.setLocalName(name);
-    REQUIRE(retVal);
-    REQUIRE( (strlen(name) + 2) == (oldRemainingLength - advData.remainingLength()) );
-    oldRemainingLength = advData.remainingLength();
+    THEN("The name parameter should be correctly overwritten. The remaining length should be 0")
+    {
+      REQUIRE(retVal);
+      REQUIRE( (strlen(name) + 2) == (oldRemainingLength - advData.remainingLength()) );
+      oldRemainingLength = advData.remainingLength();
 
-    advData.updateData();
-    REQUIRE(advData.dataLength() == (strlen(name) + 2));
-    // advData should be full now
-    REQUIRE( 0 == advData.remainingLength() );
-    REQUIRE( 0 == advData.availableForWrite() );
+      advData.updateData();
+      REQUIRE(advData.dataLength() == (strlen(name) + 2));
+      // advData should be full now
+      REQUIRE( 0 == advData.remainingLength() );
+      REQUIRE( 0 == advData.availableForWrite() );
+    }
   }
 
   WHEN("Check consistency when setting the external advertising data")
   {
-    auto goldenData = advData.data();
+    const auto goldenData = advData.data();
     BLE.setAdvertisingData(advData);
     BLE.advertise();
     REQUIRE( 0 == memcmp(goldenData, BLE.getAdvertisingData().data(), advData.dataLength()) );
