@@ -38,6 +38,19 @@
 typedef arduino::String String;
 typedef bool boolean;
 
+#if defined(__cplusplus)
+
+#undef F
+// C++11 F replacement declaration
+template <typename T1>
+auto F(T1&& A)
+  -> const arduino::__FlashStringHelper*
+{
+  return (const arduino::__FlashStringHelper*)A;
+}
+
+#endif
+
 /******************************************************************************
    FUNCTION PROTOTYPES
  ******************************************************************************/
