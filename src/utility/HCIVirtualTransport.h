@@ -47,4 +47,6 @@ public:
   virtual int read();
 
   virtual size_t write(const uint8_t* data, size_t length);
+
+  virtual void setLPMode(bool status);
 };

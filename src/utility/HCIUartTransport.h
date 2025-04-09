@@ -38,6 +38,8 @@ public:
 
   virtual size_t write(const uint8_t* data, size_t length);
 
+  virtual void setLPMode(bool status);
+  
 private:
   HardwareSerial* _uart;
   unsigned long _baudrate;

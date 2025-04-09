@@ -42,6 +42,8 @@ public:
 
   virtual size_t write(const uint8_t* data, size_t length);
 
+  virtual void setLPMode(bool status);
+
 private:
   static void onDataReceived(uint8_t* data, uint8_t len);
   void handleRxData(uint8_t* data, uint8_t len);
