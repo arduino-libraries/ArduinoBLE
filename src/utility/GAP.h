@@ -34,9 +34,9 @@ public:
   virtual void stopAdvertise();
 
   virtual int scan(bool withDuplicates);
-  virtual int scanForName(String name, bool withDuplicates);
-  virtual int scanForUuid(String uuid, bool withDuplicates);
-  virtual int scanForAddress(String address, bool withDuplicates);
+  virtual int scanForName(const String& name, bool withDuplicates);
+  virtual int scanForUuid(const String& uuid, bool withDuplicates);
+  virtual int scanForAddress(const String& address, bool withDuplicates);
   virtual void stopScan();
   virtual BLEDevice available();
 

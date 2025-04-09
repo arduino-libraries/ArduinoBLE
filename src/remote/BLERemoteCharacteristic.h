@@ -46,7 +46,7 @@ public:
   bool updatedValueRead();
 
   bool read();
-  bool writeCccd(uint16_t value);
+  int writeCccd(uint16_t value);
 
   unsigned int descriptorCount() const;
   BLERemoteDescriptor* descriptor(unsigned int index) const;
@@ -61,7 +61,7 @@ protected:
 
   void addDescriptor(BLERemoteDescriptor* descriptor);
 
-  void writeValue(BLEDevice device, const uint8_t value[], int length);
+  void writeValue(const BLEDevice& device, const uint8_t value[], int length);
 
 private:
   uint16_t _connectionHandle;

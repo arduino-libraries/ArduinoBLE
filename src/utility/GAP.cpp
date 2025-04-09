@@ -84,7 +84,7 @@ void GAPClass::stopAdvertise()
 
 int GAPClass::scan(bool withDuplicates)
 {
-  HCI.leSetScanEnable(false, true);
+  HCI.leSetScanEnable(0x00, 0x01);
 
   // active scan, 20 ms scan interval (N * 0.625), 20 ms scan window (N * 0.625), public own address type, no filter
   /*
@@ -94,19 +94,19 @@ int GAPClass::scan(bool withDuplicates)
     - The scan window can only be less than or equal to the scan interval
   */
   if (HCI.leSetScanParameters(0x01, 0x0020, 0x0020, 0x00, 0x00) != 0) {
-    return false;
+    return 0;
   }
 
   _scanning = true;
 
-  if (HCI.leSetScanEnable(true, !withDuplicates) != 0) {
+  if (HCI.leSetScanEnable(0x01, withDuplicates ? 0x00 : 0x01) != 0) {
     return 0;
   }
 
   return 1;
 }
 
-int GAPClass::scanForName(String name, bool withDuplicates)
+int GAPClass::scanForName(const String& name, bool withDuplicates)
 {
   _scanNameFilter    = name;
   _scanUuidFilter    = "";
@@ -115,7 +115,7 @@ int GAPClass::scanForName(String name, bool withDuplicates)
   return scan(withDuplicates);
 }
 
-int GAPClass::scanForUuid(String uuid, bool withDuplicates)
+int GAPClass::scanForUuid(const String& uuid, bool withDuplicates)
 {
   _scanNameFilter    = "";
   _scanUuidFilter    = uuid;
@@ -124,7 +124,7 @@ int GAPClass::scanForUuid(String uuid, bool withDuplicates)
   return scan(withDuplicates);
 }
 
-int GAPClass::scanForAddress(String address, bool withDuplicates)
+int GAPClass::scanForAddress(const String& address, bool withDuplicates)
 {
   _scanNameFilter    = "";
   _scanUuidFilter    = "";
@@ -135,7 +135,7 @@ int GAPClass::scanForAddress(String address, bool withDuplicates)
 
 void GAPClass::stopScan()
 {
-  HCI.leSetScanEnable(false, false);
+  HCI.leSetScanEnable(0x00, 0x00);
 
   _scanning = false;
 
