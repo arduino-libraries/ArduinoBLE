@@ -27,6 +27,7 @@ unsigned char const_Rb[16] = {
 #define LEN_MAC_KEY 16
 
 void BluetoothCryptoToolbox::printBytes(uint8_t bytes[], uint8_t length){
+#ifdef _BLE_TRACE_
     for(int i=0; i<length; i++){
         if(i>0){
             Serial.print(", 0x");
@@ -36,7 +37,10 @@ void BluetoothCryptoToolbox::printBytes(uint8_t bytes[], uint8_t length){
         Serial.print(bytes[i],HEX);
     }
     Serial.print('\n');
+#endif
 }
+
+
 int BluetoothCryptoToolbox::f5(uint8_t DHKey[],uint8_t N_master[], uint8_t N_slave[],
             uint8_t BD_ADDR_master[], uint8_t BD_ADDR_slave[], uint8_t MacKey[], uint8_t LTK[])
 {
@@ -71,7 +75,7 @@ int BluetoothCryptoToolbox::f5(uint8_t DHKey[],uint8_t N_master[], uint8_t N_sla
         uint8_t A1[7];
         uint8_t A2[7];
         uint8_t length[2];
-    } cmacInput = {0,0,0,0,0,0,0};
+    } cmacInput = {0,{0},{0},{0},{0},{0},{0}};
     cmacInput.counter = 0;
     memcpy(cmacInput.keyID, keyID, 4);
     memcpy(cmacInput.N1,N_master,16);
@@ -97,7 +101,7 @@ int BluetoothCryptoToolbox::f6(uint8_t W[], uint8_t N1[],uint8_t N2[],uint8_t R[
         uint8_t IOCap[3];
         uint8_t A1[7];
         uint8_t A2[7];
-    } f6Input = {0,0,0,0,0,0};
+    } f6Input = {{0},{0},{0},{0},{0},{0}};
 
     memcpy(f6Input.N1, N1, 16);
     memcpy(f6Input.N2, N2, 16);
@@ -128,15 +132,15 @@ void BluetoothCryptoToolbox::testAh()
 {
     uint8_t irk[16] = {0xec,0x02,0x34,0xa3,0x57,0xc8,0xad,0x05,0x34,0x10,0x10,0xa6,0x0a,0x39,0x7d,0x9b};         
     uint8_t expected_final[3] = {0x0d,0xfb,0xaa};
-    
     uint8_t ourResult[3];
     ah(irk, expected_final, ourResult);
 
-
+#ifdef _BLE_TRACE_
     Serial.print("Expected   : ");
     printBytes(&expected_final[3], 3);
     Serial.print("Actual     : ");
     printBytes(ourResult, 3);
+#endif
 }
 
 int BluetoothCryptoToolbox::g2(uint8_t U[], uint8_t V[], uint8_t X[], uint8_t Y[], uint8_t out[4])
@@ -145,7 +149,7 @@ int BluetoothCryptoToolbox::g2(uint8_t U[], uint8_t V[], uint8_t X[], uint8_t Y[
         uint8_t U[32];
         uint8_t V[32];
         uint8_t Y[16];
-    } cmacInput= {0,0,0};
+    } cmacInput= {{0},{0},{0}};
     memcpy(cmacInput.U,U,32);
     memcpy(cmacInput.V,V,32);
     memcpy(cmacInput.Y,Y,16);
@@ -160,19 +164,19 @@ void BluetoothCryptoToolbox::testg2(){
     uint8_t X[16] = {0xd5,0xcb,0x84,0x54,0xd1,0x77,0x73,0x3e,0xff,0xff,0xb2,0xec,0x71,0x2b,0xae,0xab};
     uint8_t Y[16] = {0xa6,0xe8,0xe7,0xcc,0x25,0xa7,0x5f,0x6e,0x21,0x65,0x83,0xf7,0xff,0x3d,0xc4,0xcf};
     uint8_t out[4];
-    
-    
+
     uint32_t expected = 0;
     g2(U,V,X,Y,out);
     uint32_t result = 0;
     for(int i=0; i<4; i++) result += out[i] << 8*i;
 
+#ifdef _BLE_TRACE_
     Serial.print("Expected :     ");
     Serial.println(expected);
     Serial.print("Result   : ");
     Serial.println(result);
     Serial.println();
-
+#endif
 }
 
 void BluetoothCryptoToolbox::AES_CMAC ( unsigned char *key, unsigned char *input, int length,
@@ -264,8 +268,10 @@ int BluetoothCryptoToolbox::AES_128(uint8_t* key, uint8_t* data_in, uint8_t* dat
     int n = 0;
     int tries = 30;
     while(HCI.leEncrypt(key,data_in, &status, data_out)!=1&&n<tries){
+#ifdef _BLE_TRACE_
         Serial.print("AES failed... retrying: ");
         Serial.println(n);
+#endif
         BLE.end();
         delay(200);
         BLE.begin();
@@ -273,7 +279,9 @@ int BluetoothCryptoToolbox::AES_128(uint8_t* key, uint8_t* data_in, uint8_t* dat
         delay(100*n);
     }
     if(n==tries){
+#ifdef _BLE_TRACE_
         Serial.println("something went wrong with AES.");
+#endif
         return 0;
     }
     return 1;
@@ -288,7 +296,7 @@ void BluetoothCryptoToolbox::test(){
 
     for ( i=0; i<16; i++ ) Z[i] = 0x00;
     uint8_t k[16]            = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
-    
+
     Serial.println("AES Plaintext:");
     for(int i=0; i<16; i++){
         Serial.print(" 0x");
@@ -352,7 +360,7 @@ void BluetoothCryptoToolbox::test(){
     }
     Serial.println(".");
 }
-#endif
+#endif //_BLE_TRACE_
 // From RFC
 void BluetoothCryptoToolbox::leftshift_onebit(unsigned char *input,unsigned char *output)
 {
