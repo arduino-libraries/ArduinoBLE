@@ -232,9 +232,9 @@ void L2CAPSignalingClass::handleSecurityData(uint16_t connectionHandle, uint8_t 
     Serial.print("V      : ");
     btct.printBytes(V,32);
     Serial.print("X      : ");
-    btct.printBytes(X,16);
+    btct.printBytes(HCI.Na,16);
     Serial.print("Y      : ");
-    btct.printBytes(Y,16);
+    btct.printBytes(HCI.Nb,16);
     Serial.print("g2res  : ");
     btct.printBytes(g2Result,4);
     Serial.print("Result : ");
@@ -415,7 +415,7 @@ void L2CAPSignalingClass::smCalculateLTKandConfirm(uint16_t handle, uint8_t expe
     // Send our confirmation value to complete authentication stage 2
     uint8_t ret[17];
     ret[0] = CONNECTION_PAIRING_DHKEY_CHECK;
-    for(int i=0; i<sizeof(Eb); i++){
+    for(uint32_t i=0; i<sizeof(Eb); i++){
       ret[sizeof(Eb)-i] = Eb[i];
     }
     HCI.sendAclPkt(handle, SECURITY_CID, sizeof(ret), ret );
