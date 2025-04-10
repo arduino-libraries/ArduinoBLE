@@ -100,6 +100,7 @@ set(TEST_TARGET_CHARACTERISTIC_SRCS
   # Test files
   ${COMMON_TEST_SRCS}
   src/test_characteristic/test_permissions.cpp
+  src/test_characteristic/test_writeValue.cpp
   # DUT files
   ${DUT_SRCS}
   # Fake classes files
