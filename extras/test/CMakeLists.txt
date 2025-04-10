@@ -96,6 +96,17 @@ set(TEST_TARGET_ADVERTISING_DATA_SRCS
   src/test_advertising_data/FakeBLELocalDevice.cpp
 )
 
+set(TEST_TARGET_CHARACTERISTIC_SRCS
+  # Test files
+  ${COMMON_TEST_SRCS}
+  src/test_characteristic/test_permissions.cpp
+  # DUT files
+  ${DUT_SRCS}
+  # Fake classes files
+  src/util/HCIFakeTransport.cpp
+  src/test_advertising_data/FakeBLELocalDevice.cpp
+)
+
 ##########################################################################
 
 set(CMAKE_C_FLAGS   ${CMAKE_C_FLAGS}   "--coverage")
@@ -106,6 +117,7 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--coverage")
 add_executable(TEST_TARGET_UUID ${TEST_TARGET_UUID_SRCS})
 add_executable(TEST_TARGET_DISC_DEVICE ${TEST_TARGET_DISC_DEVICE_SRCS})
 add_executable(TEST_TARGET_ADVERTISING_DATA ${TEST_TARGET_ADVERTISING_DATA_SRCS})
+add_executable(TEST_TARGET_CHARACTERISTIC_DATA ${TEST_TARGET_CHARACTERISTIC_SRCS})
 
 ##########################################################################
 
@@ -118,11 +130,13 @@ include_directories(../../src/utility)
 
 target_include_directories(TEST_TARGET_DISC_DEVICE PUBLIC include/test_discovered_device)
 target_include_directories(TEST_TARGET_ADVERTISING_DATA PUBLIC include/test_advertising_data)
+target_include_directories(TEST_TARGET_CHARACTERISTIC_DATA PUBLIC include/test_advertising_data)
 
 ##########################################################################
 
 target_compile_definitions(TEST_TARGET_DISC_DEVICE PUBLIC FAKE_GAP)
 target_compile_definitions(TEST_TARGET_ADVERTISING_DATA PUBLIC FAKE_BLELOCALDEVICE)
+target_compile_definitions(TEST_TARGET_CHARACTERISTIC_DATA PUBLIC FAKE_BLELOCALDEVICE)
 
 ##########################################################################
 
@@ -137,6 +151,13 @@ add_custom_command(TARGET TEST_TARGET_ADVERTISING_DATA POST_BUILD
   COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/TEST_TARGET_ADVERTISING_DATA
 )
 
+add_custom_command(TARGET TEST_TARGET_CHARACTERISTIC_DATA POST_BUILD
+  COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/TEST_TARGET_CHARACTERISTIC_DATA
+)
+
+##########################################################################
+
 target_link_libraries( TEST_TARGET_UUID Catch2WithMain )
 target_link_libraries( TEST_TARGET_DISC_DEVICE Catch2WithMain )
 target_link_libraries( TEST_TARGET_ADVERTISING_DATA Catch2WithMain )
+target_link_libraries( TEST_TARGET_CHARACTERISTIC_DATA Catch2WithMain )
