@@ -598,7 +598,7 @@ BLEDevice ATTClass::central()
   return BLEDevice();
 }
 
-bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
+int ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
 {
   int numNotifications = 0;
 
@@ -626,10 +626,10 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
     numNotifications++;
   }
 
-  return (numNotifications > 0);
+  return (numNotifications > 0) ? length : 0;
 }
 
-bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
+int ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
 {
   int numIndications = 0;
 
@@ -666,7 +666,7 @@ bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
     numIndications++;
   }
 
-  return (numIndications > 0);
+  return (numIndications > 0) ? length : 0;
 }
 
 void ATTClass::error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
