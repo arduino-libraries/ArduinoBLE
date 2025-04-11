@@ -89,6 +89,20 @@ uint8_t BLELocalCharacteristic::permissions() const {
   return _permissions;
 }
 
+bool BLELocalCharacteristic::setValueSize(uint16_t valueSize) {
+  if (valueSize == _valueSize) {
+    return true;
+  }
+
+  if (_valueLength > 0 && valueSize < _valueLength) {
+    return false;
+  }
+
+  _value = (uint8_t*)realloc(_value, valueSize);
+  _valueSize = valueSize;
+  return true;
+}
+
 int BLELocalCharacteristic::valueSize() const
 {
   return _valueSize;
