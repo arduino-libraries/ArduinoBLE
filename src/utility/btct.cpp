@@ -37,6 +37,9 @@ void BluetoothCryptoToolbox::printBytes(uint8_t bytes[], uint8_t length){
         Serial.print(bytes[i],HEX);
     }
     Serial.print('\n');
+#else
+    (void)bytes;
+    (void)length;
 #endif
 }
 
@@ -130,7 +133,7 @@ int BluetoothCryptoToolbox::ah(uint8_t k[16], uint8_t r[3], uint8_t* result)
 }
 void BluetoothCryptoToolbox::testAh()
 {
-    uint8_t irk[16] = {0xec,0x02,0x34,0xa3,0x57,0xc8,0xad,0x05,0x34,0x10,0x10,0xa6,0x0a,0x39,0x7d,0x9b};         
+    uint8_t irk[16] = {0xec,0x02,0x34,0xa3,0x57,0xc8,0xad,0x05,0x34,0x10,0x10,0xa6,0x0a,0x39,0x7d,0x9b};
     uint8_t expected_final[3] = {0x0d,0xfb,0xaa};
     uint8_t ourResult[3];
     ah(irk, expected_final, ourResult);
@@ -165,14 +168,12 @@ void BluetoothCryptoToolbox::testg2(){
     uint8_t Y[16] = {0xa6,0xe8,0xe7,0xcc,0x25,0xa7,0x5f,0x6e,0x21,0x65,0x83,0xf7,0xff,0x3d,0xc4,0xcf};
     uint8_t out[4];
 
-    uint32_t expected = 0;
     g2(U,V,X,Y,out);
     uint32_t result = 0;
     for(int i=0; i<4; i++) result += out[i] << 8*i;
 
 #ifdef _BLE_TRACE_
-    Serial.print("Expected :     ");
-    Serial.println(expected);
+    Serial.println("Expected :     0");
     Serial.print("Result   : ");
     Serial.println(result);
     Serial.println();
