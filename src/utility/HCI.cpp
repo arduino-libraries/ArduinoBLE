@@ -521,19 +521,17 @@ int HCIClass::leReadPeerResolvableAddress(uint8_t peerAddressType, uint8_t* peer
 #ifdef _BLE_TRACE_
   Serial.print("res: 0x");
   Serial.println(res, HEX);
-#endif
   if(res==0){
     struct __attribute__ ((packed)) Response {
       uint8_t status;
       uint8_t peerResolvableAddress[6];
     } *response = (Response*)_cmdResponse;
-#ifdef _BLE_TRACE_
     Serial.print("Address resolution status: 0x");
     Serial.println(response->status, HEX);
     Serial.print("peer resolvable address: ");
     btct.printBytes(response->peerResolvableAddress,6);
-#endif
   }
+  #endif
   return res;
 }
 
