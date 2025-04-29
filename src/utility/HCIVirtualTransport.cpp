@@ -80,7 +80,7 @@ int HCIVirtualTransportClass::begin()
 #if CONFIG_IDF_TARGET_ESP32
   bt_cfg.mode = ESP_BT_MODE_BLE; //original esp32 chip
 #else
-#if !(CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2)
+#if !(CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C5 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2)
   bt_cfg.bluetooth_mode = ESP_BT_MODE_BLE; //different api for newer models
 #endif
 #endif
