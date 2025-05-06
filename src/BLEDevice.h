@@ -50,12 +50,14 @@ public:
   virtual String address() const;
 
   bool hasLocalName() const;
-    
+  bool hasServiceData() const;
+
   bool hasAdvertisedServiceUuid() const;
   bool hasAdvertisedServiceUuid(int index) const;
   int advertisedServiceUuidCount() const;
 
   String localName() const;
+  String serviceData() const;
   String advertisedServiceUuid() const;
   String advertisedServiceUuid(int index) const;
 
