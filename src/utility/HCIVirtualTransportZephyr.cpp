@@ -32,12 +32,28 @@ HCIVirtualTransportZephyrClass::~HCIVirtualTransportZephyrClass()
 }
 
 extern "C" void set_public_address(struct k_fifo *rx_queue);
+extern "C" int bt_h4_vnd_setup(const struct device *dev);
+struct h4_config {
+       const struct device *uart;
+       k_thread_stack_t *rx_thread_stack;
+       size_t rx_thread_stack_size;
+       struct k_thread *rx_thread;
+};
+
 int HCIVirtualTransportZephyrClass::begin()
 {
   bt_enable_raw(__rx_queue);
-  //bt_hci_raw_set_mode(BT_HCI_RAW_MODE_PASSTHROUGH);
+#if defined(CONFIG_BT_HCI_SETUP)
+  const struct device *dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_bt_hci));
+  if (!dev) {
+    return 0;
+  }
+  const struct h4_config *cfg = (const struct h4_config *)dev->config;
+  bt_h4_vnd_setup(cfg->uart);
+#else
   set_public_address(__rx_queue);
-  bt_hci_raw_set_mode(BT_HCI_RAW_MODE_H4);
+#endif
+
   rxbuf.clear();
   return 1;
 }
@@ -93,7 +109,7 @@ int HCIVirtualTransportZephyrClass::read()
 
 size_t HCIVirtualTransportZephyrClass::write(const uint8_t* data, size_t length)
 {
-  struct net_buf *__net_buf = bt_buf_get_tx(BT_BUF_H4, K_MSEC(10), data, length);
+  struct net_buf *__net_buf = bt_buf_get_tx(bt_buf_type_from_h4(data[0], BT_BUF_OUT), K_FOREVER, &data[1], length - 1);
   if (__net_buf) {
     auto err = bt_send(__net_buf);
 		if (err) {
