@@ -101,7 +101,8 @@ String commandToString(LE_COMMAND command){
 HCIClass::HCIClass() :
   _debug(NULL),
   _recvIndex(0),
-  _pendingPkt(0)
+  _pendingPkt(0),
+  _l2CapPduBufferSize(0)
 {
 }
 
@@ -718,72 +719,118 @@ int HCIClass::sendCommand(uint16_t opcode, uint8_t plen, void* parameters)
 void HCIClass::handleAclDataPkt(uint8_t /*plen*/, uint8_t pdata[])
 {
   struct __attribute__ ((packed)) HCIACLHdr {
-    uint16_t handle;
-    uint16_t dlen;
-    uint16_t len;
-    uint16_t cid;
-  } *aclHdr = (HCIACLHdr*)pdata;
+    uint16_t connectionHandleWithFlags;
+    uint16_t dlen; // dlen + 4 = plen (dlen is the size of the ACL SDU)
+  } *aclHeader = (HCIACLHdr*)pdata;
 
+  uint8_t bcFlag = (aclHeader->connectionHandleWithFlags & 0xc000) >> 14;
+  uint8_t pbFlag = (aclHeader->connectionHandleWithFlags & 0x3000) >> 12;
+  uint16_t connectionHandle = aclHeader->connectionHandleWithFlags & 0x0fff;
 
-  uint16_t aclFlags = (aclHdr->handle & 0xf000) >> 12;
+  uint8_t *aclSdu = &pdata[sizeof(HCIACLHdr)];
 
-  if ((aclHdr->dlen - 4) != aclHdr->len) {
-    // packet is fragmented
-    if (aclFlags != 0x01) {
-      // copy into ACL buffer
-      memcpy(_aclPktBuffer, &_recvBuffer[1], sizeof(HCIACLHdr) + aclHdr->dlen - 4);
-    } else {
-      // copy next chunk into the buffer
-      HCIACLHdr* aclBufferHeader = (HCIACLHdr*)_aclPktBuffer;
-
-      memcpy(&_aclPktBuffer[sizeof(HCIACLHdr) + aclBufferHeader->dlen - 4], &_recvBuffer[1 + sizeof(aclHdr->handle) + sizeof(aclHdr->dlen)], aclHdr->dlen);
-
-      aclBufferHeader->dlen += aclHdr->dlen;
-      aclHdr = aclBufferHeader;
-    }
-  }
-
-  if ((aclHdr->dlen - 4) != aclHdr->len) {
 #ifdef _BLE_TRACE_
-    Serial.println("Don't have full packet yet");
-    Serial.print("Handle: ");
-    btct.printBytes((uint8_t*)&aclHdr->handle,2);
-    Serial.print("dlen: ");
-    btct.printBytes((uint8_t*)&aclHdr->dlen,2);
-    Serial.print("len: ");
-    btct.printBytes((uint8_t*)&aclHdr->len,2);
-    Serial.print("cid: ");
-    btct.printBytes((uint8_t*)&aclHdr->cid,2);
+  Serial.print("Acl packet bcFlag = ");
+  Serial.print(bcFlag, BIN);
+  Serial.print(" pbFlag = ");
+  Serial.print(pbFlag, BIN);
+  Serial.print(" connectionHandle = ");
+  Serial.print(connectionHandle, HEX);
+  Serial.print(" dlen = ");
+  Serial.println(aclHeader->dlen, DEC);
 #endif
-    // don't have the full packet yet
+
+  // Pointer to the L2CAP PDU (might be reconstructed from multiple fragments)
+  uint8_t *l2CapPdu;
+  uint8_t l2CapPduSize;
+
+  if (pbFlag == 0b10) {
+    // "First automatically flushable packet" = Start of our L2CAP PDU
+
+    l2CapPdu = aclSdu;
+    l2CapPduSize = aclHeader->dlen;
+  } else if (pbFlag == 0b01) {
+    // "Continuing Fragment" = Continued L2CAP PDU
+#ifdef _BLE_TRACE_
+    Serial.print("Continued packet. Appending to L2CAP PDU buffer (previously ");
+    Serial.print(_l2CapPduBufferSize, DEC);
+    Serial.println(" bytes in buffer)");
+#endif
+    // If we receive a fragment, we always need to append it to the L2CAP PDU buffer
+    memcpy(&_l2CapPduBuffer[_l2CapPduBufferSize], aclSdu, aclHeader->dlen);
+    _l2CapPduBufferSize += aclHeader->dlen;
+
+    l2CapPdu = _l2CapPduBuffer;
+    l2CapPduSize = _l2CapPduBufferSize;
+  } else {
+    // I don't think other values are allowed for BLE
+#ifdef _BLE_TRACE_
+    Serial.println("Invalid pbFlag, discarding packet");
+#endif
     return;
   }
 
-  if (aclHdr->cid == ATT_CID) {
-    if (aclFlags == 0x01) {
-      // use buffered packet
-      ATT.handleData(aclHdr->handle & 0x0fff, aclHdr->len, &_aclPktBuffer[sizeof(HCIACLHdr)]);
-    } else {
-      // use the recv buffer
-      ATT.handleData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
-    }
-  } else if (aclHdr->cid == SIGNALING_CID) {
+  // We now have a valid L2CAP header in l2CapPdu and can parse the headers
+  struct __attribute__ ((packed)) HCIL2CapHdr {
+    uint16_t len; // size of the L2CAP SDU
+    uint16_t cid;
+  } *l2CapHeader = (HCIL2CapHdr*)l2CapPdu;
+
 #ifdef _BLE_TRACE_
-    Serial.println("Signaling");
+  Serial.print("Received ");
+  Serial.print(l2CapPduSize - 4, DEC);
+  Serial.print("B/");
+  Serial.print(l2CapHeader->len, DEC);
+  Serial.print("B of the L2CAP SDU. CID = ");
+  Serial.println(l2CapHeader->cid, HEX);
 #endif
-    L2CAPSignaling.handleData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
-  } else if (aclHdr->cid == SECURITY_CID){
-    // Security manager
+
+  // -4 because the buffer is the L2CAP PDU (with L2CAP header). The len field is only the L2CAP SDU (without L2CAP header).
+  if (l2CapPduSize - 4 != l2CapHeader->len) {
 #ifdef _BLE_TRACE_
-    Serial.println("Security data");
+    Serial.println("L2CAP SDU incomplete");
 #endif
-    if (aclFlags == 0x1){
-      L2CAPSignaling.handleSecurityData(aclHdr->handle & 0x0fff, aclHdr->len, &_aclPktBuffer[sizeof(HCIACLHdr)]);
-    }else{
-      L2CAPSignaling.handleSecurityData(aclHdr->handle & 0x0fff, aclHdr->len, &_recvBuffer[1 + sizeof(HCIACLHdr)]);
+
+    // If this is a first packet, we have not copied it into the buffer yet
+    if (pbFlag == 0b10) {
+#ifdef _BLE_TRACE_
+      Serial.println("Storing first packet to L2CAP PDU buffer");
+      if (_l2CapPduBufferSize != 0) {
+        Serial.print("Warning: Discarding ");
+        Serial.print(_l2CapPduBufferSize, DEC);
+        Serial.println(" bytes from buffer");
+      }
+#endif
+
+      memcpy(_l2CapPduBuffer, l2CapPdu, l2CapPduSize);
+      _l2CapPduBufferSize = l2CapPduSize;
     }
 
-  }else {
+    // We need to wait for the missing parts of the L2CAP SDU
+    return;
+  }
+
+#ifdef _BLE_TRACE_
+    Serial.println("L2CAP SDU complete");
+#endif
+
+  if (l2CapHeader->cid == ATT_CID) {
+#ifdef _BLE_TRACE_
+    Serial.println("CID: ATT");
+#endif
+    ATT.handleData(connectionHandle, l2CapHeader->len, &l2CapPdu[sizeof(HCIL2CapHdr)]);
+  } else if (l2CapHeader->cid == SIGNALING_CID) {
+#ifdef _BLE_TRACE_
+    Serial.println("CID: SIGNALING");
+#endif
+    L2CAPSignaling.handleData(connectionHandle, l2CapHeader->len, &l2CapPdu[sizeof(HCIL2CapHdr)]);
+  } else if (l2CapHeader->cid == SECURITY_CID) {
+    // Security manager
+#ifdef _BLE_TRACE_
+    Serial.println("CID: SECURITY");
+#endif
+    L2CAPSignaling.handleSecurityData(connectionHandle, l2CapHeader->len, &l2CapPdu[sizeof(HCIL2CapHdr)]);
+  } else {
     struct __attribute__ ((packed)) {
       uint8_t op;
       uint8_t id;
@@ -791,14 +838,16 @@ void HCIClass::handleAclDataPkt(uint8_t /*plen*/, uint8_t pdata[])
       uint16_t reason;
       uint16_t localCid;
       uint16_t remoteCid;
-    } l2capRejectCid= { 0x01, 0x00, 0x006, 0x0002, aclHdr->cid, 0x0000 };
+    } l2capRejectCid= { 0x01, 0x00, 0x006, 0x0002, l2CapHeader->cid, 0x0000 };
 #ifdef _BLE_TRACE_
-    Serial.print("rejecting packet cid: 0x");
-    Serial.println(aclHdr->cid,HEX);
+    Serial.println("Rejecting packet cid");
 #endif
 
-    sendAclPkt(aclHdr->handle & 0x0fff, 0x0005, sizeof(l2capRejectCid), &l2capRejectCid);
+    sendAclPkt(connectionHandle, 0x0005, sizeof(l2capRejectCid), &l2capRejectCid);
   }
+
+  // We have processed everything in the buffer. Discard the contents.
+  _l2CapPduBufferSize = 0;
 }
 
 void HCIClass::handleNumCompPkts(uint16_t /*handle*/, uint16_t numPkts)

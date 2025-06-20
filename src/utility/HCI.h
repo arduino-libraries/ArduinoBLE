@@ -159,7 +159,8 @@ private:
   uint8_t _maxPkt;
   uint8_t _pendingPkt;
 
-  uint8_t _aclPktBuffer[255];
+  uint8_t _l2CapPduBuffer[255];
+  uint8_t _l2CapPduBufferSize;
 };
 
 extern HCIClass& HCI;
