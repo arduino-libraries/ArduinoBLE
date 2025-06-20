@@ -254,8 +254,11 @@ void HCICordioTransportClass::end()
 
 void HCICordioTransportClass::wait(unsigned long timeout)
 {
-  if (available()) {
-    return;
+  {
+    mbed::CriticalSectionLock critical_section;
+    if (available()) {
+      return;
+    }
   }
 
   // wait for handleRxData to signal
@@ -275,6 +278,14 @@ int HCICordioTransportClass::peek()
 int HCICordioTransportClass::read()
 {
   return _rxBuf.read_char();
+}
+
+void HCICordioTransportClass::lockForRead() {
+  mbed::CriticalSectionLock::enable();
+}
+
+void HCICordioTransportClass::unlockForRead() {
+  mbed::CriticalSectionLock::disable();
 }
 
 size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
@@ -299,13 +310,16 @@ size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
 
 void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
 {
-  if (_rxBuf.availableForStore() < len) {
-    // drop!
-    return;
-  }
+  {
+    mbed::CriticalSectionLock critical_section;
+    if (_rxBuf.availableForStore() < len) {
+      // drop!
+      return;
+    }
 
-  for (int i = 0; i < len; i++) {
-    _rxBuf.store_char(data[i]);
+    for (int i = 0; i < len; i++) {
+      _rxBuf.store_char(data[i]);
+    }
   }
 
   bleEventFlags.set(0x01);
