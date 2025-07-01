@@ -136,13 +136,16 @@ void HCIClass::poll(unsigned long timeout)
     HCITransport.wait(timeout);
   }
 
+  HCITransport.lockForRead();
   while (HCITransport.available()) {
     byte b = HCITransport.read();
 
     if (_recvIndex >= (int)sizeof(_recvBuffer)) {
         _recvIndex = 0;
         if (_debug) {
+            HCITransport.unlockForRead();
             _debug->println("_recvBuffer overflow");
+            HCITransport.lockForRead();
         }
     }
 
@@ -150,6 +153,7 @@ void HCIClass::poll(unsigned long timeout)
 
     if (_recvBuffer[0] == HCI_ACLDATA_PKT) {
       if (_recvIndex > 5 && _recvIndex >= (5 + (_recvBuffer[3] + (_recvBuffer[4] << 8)))) {
+        HCITransport.unlockForRead();
         if (_debug) {
           dumpPkt("HCI ACLDATA RX <- ", _recvIndex, _recvBuffer);
         }
@@ -164,9 +168,11 @@ void HCIClass::poll(unsigned long timeout)
 #ifdef ARDUINO_AVR_UNO_WIFI_REV2
         digitalWrite(NINA_RTS, LOW);
 #endif
+        HCITransport.lockForRead();
       }
     } else if (_recvBuffer[0] == HCI_EVENT_PKT) {
       if (_recvIndex > 3 && _recvIndex >= (3 + _recvBuffer[2])) {
+        HCITransport.unlockForRead();
         if (_debug) {
           dumpPkt("HCI EVENT RX <- ", _recvIndex, _recvBuffer);
         }
@@ -182,12 +188,15 @@ void HCIClass::poll(unsigned long timeout)
 #ifdef ARDUINO_AVR_UNO_WIFI_REV2
         digitalWrite(NINA_RTS, LOW);
 #endif
+        HCITransport.lockForRead();
       }
     } else {
       _recvIndex = 0;
 
       if (_debug) {
+        HCITransport.unlockForRead();
         _debug->println(b, HEX);
+        HCITransport.lockForRead();
       }
     }
   }
@@ -195,6 +204,7 @@ void HCIClass::poll(unsigned long timeout)
 #ifdef ARDUINO_AVR_UNO_WIFI_REV2
   digitalWrite(NINA_RTS, HIGH);
 #endif
+  HCITransport.unlockForRead();
 }
 
 int HCIClass::reset()

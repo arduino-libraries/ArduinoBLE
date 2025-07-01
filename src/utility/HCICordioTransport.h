@@ -40,6 +40,9 @@ public:
   virtual int peek();
   virtual int read();
 
+  virtual void lockForRead() override;
+  virtual void unlockForRead() override;
+
   virtual size_t write(const uint8_t* data, size_t length);
 
 private:
