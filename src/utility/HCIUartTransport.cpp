@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#if !defined(ARDUINO_ARCH_MBED) && !defined(ESP32) && !defined(ARDUINO_SILABS) && !defined(ARDUINO_UNOR4_WIFI) || defined(TARGET_NANO_RP2040_CONNECT) //|| defined(CORE_CM4)
+#if !defined(ARDUINO_ARCH_MBED) && !defined(__ZEPHYR__) && !defined(ESP32) && !defined(ARDUINO_SILABS) && !defined(ARDUINO_UNOR4_WIFI) && !defined(__ZEPHYR__) || defined(TARGET_NANO_RP2040_CONNECT) //|| defined(CORE_CM4)
 
 #include "HCIUartTransport.h"
 
