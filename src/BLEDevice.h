@@ -93,6 +93,17 @@ public:
   BLECharacteristic characteristic(const char * uuid) const;
   BLECharacteristic characteristic(const char * uuid, int index) const;
 
+  /**
+  * Enable advertising on Coded PHY (long range).
+  * Must be called after BLE.begin() and before BLE.advertise().
+  */
+  void enableCodedPHYAdvertising(bool enabled = true);
+
+  /**
+  * Set advertise and connection transmit power (in dBm, max +4 for Nano 33 BLE Rev2).
+  */
+  void setTxPower(int8_t dbm);
+
 protected:
   friend class ATTClass;
   friend class GAPClass;
