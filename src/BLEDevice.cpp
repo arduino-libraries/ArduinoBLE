@@ -25,6 +25,10 @@
 
 #include "BLEDevice.h"
 
+#include "ble/AdvertisingParameters.h"
+#include "ble/Gap.h"
+
+
 extern "C" int strcasecmp(char const *a, char const *b);
 
 BLEDevice::BLEDevice() :
@@ -574,5 +578,27 @@ bool BLEDevice::discovered()
 {
   // expect, 0x03 or 0x04 flag to be set
   return (_advertisementTypeMask & 0x18) != 0;
+}
+
+void BLEDevice::setTxPower(int8_t dbm) {
+    if (!_ble_interface.hasInitialized()) return;
+    _ble_interface.gap().setTxPower(dbm);
+}
+
+void BLEDevice::enableCodedPHYAdvertising(bool enabled) {
+    if (!_ble_interface.hasInitialized()) return;
+
+    ble::AdvertisingParameters advParams(
+        ble::advertising_type_t::NON_CONNECTABLE_UNDIRECTED,
+        ble::adv_interval_t(ble::millisecond_t(200))
+    );
+    if (enabled) {
+        advParams.setPhy(ble::phy_t::LE_1M, ble::phy_t::LE_CODED);
+    }
+    auto& gap = _ble_interface.gap();
+    gap.setAdvertisingParameters(_adv_handle, advParams);
+
+    // Set TX power here if not using setTxPower separately
+    gap.setTxPower(4);
 }
 
