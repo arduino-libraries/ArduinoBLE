@@ -25,7 +25,9 @@
 #include <zephyr/bluetooth/buf.h>
 #include <zephyr/bluetooth/hci.h>
 #include <zephyr/bluetooth/hci_raw.h>
+#include <zephyr/bluetooth/controller.h>
 #include <zephyr/drivers/uart.h>
+#include <zephyr/drivers/hwinfo.h>
 
 static K_FIFO_DEFINE(rx_queue);
 struct k_fifo* __rx_queue = &rx_queue;
@@ -146,6 +148,18 @@ int HCIVirtualTransportZephyrClass::begin() {
   }
 #endif /* CONFIG_CYW4343W_MURATA_1DX */
 #endif /* CONFIG_BT_HCI_SETUP */
+
+#if CONFIG_BT_LL_SW_SPLIT
+  // Use unique device id for BD addr.
+  uint8_t bd_addr[6] = { 0xFA, 0xFA, 0xFA, 0xFA, 0xFA, 0xFA };
+
+#if CONFIG_HWINFO
+  hwinfo_get_device_id(bd_addr, sizeof(bd_addr));
+#endif  /* CONFIG_HWINFO */
+
+  // Set public address for controller.
+  bt_ctlr_set_public_addr(bd_addr);
+#endif  /* CONFIG_BT_LL_SW_SPLIT */
 
   rxbuf.clear();
 
