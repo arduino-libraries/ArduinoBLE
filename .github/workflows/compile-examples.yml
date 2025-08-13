@@ -35,26 +35,41 @@ jobs:
             platforms: |
               - name: arduino:samd
             artifact-name-suffix: arduino-samd-mkrwifi1010
+            type: nina
           - fqbn: arduino:samd:nano_33_iot
             platforms: |
               - name: arduino:samd
             artifact-name-suffix: arduino-samd-nano_33_iot
+            type: nina
           - fqbn: arduino:megaavr:uno2018:mode=on
             platforms: |
               - name: arduino:megaavr
             artifact-name-suffix: arduino-megaavr-uno2018
+            type: nina
           - fqbn: arduino:mbed_nano:nano33ble
             platforms: |
               - name: arduino:mbed_nano
             artifact-name-suffix: arduino-mbed_nano-nano33ble
+            type: nina
           - fqbn: arduino:mbed_nano:nanorp2040connect
             platforms: |
               - name: arduino:mbed_nano
             artifact-name-suffix: arduino-mbed_nano-nanorp2040connect
+            type: nina
           - fqbn: arduino:renesas_uno:unor4wifi
             platforms: |
               - name: arduino:renesas_uno
             artifact-name-suffix: arduino-renesas_uno-unor4wifi
+            type: unor4wifi
+
+        include:
+          - board:
+              type: nina
+            libraries: |
+              - name: WiFiNINA
+          - board:
+              type: unor4wifi
+            libraries:
 
     steps:
       - name: Checkout repository
@@ -69,6 +84,7 @@ jobs:
           libraries: |
             # Install the library from the local path.
             - source-path: ./
+            ${{ matrix.libraries }}
           sketch-paths: |
             - examples
           enable-deltas-report: true
@@ -101,6 +117,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.fqbn }}
+          libraries: |
+            ${{ matrix.libraries }}
           platforms: |
             - name: esp32:esp32
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
