@@ -1745,8 +1745,19 @@ bool ATTClass::discoverDescriptors(uint16_t connectionHandle, BLERemoteDevice* d
         }
 
         if (responseBuffer[0] == ATT_OP_FIND_INFO_RESP) {
-          uint16_t lengthPerDescriptor = responseBuffer[1] * 4;
-          uint8_t uuidLen = 2;
+          //
+          // Format parameter (responseBuffer[1]) either 0x01 - 16-bit Bluetooth UUID(s), or 0x02 - 128 bit UUID(s)
+          //
+          // Therefore for:
+          //   0x01 - uuidLen = 2 (octets)
+          //          lengthPerDescriptor = 4 (Handle 2 octets + UUID 2 octets)
+          //   0x02 - uuidLen = 16 (octets)
+          //          lengthPerDescriptor = 18 (Handle 2 octets + UUID 16 octets)
+          //
+          // See section 3.4.3.2 ATT_FIND_INFORMATION_RSP of Bluetooth Core Specification 5.3.
+          //
+          uint16_t lengthPerDescriptor = responseBuffer[1] * 14 - 10;
+          uint8_t uuidLen = lengthPerDescriptor - 2;
 
           for (int i = 2; i < respLength; i += lengthPerDescriptor) {
             struct __attribute__ ((packed)) RawDescriptor {
