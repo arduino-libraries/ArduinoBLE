@@ -70,7 +70,7 @@ void GATTClass::begin()
 //_genericAttributeService->addCharacteristic(_servicesChangedCharacteristic); // removed
 
   setDeviceName("Arduino");
-  setAppearance(0x0000);
+  setAppearance(0x000);
 
   setPPCP(DEFAULT_PPCP_minimumConnectionInterval, DEFAULT_PPCP_maximumConnectionInterval, DEFAULT_PPCP_slaveLatency, DEFAULT_PPCP_connectionSupervisionTimeout);
 
@@ -82,24 +82,36 @@ void GATTClass::begin()
 
 void GATTClass::end()
 {
-  if (_genericAccessService->release() == 0)
+  if (_genericAccessService && _genericAccessService->release() == 0) {
     delete(_genericAccessService);
-  
-  if (_deviceNameCharacteristic->release() == 0)
-    delete(_deviceNameCharacteristic);
-  
-  if (_appearanceCharacteristic->release() == 0)
-    delete(_appearanceCharacteristic);
-  
-  if (_PPCPCharacteristic->release() == 0)
-    delete(_PPCPCharacteristic);
+    _genericAccessService = NULL;
+  }
 
-  if (_genericAttributeService->release() == 0)
+  if (_deviceNameCharacteristic && _deviceNameCharacteristic->release() == 0) {
+    delete(_deviceNameCharacteristic);
+    _deviceNameCharacteristic = NULL;
+  }
+
+  if (_appearanceCharacteristic && _appearanceCharacteristic->release() == 0) {
+    delete(_appearanceCharacteristic);
+    _appearanceCharacteristic = NULL;
+  }
+
+  if (_PPCPCharacteristic &&_PPCPCharacteristic->release() == 0) {
+    delete(_PPCPCharacteristic);
+    _PPCPCharacteristic = NULL;
+  }
+  
+  if (_genericAttributeService && _genericAttributeService->release() == 0) {
     delete(_genericAttributeService);
-  
-//if (_servicesChangedCharacteristic->release() == 0) // removed
-//  delete(_servicesChangedCharacteristic);
-  
+    _genericAttributeService = NULL;
+  }
+
+//if (_servicesChangedCharacteristic && _servicesChangedCharacteristic->release() == 0) {
+//   delete(_servicesChangedCharacteristic);
+//   _servicesChangedCharacteristic = NULL;
+//}
+
   clearAttributes();
 }
 

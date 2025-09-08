@@ -55,6 +55,7 @@
 #include "CordioHCICustomDriver.h"
 
 extern BLE_NAMESPACE::CordioHCIDriver& ble_cordio_get_hci_driver();
+extern "C" void hciTrSerialRxIncoming(uint8_t *pBuf, uint8_t len);
 
 namespace BLE_NAMESPACE {
   struct CordioHCIHook {
@@ -236,6 +237,13 @@ void HCICordioTransportClass::end()
     delete bleLoopThread;
     bleLoopThread = NULL;
   }
+  // Reset the callback with the mbed-os default handler to properly handle the following CYW43xxx chip initializations and begins
+  CordioHCIHook::setDataReceivedHandler(hciTrSerialRxIncoming);
+
+#if (defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)) && !defined(CUSTOM_HCI_DRIVER)
+  BLE &ble = BLE::Instance();
+  ble.shutdown();
+#endif
 
 #if !defined(TARGET_STM32H7)
   CordioHCIHook::getDriver().terminate();
@@ -246,8 +254,11 @@ void HCICordioTransportClass::end()
 
 void HCICordioTransportClass::wait(unsigned long timeout)
 {
-  if (available()) {
-    return;
+  {
+    mbed::CriticalSectionLock critical_section;
+    if (available()) {
+      return;
+    }
   }
 
   // wait for handleRxData to signal
@@ -267,6 +278,14 @@ int HCICordioTransportClass::peek()
 int HCICordioTransportClass::read()
 {
   return _rxBuf.read_char();
+}
+
+void HCICordioTransportClass::lockForRead() {
+  mbed::CriticalSectionLock::enable();
+}
+
+void HCICordioTransportClass::unlockForRead() {
+  mbed::CriticalSectionLock::disable();
 }
 
 size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
@@ -291,13 +310,16 @@ size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
 
 void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
 {
-  if (_rxBuf.availableForStore() < len) {
-    // drop!
-    return;
-  }
+  {
+    mbed::CriticalSectionLock critical_section;
+    if (_rxBuf.availableForStore() < len) {
+      // drop!
+      return;
+    }
 
-  for (int i = 0; i < len; i++) {
-    _rxBuf.store_char(data[i]);
+    for (int i = 0; i < len; i++) {
+      _rxBuf.store_char(data[i]);
+    }
   }
 
   bleEventFlags.set(0x01);

@@ -114,7 +114,7 @@ void monitorSensorTagButtons(BLEDevice peripheral) {
     if (simpleKeyCharacteristic.valueUpdated()) {
       // yes, get the value, characteristic is 1 byte so use byte value
       byte value = 0;
-      
+
       simpleKeyCharacteristic.readValue(value);
 
       if (value & 0x01) {

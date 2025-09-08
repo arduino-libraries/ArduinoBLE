@@ -46,7 +46,8 @@ enum LE_META_EVENT {
   LONG_TERM_KEY_REQUEST     = 0x05,
   REMOTE_CONN_PARAM_REQ     = 0x06,
   READ_LOCAL_P256_COMPLETE  = 0x08,
-  GENERATE_DH_KEY_COMPLETE  = 0x09
+  GENERATE_DH_KEY_COMPLETE  = 0x09,
+  ENHANCED_CONN_COMPLETE    = 0x0A,
 };
 String metaEventToString(LE_META_EVENT event);
 String commandToString(LE_COMMAND command);
@@ -158,7 +159,8 @@ private:
   uint8_t _maxPkt;
   uint8_t _pendingPkt;
 
-  uint8_t _aclPktBuffer[255];
+  uint8_t _l2CapPduBuffer[255];
+  uint8_t _l2CapPduBufferSize;
 };
 
 extern HCIClass& HCI;

@@ -126,15 +126,13 @@ int BLELocalCharacteristic::writeValue(const uint8_t value[], int length)
 
   if (_broadcast) {
     uint16_t serviceUuid = GATT.serviceUuidForCharacteristic(this);
-
-    BLE.setAdvertisedServiceData(serviceUuid, value, length);
-  
+    BLE.setAdvertisedServiceData(serviceUuid, value, _valueLength);
     if (!ATT.connected() && GAP.advertising()) {
       BLE.advertise();
     }
   }
 
-  return 1;
+  return _valueLength;
 }
 
 int BLELocalCharacteristic::writeValue(const char* value)
