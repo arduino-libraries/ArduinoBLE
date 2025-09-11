@@ -20,6 +20,7 @@
 #include "BLEAdvertisingData.h"
 
 #define AD_FIELD_OVERHEAD (2)
+#define AD_NAME_LENGTH (19)
 
 BLEAdvertisingData::BLEAdvertisingData() :
   _dataLength(0),
@@ -320,13 +321,11 @@ bool BLEAdvertisingData::hasFlags() const
 
 bool BLEAdvertisingData::addLocalName(const char *localName)
 {
-  bool success = false;
-  if (strlen(localName) > (MAX_AD_DATA_LENGTH - AD_FIELD_OVERHEAD)) {
-    success = addField(BLEFieldShortLocalName, (uint8_t*)localName, (MAX_AD_DATA_LENGTH - AD_FIELD_OVERHEAD));
-  } else {
-    success = addField(BLEFieldCompleteLocalName, localName);
-  }
-  return success;
+  uint8_t tempData[AD_NAME_LENGTH];
+  uint8_t tempDataLength = strlen(localName);
+  memcpy(tempData, (uint8_t*)localName, tempDataLength + 1);
+  memset(&tempData[tempDataLength + 1], 0x20, AD_NAME_LENGTH - tempDataLength - 1);
+  return addField(BLEFieldCompleteLocalName, tempData, AD_NAME_LENGTH);
 }
 
 bool BLEAdvertisingData::addAdvertisedServiceUuid(const char* advertisedServiceUuid)
