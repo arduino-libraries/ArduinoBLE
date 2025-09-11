@@ -45,8 +45,6 @@ public:
   virtual bool disconnect();
 
   virtual String address() const;
-  
-  virtual void address(uint8_t address[6]) const;
 
   virtual int rssi();
 

@@ -280,11 +280,6 @@ String BLELocalDevice::address() const
   return result;
 }
 
-void BLELocalDevice::address(uint8_t address[6]) const
-{
-  HCI.readBdAddr(address);
-}
-
 int BLELocalDevice::rssi()
 {
   BLEDevice central = ATT.central();
