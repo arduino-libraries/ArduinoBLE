@@ -121,7 +121,7 @@ void GATTClass::setAppearance(uint16_t appearance)
 void GATTClass::setPreferredConnectionParameters(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout)
 {
   uint16_t PPCPData[] = {minimumConnectionInterval, maximumConnectionInterval, slaveLatency, connectionSupervisionTimeout};
-  _PPCPCharacteristic->writeValue((uint8_t*)&PPCPData, sizeof(PPCPData));
+  _preferredConnectionParametersCharacteristic->writeValue((uint8_t*)&PPCPData, sizeof(PPCPData));
 }
 
 void GATTClass::addService(BLEService& service)
