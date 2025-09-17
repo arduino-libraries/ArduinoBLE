@@ -25,14 +25,6 @@
 
 #include "BLELocalDevice.h"
 
-#ifdef __ZEPHYR__
-#undef ARDUINO_PORTENTA_H7_M7
-#undef ARDUINO_OPTA
-#undef ARDUINO_GIGA
-#undef ARDUINO_NICLA_VISION
-#undef ARDUINO_PORTENTA_C33
-#endif
-
 #if defined(PORTENTA_H7_PINS) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
 #ifndef BT_REG_ON
 #define BT_REG_ON PJ_12
@@ -354,9 +346,9 @@ void BLELocalDevice::setAppearance(uint16_t appearance)
   GATT.setAppearance(appearance);
 }
 
-void BLELocalDevice::setPPCP(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout)
+void BLELocalDevice::setPreferredConnectionParameters(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout)
 {
-  GATT.setPPCP(minimumConnectionInterval, maximumConnectionInterval, slaveLatency, connectionSupervisionTimeout);
+  GATT.setPreferredConnectionParameters(minimumConnectionInterval, maximumConnectionInterval, slaveLatency, connectionSupervisionTimeout);
 }
 
 void BLELocalDevice::addService(BLEService& service)

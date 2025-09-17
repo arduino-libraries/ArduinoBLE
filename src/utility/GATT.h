@@ -38,8 +38,7 @@ public:
 
   virtual void setDeviceName(const char* deviceName);
   virtual void setAppearance(uint16_t appearance);
-
-  virtual void setPPCP(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout);
+  virtual void setPreferredConnectionParameters(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout);
 
   virtual void addService(BLEService& service);
 
@@ -66,11 +65,9 @@ private:
   BLELocalService*              _genericAccessService;
   BLELocalCharacteristic*       _deviceNameCharacteristic;
   BLELocalCharacteristic*       _appearanceCharacteristic;
-
-  BLELocalCharacteristic*       _PPCPCharacteristic;
-
+  BLELocalCharacteristic*       _preferredConnectionParametersCharacteristic;
   BLELocalService*              _genericAttributeService;
-//BLELocalCharacteristic*       _servicesChangedCharacteristic; // removed
+//BLELocalCharacteristic*       _servicesChangedCharacteristic;
 };
 
 extern GATTClass& GATT;

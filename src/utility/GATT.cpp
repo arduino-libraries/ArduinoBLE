@@ -31,11 +31,9 @@ GATTClass::GATTClass() :
   _genericAccessService(NULL),
   _deviceNameCharacteristic(NULL),
   _appearanceCharacteristic(NULL),
-
-  _PPCPCharacteristic(NULL),
-
+  _preferredConnectionParametersCharacteristic(NULL),
   _genericAttributeService(NULL)
-//_servicesChangedCharacteristic(NULL) // removed
+//_servicesChangedCharacteristic(NULL)
 {
 }
 
@@ -49,30 +47,25 @@ void GATTClass::begin()
   _genericAccessService = new BLELocalService("1800");
   _deviceNameCharacteristic = new BLELocalCharacteristic("2a00", BLERead, 20);
   _appearanceCharacteristic = new BLELocalCharacteristic("2a01", BLERead, 2);
-
-  _PPCPCharacteristic = new BLELocalCharacteristic("2a04", BLERead, 8);
-
+  _preferredConnectionParametersCharacteristic = new BLELocalCharacteristic("2a04", BLERead, 8);
   _genericAttributeService = new BLELocalService("1801");
-//_servicesChangedCharacteristic = new BLELocalCharacteristic("2a05", BLEIndicate, 4); // removed
+//_servicesChangedCharacteristic = new BLELocalCharacteristic("2a05", BLEIndicate, 4);
 
   _genericAccessService->retain();
   _deviceNameCharacteristic->retain();
   _appearanceCharacteristic->retain();
-
-  _PPCPCharacteristic->retain();
-
+  _preferredConnectionParametersCharacteristic->retain();
   _genericAttributeService->retain();
-//_servicesChangedCharacteristic->retain(); // removed
+//_servicesChangedCharacteristic->retain();
 
   _genericAccessService->addCharacteristic(_deviceNameCharacteristic);
   _genericAccessService->addCharacteristic(_appearanceCharacteristic);
-  _genericAccessService->addCharacteristic(_PPCPCharacteristic);
-//_genericAttributeService->addCharacteristic(_servicesChangedCharacteristic); // removed
+  _genericAccessService->addCharacteristic(_preferredConnectionParametersCharacteristic);
+//_genericAttributeService->addCharacteristic(_servicesChangedCharacteristic);
 
   setDeviceName("Arduino");
   setAppearance(0x000);
-
-  setPPCP(DEFAULT_PPCP_minimumConnectionInterval, DEFAULT_PPCP_maximumConnectionInterval, DEFAULT_PPCP_slaveLatency, DEFAULT_PPCP_connectionSupervisionTimeout);
+  setPreferredConnectionParameters(GAP_PPCP_MIN_CONN_INTERVAL, GAP_PPCP_MAX_CONN_INTERVAL, GAP_PPCP_SLAVE_LATENCY, GAP_PPCP_SUPERVISION_TMO);
 
   clearAttributes();
 
@@ -97,21 +90,21 @@ void GATTClass::end()
     _appearanceCharacteristic = NULL;
   }
 
-  if (_PPCPCharacteristic &&_PPCPCharacteristic->release() == 0) {
-    delete(_PPCPCharacteristic);
-    _PPCPCharacteristic = NULL;
+  if (_preferredConnectionParametersCharacteristic &&_preferredConnectionParametersCharacteristic->release() == 0) {
+    delete(_preferredConnectionParametersCharacteristic);
+    _preferredConnectionParametersCharacteristic = NULL;
   }
   
   if (_genericAttributeService && _genericAttributeService->release() == 0) {
     delete(_genericAttributeService);
     _genericAttributeService = NULL;
   }
-
-//if (_servicesChangedCharacteristic && _servicesChangedCharacteristic->release() == 0) {
-//   delete(_servicesChangedCharacteristic);
-//   _servicesChangedCharacteristic = NULL;
-//}
-
+/*
+  if (_servicesChangedCharacteristic && _servicesChangedCharacteristic->release() == 0) {
+     delete(_servicesChangedCharacteristic);
+     _servicesChangedCharacteristic = NULL;
+  }
+*/
   clearAttributes();
 }
 
@@ -125,9 +118,9 @@ void GATTClass::setAppearance(uint16_t appearance)
   _appearanceCharacteristic->writeValue((uint8_t*)&appearance, sizeof(appearance));
 }
 
-void GATTClass::setPPCP(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout)
+void GATTClass::setPreferredConnectionParameters(uint16_t minimumConnectionInterval, uint16_t maximumConnectionInterval, uint16_t slaveLatency, uint16_t connectionSupervisionTimeout)
 {
-  uint16_t PPCPData[] = { minimumConnectionInterval, maximumConnectionInterval, slaveLatency, connectionSupervisionTimeout };
+  uint16_t PPCPData[] = {minimumConnectionInterval, maximumConnectionInterval, slaveLatency, connectionSupervisionTimeout};
   _PPCPCharacteristic->writeValue((uint8_t*)&PPCPData, sizeof(PPCPData));
 }
 

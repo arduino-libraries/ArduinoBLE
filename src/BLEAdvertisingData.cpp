@@ -30,13 +30,11 @@ BLEAdvertisingData::BLEAdvertisingData() :
   _flags(0),
   _hasFlags(false),
   _localName(NULL),
-
   _minimumConnectionInterval(0),
   _maximumConnectionInterval(0),
   _hasConnectionInterval(false),
   _TransmitPowerLevel(0),
   _hasTransmitPowerLevel(false),
-
   _manufacturerData(NULL),
   _manufacturerDataLength(0),
   _manufacturerCompanyId(0),
@@ -81,13 +79,11 @@ void BLEAdvertisingData::clear()
   _rawDataLength = 0;
   _hasFlags = false;
   _localName = NULL;
-
   _minimumConnectionInterval = 0;
   _maximumConnectionInterval = 0;
   _hasConnectionInterval = false;
   _TransmitPowerLevel = 0;
   _hasTransmitPowerLevel = false;
-
   _manufacturerData = NULL;
   _manufacturerDataLength = 0;
   _hasManufacturerCompanyId = false;
@@ -105,13 +101,11 @@ void BLEAdvertisingData::copy(const BLEAdvertisingData& adv)
   _flags = adv._flags;
   _hasFlags = adv._hasFlags;
   _localName = adv._localName;
-
   _minimumConnectionInterval = adv._minimumConnectionInterval;
   _maximumConnectionInterval = adv._maximumConnectionInterval;
   _hasConnectionInterval = adv._hasConnectionInterval;
   _TransmitPowerLevel = adv._TransmitPowerLevel;
   _hasTransmitPowerLevel = adv._hasTransmitPowerLevel;
-
   _manufacturerData = adv._manufacturerData;
   _manufacturerDataLength = adv._manufacturerDataLength;
   _manufacturerCompanyId = adv._manufacturerCompanyId;
@@ -321,11 +315,17 @@ bool BLEAdvertisingData::hasFlags() const
 
 bool BLEAdvertisingData::addLocalName(const char *localName)
 {
-  uint8_t tempData[AD_NAME_LENGTH];
-  uint8_t tempDataLength = strlen(localName);
-  memcpy(tempData, (uint8_t*)localName, tempDataLength + 1);
-  memset(&tempData[tempDataLength + 1], 0x20, AD_NAME_LENGTH - tempDataLength - 1);
-  return addField(BLEFieldCompleteLocalName, tempData, AD_NAME_LENGTH);
+  bool success = false;
+  if (strlen(localName) > (MAX_AD_DATA_LENGTH - AD_FIELD_OVERHEAD)) {
+    success = addField(BLEFieldShortLocalName, (uint8_t*)localName, (MAX_AD_DATA_LENGTH - AD_FIELD_OVERHEAD));
+  } else {
+    uint8_t tempData[AD_NAME_LENGTH];
+    uint8_t tempDataLength = strlen(localName);
+    memcpy(tempData, (uint8_t*)localName, tempDataLength + 1);
+    memset(&tempData[tempDataLength + 1], 0x20, AD_NAME_LENGTH - tempDataLength - 1);
+    success = addField(BLEFieldCompleteLocalName, tempData, AD_NAME_LENGTH);
+  }
+  return success;
 }
 
 bool BLEAdvertisingData::addAdvertisedServiceUuid(const char* advertisedServiceUuid)
