@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Compile examples
         uses: arduino/compile-sketches@v1
@@ -83,20 +83,20 @@ jobs:
 
   build-for-esp32:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         fqbn:
           - esp32:esp32:esp32
           - esp32:esp32:esp32s3
           - esp32:esp32:esp32c3
-          # future bluetooth chips
+          - esp32:esp32:esp32c6
+          - esp32:esp32:esp32h2
+          # Not supported out of the box by ESP32 Arduino core
           #- esp32:esp32:esp32c2
-          #- esp32:esp32:esp32c6
-          #- esp32:esp32:esp32h2
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: arduino/compile-sketches@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

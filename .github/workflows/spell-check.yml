@@ -1,16 +1,25 @@
+# Source: https://github.com/per1234/.github/blob/main/workflow-templates/spell-check.md
 name: Spell Check
 
-on: [push, pull_request]
+# See: https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+on:
+  push:
+  pull_request:
+  schedule:
+    # Run every Tuesday at 8 AM UTC to catch new misspelling detections resulting from dictionary updates.
+    - cron: "0 8 * * TUE"
+  workflow_dispatch:
+  repository_dispatch:
 
 jobs:
-  build:
+  spellcheck:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
       - name: Spell check
-        uses: arduino/actions/libraries/spell-check@master
-        with:
-          skip-paths: ./extras/test
+        uses: codespell-project/actions-codespell@v2
