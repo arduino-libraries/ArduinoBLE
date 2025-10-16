@@ -261,6 +261,11 @@ int BLEDevice::rssi()
   return _rssi;
 }
 
+uint16_t BLEDevice::getMTU() const
+{
+	return ATT.mtu(ATT.connectionHandle(_addressType, _address));
+}
+
 bool BLEDevice::connect()
 {
   return ATT.connect(_addressType, _address);
