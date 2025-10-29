@@ -311,7 +311,9 @@ size_t HCICordioTransportClass::write(const uint8_t* data, size_t length)
 void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
 {
   {
+    #if defined(ARDUINO_ARCH_NRF52840)
     mbed::CriticalSectionLock critical_section;
+    #endif
     if (_rxBuf.availableForStore() < len) {
       // drop!
       return;
@@ -321,7 +323,6 @@ void HCICordioTransportClass::handleRxData(uint8_t* data, uint8_t len)
       _rxBuf.store_char(data[i]);
     }
   }
-
   bleEventFlags.set(0x01);
 }
 
