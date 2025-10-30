@@ -48,6 +48,7 @@ public:
   virtual bool disconnect();
 
   virtual String address() const;
+  virtual void address(uint8_t* address) const;
 
   bool hasLocalName() const;
     
