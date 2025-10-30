@@ -552,6 +552,12 @@ bool ATTClass::disconnect()
     }
 
     numDisconnects++;
+    
+    BLEDevice bleDevice(_peers[i].addressType, _peers[i].address);
+
+    if (_eventHandlers[BLEDisconnected]) {
+      _eventHandlers[BLEDisconnected](bleDevice);
+    }
 
     BLEDevice bleDevice(_peers[i].addressType, _peers[i].address);
 
