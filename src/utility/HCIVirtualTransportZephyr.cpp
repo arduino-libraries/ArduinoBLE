@@ -130,6 +130,7 @@ HCIVirtualTransportZephyrClass::~HCIVirtualTransportZephyrClass() {
 }
 
 int HCIVirtualTransportZephyrClass::begin() {
+  k_fifo_init(&rx_queue);
   bt_enable_raw(__rx_queue);
 
 #if CONFIG_BT_HCI_SETUP
