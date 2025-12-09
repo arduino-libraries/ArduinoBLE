@@ -731,13 +731,13 @@ void HCIClass::handleAclDataPkt(uint8_t /*plen*/, uint8_t pdata[])
     uint16_t dlen; // dlen + 4 = plen (dlen is the size of the ACL SDU)
   } *aclHeader = (HCIACLHdr*)pdata;
 
-  uint8_t bcFlag = (aclHeader->connectionHandleWithFlags & 0xc000) >> 14;
   uint8_t pbFlag = (aclHeader->connectionHandleWithFlags & 0x3000) >> 12;
   uint16_t connectionHandle = aclHeader->connectionHandleWithFlags & 0x0fff;
 
   uint8_t *aclSdu = &pdata[sizeof(HCIACLHdr)];
 
 #ifdef _BLE_TRACE_
+  uint8_t bcFlag = (aclHeader->connectionHandleWithFlags & 0xc000) >> 14;
   Serial.print("Acl packet bcFlag = ");
   Serial.print(bcFlag, BIN);
   Serial.print(" pbFlag = ");
