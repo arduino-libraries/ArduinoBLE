@@ -18,9 +18,10 @@
 #include <ArduinoBLE.h>
 
 
-#define PAIR_BUTTON 3        // button for pairing
+#define PAIR_BUTTON 3         // button for pairing
 #define PAIR_LED 24           // LED used to signal pairing
 #define PAIR_LED_ON LOW       // Blue LED on Nano BLE has inverted logic
+#define PAIR_LED_OFF HIGH     // ... so these are inverted as well
 #define PAIR_INTERVAL 30000   // interval for pairing after button press in ms
 
 #define CTRL_LED LED_BUILTIN
@@ -59,13 +60,13 @@ void setup() {
   BLE.setDisplayCode([](uint32_t confirmCode){
     Serial.println("New device pairing request.");
     Serial.print("Confirm code matches pairing device: ");
-    char code[6];
+    char code[7];
     sprintf(code, "%06d", confirmCode);
     Serial.println(code);
   });
 
   // Callback to allow accepting or rejecting pairing
-  BLE.setBinaryConfirmPairing([&acceptOrReject](){
+  BLE.setBinaryConfirmPairing([](){
     Serial.print("Should we confirm pairing? ");
     delay(5000);
     if(acceptOrReject){
@@ -176,8 +177,7 @@ void setup() {
 
     BLE.addService(batteryService);               // Add the battery service
     batteryLevelChar.writeValue(oldBatteryLevel); // set initial value for this characteristic
-    char* stringCharValue = new char[32];
-    stringCharValue = "string";
+    const char* stringCharValue = "string";
     stringcharacteristic.writeValue(stringCharValue);
     secretValue.writeValue(0);
 
@@ -219,9 +219,10 @@ void loop() {
     BLE.setPairable(false);
     Serial.println("No longer accepting pairing");
   }
-  // Make LED blink while pairing is allowed
-  digitalWrite(PAIR_LED, (BLE.pairable() ? (millis()%400)<200 : BLE.paired()) ? PAIR_LED_ON : !PAIR_LED_ON);
 
+  // Make LED blink while pairing is allowed, steady ON when paired
+  bool led_status = BLE.pairable() ? (millis()%400)<200 : BLE.paired();
+  digitalWrite(PAIR_LED, led_status ? PAIR_LED_ON : PAIR_LED_OFF);
 
   // if a central is connected to the peripheral:
   if (central && central.connected()) {
