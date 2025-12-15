@@ -59,7 +59,7 @@ void setup() {
   BLE.setDisplayCode([](uint32_t confirmCode){
     Serial.println("New device pairing request.");
     Serial.print("Confirm code matches pairing device: ");
-    char code[6];
+    char code[7];
     sprintf(code, "%06d", confirmCode);
     Serial.println(code);
   });
@@ -176,8 +176,7 @@ void setup() {
 
     BLE.addService(batteryService);               // Add the battery service
     batteryLevelChar.writeValue(oldBatteryLevel); // set initial value for this characteristic
-    char* stringCharValue = new char[32];
-    stringCharValue = "string";
+    const char* stringCharValue = "string";
     stringcharacteristic.writeValue(stringCharValue);
     secretValue.writeValue(0);
 
