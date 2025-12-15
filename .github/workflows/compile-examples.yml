@@ -34,78 +34,98 @@ jobs:
           - fqbn: arduino:samd:mkrwifi1010
             platforms: |
               - name: arduino:samd
+            libraries: ""
             artifact-name-suffix: arduino-samd-mkrwifi1010
           - fqbn: arduino:samd:nano_33_iot
             platforms: |
               - name: arduino:samd
+            libraries: ""
             artifact-name-suffix: arduino-samd-nano_33_iot
           - fqbn: arduino:megaavr:uno2018:mode=on
             platforms: |
               - name: arduino:megaavr
+            libraries: ""
             artifact-name-suffix: arduino-megaavr-uno2018
           - fqbn: arduino:mbed_nano:nano33ble
             platforms: |
               - name: arduino:mbed_nano
+            libraries: ""
             artifact-name-suffix: arduino-mbed_nano-nano33ble
           - fqbn: arduino:mbed_nano:nanorp2040connect
             platforms: |
               - name: arduino:mbed_nano
+            libraries: ""
             artifact-name-suffix: arduino-mbed_nano-nanorp2040connect
           - fqbn: arduino:mbed_portenta:envie_m7
             platforms: |
               - name: arduino:mbed_portenta
+            libraries: ""
             artifact-name-suffix: arduino-mbed_portenta-envie_m7
           - fqbn: arduino:mbed_nicla:nicla_vision
             platforms: |
               - name: arduino:mbed_nicla
+            libraries: ""
             artifact-name-suffix: arduino-mbed_nicla-nicla_vision
           - fqbn: arduino:mbed_giga:giga
             platforms: |
               - name: arduino:mbed_giga
+            libraries: ""
             artifact-name-suffix: arduino-mbed_giga-giga
           - fqbn: arduino:mbed_opta:opta
             platforms: |
               - name: arduino:mbed_opta
+            libraries: ""
             artifact-name-suffix: arduino-mbed_opta-opta
           - fqbn: arduino:renesas_uno:unor4wifi
             platforms: |
               - name: arduino:renesas_uno
+            libraries: ""
             artifact-name-suffix: arduino-renesas_uno-unor4wifi
           - fqbn: arduino:renesas_portenta:portenta_c33
             platforms: |
               - name: arduino:renesas_portenta
+            libraries: ""
             artifact-name-suffix: arduino-renesas_portenta-portenta_c33
           - fqbn: arduino:esp32:nano_nora
             platforms: |
               - name: arduino:esp32
+            libraries: ""
             artifact-name-suffix: arduino-esp32-nano_nora
           - fqbn: arduino:zephyr_main:giga
             platforms: |
               - name: arduino:zephyr_main
+            libraries: ""
             artifact-name-suffix: arduino-zephyr_main-giga
           - fqbn: arduino:zephyr_main:nano33ble
             platforms: |
               - name: arduino:zephyr_main
+            libraries: ""
             artifact-name-suffix: arduino-zephyr_main-nano33ble
           - fqbn: arduino:zephyr_main:portentah7
             platforms: |
               - name: arduino:zephyr_main
+            libraries: ""
             artifact-name-suffix: arduino-zephyr_main-portentah7
           - fqbn: arduino:zephyr_main:niclasense
             platforms: |
               - name: arduino:zephyr_main
+            libraries: ""
             artifact-name-suffix: arduino-zephyr_main-niclasense
           - fqbn: arduino:zephyr_main:portentac33
             platforms: |
               - name: arduino:zephyr_main
+            libraries: ""
             artifact-name-suffix: arduino-zephyr_main-portentac33
           - fqbn: arduino:zephyr_main:opta
             platforms: |
               - name: arduino:zephyr_main
+            libraries: ""
             artifact-name-suffix: arduino-zephyr_main-opta
           - fqbn: arduino:zephyr:unoq
             platforms: |
               - name: arduino:zephyr
+            libraries: |
+              - name: MsgPack
             artifact-name-suffix: arduino-zephyr-unoq
 
     steps:
@@ -121,6 +141,7 @@ jobs:
           libraries: |
             # Install the library from the local path.
             - source-path: ./
+            ${{ matrix.board.libraries }}
           sketch-paths: |
             - examples
           enable-deltas-report: true
