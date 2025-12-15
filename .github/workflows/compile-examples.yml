@@ -137,6 +137,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         fqbn:
           - esp32:esp32:esp32
