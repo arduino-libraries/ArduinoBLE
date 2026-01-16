@@ -99,11 +99,12 @@ int BLERemoteCharacteristic::writeValue(const uint8_t value[], int length, bool 
     length = maxLength;
   }
 
-  _value = (uint8_t*)realloc(_value, length);
-  if (_value == NULL) {
-    // realloc failed
+  uint8_t* newValue = (uint8_t*)realloc(_value, length);
+  if (newValue == NULL) {
+    // realloc failed - keep old buffer to avoid memory leak
     return 0;
   }
+  _value = newValue;
 
   if ((_properties & BLEWrite) && withResponse) {
     uint8_t resp[4];
@@ -180,14 +181,16 @@ bool BLERemoteCharacteristic::read()
     return false;
   }
 
-  _valueLength = respLength - 1;
-  _value = (uint8_t*)realloc(_value, _valueLength);
+  int newLength = respLength - 1;
+  uint8_t* newValue = (uint8_t*)realloc(_value, newLength);
 
-  if (_value == NULL) {
-    _valueLength = 0;
+  if (newValue == NULL) {
+    // realloc failed - keep old buffer to avoid memory leak
     return false;
   }
 
+  _value = newValue;
+  _valueLength = newLength;
   memcpy(_value, &resp[1], _valueLength); 
 
   return true;
@@ -246,17 +249,22 @@ void BLERemoteCharacteristic::addDescriptor(BLERemoteDescriptor* descriptor)
 
 void BLERemoteCharacteristic::writeValue(BLEDevice device, const uint8_t value[], int length)
 {
-  _valueLength = length;
-  _value = (uint8_t*)realloc(_value, _valueLength);
+  uint8_t* newValue = (uint8_t*)realloc(_value, length);
 
-  if (_value == NULL) {
-    _valueLength = 0;
-    return;
+  if (newValue == NULL) {
+    // realloc failed, but still signal that an update occurred
+    // so the user knows data arrived (even though we couldn't store it)
+    _valueUpdated = true;
+    _updatedValueRead = false;
+    // keep old _value and _valueLength intact to avoid memory leak
+    // and preserve previous data
+  } else {
+    _value = newValue;
+    _valueLength = length;
+    _valueUpdated = true;
+    _updatedValueRead = false;
+    memcpy(_value, value, _valueLength);
   }
-
-  _valueUpdated = true;
-  _updatedValueRead = false;
-  memcpy(_value, value, _valueLength);
 
   if (_valueUpdatedEventHandler) {
     _valueUpdatedEventHandler(device, BLECharacteristic(this));
