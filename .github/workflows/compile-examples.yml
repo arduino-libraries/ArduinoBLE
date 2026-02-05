@@ -34,17 +34,20 @@ jobs:
           - fqbn: arduino:samd:mkrwifi1010
             platforms: |
               - name: arduino:samd
-            libraries: ""
+            libraries: |
+              - name: WiFiNINA
             artifact-name-suffix: arduino-samd-mkrwifi1010
           - fqbn: arduino:samd:nano_33_iot
             platforms: |
               - name: arduino:samd
-            libraries: ""
+            libraries: |
+              - name: WiFiNINA
             artifact-name-suffix: arduino-samd-nano_33_iot
           - fqbn: arduino:megaavr:uno2018:mode=on
             platforms: |
               - name: arduino:megaavr
-            libraries: ""
+            libraries: |
+              - name: WiFiNINA
             artifact-name-suffix: arduino-megaavr-uno2018
           - fqbn: arduino:mbed_nano:nano33ble
             platforms: |
@@ -54,7 +57,8 @@ jobs:
           - fqbn: arduino:mbed_nano:nanorp2040connect
             platforms: |
               - name: arduino:mbed_nano
-            libraries: ""
+            libraries: |
+              - name: WiFiNINA
             artifact-name-suffix: arduino-mbed_nano-nanorp2040connect
           - fqbn: arduino:mbed_portenta:envie_m7
             platforms: |
@@ -175,6 +179,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.fqbn }}
+          libraries: |
+            ${{ matrix.libraries }}
           platforms: |
             - name: esp32:esp32
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
