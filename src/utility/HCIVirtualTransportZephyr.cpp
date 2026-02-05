@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#if defined(__ZEPHYR__) && !defined(ARDUINO_UNO_Q)
+#if defined(__ZEPHYR__) && !defined(ARDUINO_UNO_Q) && !defined(ARDUINO_NANO_RP2040_CONNECT)
 
 #include "HCIVirtualTransportZephyr.h"
 #include "HCI.h"
