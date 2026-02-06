@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoBLE library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2018-2025 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,31 +17,37 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _HCI_TRANSPORT_INTERFACE_H_
-#define _HCI_TRANSPORT_INTERFACE_H_
+#ifndef _HCI_VIRTUAL_TRANSPORT_RPC_H_
+#define _HCI_VIRTUAL_TRANSPORT_RPC_H_
 
-#include <Arduino.h>
+#include "HCITransport.h"
+#include "api/RingBuffer.h"
+#include <Arduino_RouterBridge.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
-class HCITransportInterface {
-public:
-  virtual int begin() = 0;
-  virtual void end() = 0;
+class HCIVirtualTransportRPCClass : public HCITransportInterface {
+  public:
+    HCIVirtualTransportRPCClass();
+    virtual ~HCIVirtualTransportRPCClass();
 
-  virtual void wait(unsigned long timeout) = 0;
+    virtual int begin();
+    virtual void end();
 
-  virtual int available() = 0;
-  virtual int peek() = 0;
-  virtual int read() = 0;
+    virtual void wait(unsigned long timeout);
 
-  // Some transports require a lock to use available/peek/read
-  // These methods allow to keep the lock while reading an unknown number of bytes
-  // These methods might disable interrupts. Only keep the lock as long as necessary.
-  virtual void lockForRead() {}
-  virtual void unlockForRead() {}
+    virtual int available();
+    virtual int peek();
+    virtual int read();
 
-  virtual size_t write(const uint8_t* data, size_t length) = 0;
+    virtual size_t write(const uint8_t* data, size_t length);
+
+  private:
+    RingBufferN<258> rxbuf;
+    bool initialized;
 };
 
-extern HCITransportInterface& HCITransport;
+extern HCIVirtualTransportRPCClass HCIVirtualTransportRPC;
 
 #endif

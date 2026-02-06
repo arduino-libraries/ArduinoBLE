@@ -28,7 +28,7 @@ const int ledPin = LED_BUILTIN; // pin to use for the LED
 void setup() {
   Serial.begin(9600);
   while (!Serial);
-  
+
   pinMode(ledPin, OUTPUT); // use the LED pin as an output
 
   // begin initialization
@@ -82,6 +82,10 @@ void blePeripheralDisconnectHandler(BLEDevice central) {
 }
 
 void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
+  // unused parameters
+  (void)central;
+  (void)characteristic;
+
   // central wrote new value to characteristic, update LED
   Serial.print("Characteristic event, written: ");
 

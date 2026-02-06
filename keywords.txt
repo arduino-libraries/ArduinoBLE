@@ -94,7 +94,7 @@ setValue	KEYWORD2
 broadcast	KEYWORD2
 written	KEYWORD2
 subscribed	KEYWORD2
-valueUpdated	KEYWORD2	
+valueUpdated	KEYWORD2
 addDescriptor	KEYWORD2
 descriptorCount	KEYWORD2
 hasDescriptor	KEYWORD2
@@ -105,7 +105,7 @@ canWrite	KEYWORD2
 canSubscribe	KEYWORD2
 subscribe	KEYWORD2
 canUnsubscribe	KEYWORD2
-unsubscribe	KEYWORD2	
+unsubscribe	KEYWORD2
 writeValueLE	KEYWORD2
 setValueLE	KEYWORD2
 valueLE	KEYWORD2
@@ -114,7 +114,7 @@ setValueBE	KEYWORD2
 valueBE	KEYWORD2
 
 uuid	KEYWORD2
-addCharacteristic	KEYWORD
+addCharacteristic	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -134,5 +134,5 @@ BLEIndicate	LITERAL1
 BLESubscribed	LITERAL1
 BLEUnsubscribed	LITERAL1
 BLEWritten	LITERAL1
-BLEUpdated	LITERAL1	
+BLEUpdated	LITERAL1
 

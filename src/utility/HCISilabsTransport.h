@@ -17,31 +17,26 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _HCI_TRANSPORT_INTERFACE_H_
-#define _HCI_TRANSPORT_INTERFACE_H_
+#ifndef _HCI_SILABS_TRANSPORT_H_
+#define _HCI_SILABS_TRANSPORT_H_
 
-#include <Arduino.h>
+#include "HCITransport.h"
 
-class HCITransportInterface {
+class HCISilabsTransportClass : public HCITransportInterface {
 public:
-  virtual int begin() = 0;
-  virtual void end() = 0;
+  HCISilabsTransportClass();
+  virtual ~HCISilabsTransportClass();
 
-  virtual void wait(unsigned long timeout) = 0;
+  virtual int begin();
+  virtual void end();
 
-  virtual int available() = 0;
-  virtual int peek() = 0;
-  virtual int read() = 0;
+  virtual void wait(unsigned long timeout);
 
-  // Some transports require a lock to use available/peek/read
-  // These methods allow to keep the lock while reading an unknown number of bytes
-  // These methods might disable interrupts. Only keep the lock as long as necessary.
-  virtual void lockForRead() {}
-  virtual void unlockForRead() {}
+  virtual int available();
+  virtual int peek();
+  virtual int read();
 
-  virtual size_t write(const uint8_t* data, size_t length) = 0;
+  virtual size_t write(const uint8_t* data, size_t length);
 };
-
-extern HCITransportInterface& HCITransport;
 
 #endif

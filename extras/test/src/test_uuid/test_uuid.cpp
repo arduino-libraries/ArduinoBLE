@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "utility/BLEUuid.h"
 
@@ -47,6 +47,6 @@ TEST_CASE("BLE uuid test", "[ArduinoBLE::BLEUuid]")
     REQUIRE(verify);
 
     // print the uuid
-    WARN("test: " << testUuid << ",  golden: " << goldenUuid);
+    //WARN("test: " << testUuid << ",  golden: " << goldenUuid);
   }
 }

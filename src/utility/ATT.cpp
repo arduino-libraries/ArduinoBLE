@@ -34,6 +34,8 @@
 
 #include "ATT.h"
 
+extern "C" int strcasecmp(char const *a, char const *b);
+
 #define ATT_OP_ERROR              0x01
 #define ATT_OP_MTU_REQ            0x02
 #define ATT_OP_MTU_RESP           0x03
@@ -551,6 +553,22 @@ bool ATTClass::disconnect()
 
     numDisconnects++;
 
+    BLEDevice bleDevice(_peers[i].addressType, _peers[i].address);
+
+    // clear CCCD values on disconnect
+    for (uint16_t att = 0; att < GATT.attributeCount(); att++) {
+      BLELocalAttribute* attribute = GATT.attribute(att);
+
+      if (attribute->type() == BLETypeCharacteristic) {
+        BLELocalCharacteristic* characteristic = (BLELocalCharacteristic*)attribute;
+
+        characteristic->writeCccdValue(bleDevice, 0x0000);
+      }
+    }
+
+    _longWriteHandle = 0x0000;
+    _longWriteValueLength = 0;
+
     _peers[i].connectionHandle = 0xffff;
     _peers[i].role = 0x00;
     _peers[i].addressType = 0x00;
@@ -580,7 +598,7 @@ BLEDevice ATTClass::central()
   return BLEDevice();
 }
 
-bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
+int ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
 {
   int numNotifications = 0;
 
@@ -608,10 +626,10 @@ bool ATTClass::handleNotify(uint16_t handle, const uint8_t* value, int length)
     numNotifications++;
   }
 
-  return (numNotifications > 0);
+  return (numNotifications > 0) ? length : 0;
 }
 
-bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
+int ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
 {
   int numIndications = 0;
 
@@ -648,7 +666,7 @@ bool ATTClass::handleInd(uint16_t handle, const uint8_t* value, int length)
     numIndications++;
   }
 
-  return (numIndications > 0);
+  return (numIndications > 0) ? length : 0;
 }
 
 void ATTClass::error(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
@@ -991,8 +1009,8 @@ void ATTClass::readOrReadBlobReq(uint16_t connectionHandle, uint16_t mtu, uint8_
   }
   /// if auth error, hold the response in a buffer.
   bool holdResponse = false;
-
-  uint16_t handle = *(uint16_t*)data;
+  uint16_t handle;
+  memcpy(&handle, data, sizeof(handle));
   uint16_t offset = (opcode == ATT_OP_READ_REQ) ? 0 : *(uint16_t*)&data[sizeof(handle)];
 
   if ((uint16_t)(handle - 1) > GATT.attributeCount()) {
@@ -1246,7 +1264,8 @@ void ATTClass::writeReqOrCmd(uint16_t connectionHandle, uint16_t mtu, uint8_t op
     return;
   }
 
-  uint16_t handle = *(uint16_t*)data;
+  uint16_t handle;
+  memcpy(&handle, data, sizeof(handle));
 
   if ((uint16_t)(handle - 1) > GATT.attributeCount()) {
     if (withResponse) {
