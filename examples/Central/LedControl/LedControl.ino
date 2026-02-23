@@ -30,7 +30,11 @@ void setup() {
   pinMode(buttonPin, INPUT);
 
   // initialize the Bluetooth® Low Energy hardware
-  BLE.begin();
+  if (!BLE.begin()) {
+    Serial.println("starting Bluetooth® Low Energy module failed!");
+
+    while (1);
+  }
 
   Serial.println("Bluetooth® Low Energy Central - LED control");
 

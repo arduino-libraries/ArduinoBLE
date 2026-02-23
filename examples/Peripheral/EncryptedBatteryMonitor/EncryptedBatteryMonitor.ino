@@ -154,9 +154,9 @@ void setup() {
   while(1){
     // begin initialization
     if (!BLE.begin()) {
-      Serial.println("starting BLE failed!");
-      delay(200);
-      continue;
+      Serial.println("starting Bluetooth® Low Energy module failed!");
+
+      while (1);
     }
     Serial.println("BT init");
     delay(200);
