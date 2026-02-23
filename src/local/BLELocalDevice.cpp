@@ -106,7 +106,10 @@ int BLELocalDevice::begin()
 
   if (HCI.reset() != 0) {
     end();
-
+#if defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_NANO_33_IOT) || defined(TARGET_NANO_RP2040_CONNECT)
+    Serial.println("The initialization of the Bluetooth® Low Energy module failed.");
+    Serial.println("Please ensure your NINA firmware is version 3.0.0 or higher.");
+#endif
     return 0;
   }
 
