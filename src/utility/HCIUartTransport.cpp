@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#if defined(ARDUINO_PORTENTA_C33)
+#if defined(ARDUINO_PORTENTA_C33) && !defined(__ZEPHYR__)
 
 #include "HCIUartTransport.h"
 
@@ -87,11 +87,7 @@ size_t HCIUartTransportClass::write(const uint8_t* data, size_t length)
   return result;
 }
 
-#if defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_NANO_RP2040_CONNECT)
-HCIUartTransportClass HCIUartTransport(SerialHCI, 119600);
-#else
 HCIUartTransportClass HCIUartTransport(SerialHCI, 912600);
-#endif
 HCITransportInterface& HCITransport = HCIUartTransport;
 
 #endif
