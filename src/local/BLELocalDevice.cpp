@@ -63,26 +63,7 @@ BLELocalDevice::~BLELocalDevice()
 
 int BLELocalDevice::begin()
 {
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
-  // reset the NINA in BLE mode
-  pinMode(SPIWIFI_SS, OUTPUT);
-  pinMode(NINA_RESETN, OUTPUT);
-  
-  digitalWrite(SPIWIFI_SS, LOW);
-#endif
-
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
-  digitalWrite(NINA_RESETN, HIGH);
-  delay(100);
-  digitalWrite(NINA_RESETN, LOW);
-  delay(750);
-#elif defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
-  // inverted reset
-  digitalWrite(NINA_RESETN, LOW);
-  delay(100);
-  digitalWrite(NINA_RESETN, HIGH);
-  delay(750);
-#elif defined(PORTENTA_H7_PINS) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
+#if defined(PORTENTA_H7_PINS) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
   // BT_REG_ON -> HIGH
   pinMode(BT_REG_ON, OUTPUT);
   digitalWrite(BT_REG_ON, LOW);
@@ -125,7 +106,10 @@ int BLELocalDevice::begin()
 
   if (HCI.reset() != 0) {
     end();
-
+#if defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_NANO_33_IOT) || defined(TARGET_NANO_RP2040_CONNECT)
+    Serial.println("The initialization of the Bluetooth® Low Energy module failed.");
+    Serial.println("Please ensure your NINA firmware is version 3.0.0 or higher.");
+#endif
     return 0;
   }
 
@@ -187,10 +171,10 @@ int BLELocalDevice::begin()
   //     }
   //     Serial.println();
 
-  //     // save this 
+  //     // save this
   //     uint8_t zeros[16];
   //     for(int k=0; k<16; k++) zeros[15-k] = 0;
-      
+
   //     // HCI.leAddResolvingAddress((*BADDR_Type)[i],(*BADDRs)[i],(*IRKs)[i], zeros);
 
   //     delete[] (*BADDRs)[i];
@@ -202,7 +186,7 @@ int BLELocalDevice::begin()
   //   delete BADDRs;
   //   delete[] (*IRKs);
   //   delete IRKs;
-    
+
   //   memcheck = new uint8_t[1];
   //   Serial.print("nIRK location: 0x");
   //   Serial.println((int)memcheck,HEX);
@@ -221,15 +205,9 @@ void BLELocalDevice::end()
 
   HCI.end();
 
-#if defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_AVR_UNO_WIFI_REV2)
-  // disable the NINA
-  digitalWrite(NINA_RESETN, HIGH);
-#elif defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_NANO_RP2040_CONNECT)
-  // disable the NINA
-  digitalWrite(NINA_RESETN, LOW);
-#elif defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
+#if defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
   digitalWrite(BT_REG_ON, LOW);
-#endif 
+#endif
   _advertisingData.clear();
   _scanResponseData.clear();
 }
@@ -315,7 +293,7 @@ bool BLELocalDevice::setManufacturerData(const uint16_t companyId, const uint8_t
 
 bool BLELocalDevice::setLocalName(const char *localName)
 {
-  return _scanResponseData.setLocalName(localName);  
+  return _scanResponseData.setLocalName(localName);
 }
 
 void BLELocalDevice::setAdvertisingData(BLEAdvertisingData& advertisingData)
@@ -360,7 +338,7 @@ int BLELocalDevice::advertise()
 {
   _advertisingData.updateData();
   _scanResponseData.updateData();
-  return GAP.advertise( _advertisingData.data(), _advertisingData.dataLength(), 
+  return GAP.advertise( _advertisingData.data(), _advertisingData.dataLength(),
                         _scanResponseData.data(), _scanResponseData.dataLength());
 }
 
