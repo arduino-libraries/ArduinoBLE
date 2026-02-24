@@ -35,19 +35,19 @@ jobs:
             platforms: |
               - name: arduino:samd
             libraries: |
-              - name: WiFiNINA
+              - name: Arduino_SpiNINA
             artifact-name-suffix: arduino-samd-mkrwifi1010
           - fqbn: arduino:samd:nano_33_iot
             platforms: |
               - name: arduino:samd
             libraries: |
-              - name: WiFiNINA
+              - name: Arduino_SpiNINA
             artifact-name-suffix: arduino-samd-nano_33_iot
           - fqbn: arduino:megaavr:uno2018:mode=on
             platforms: |
               - name: arduino:megaavr
             libraries: |
-              - name: WiFiNINA
+              - name: Arduino_SpiNINA
             artifact-name-suffix: arduino-megaavr-uno2018
           - fqbn: arduino:mbed_nano:nano33ble
             platforms: |
@@ -58,7 +58,7 @@ jobs:
             platforms: |
               - name: arduino:mbed_nano
             libraries: |
-              - name: WiFiNINA
+              - name: Arduino_SpiNINA
             artifact-name-suffix: arduino-mbed_nano-nanorp2040connect
           - fqbn: arduino:mbed_portenta:envie_m7
             platforms: |
