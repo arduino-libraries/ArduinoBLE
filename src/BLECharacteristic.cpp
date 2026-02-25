@@ -109,6 +109,18 @@ uint8_t BLECharacteristic::properties() const
   return 0;
 }
 
+bool BLECharacteristic::setValueSize(uint16_t valueSize) {
+  if (_local) {
+    return _local->setValueSize(valueSize);
+  }
+
+  if (_remote) {
+    //_remote->setValueLength();
+  }
+
+  return false;
+}
+
 int BLECharacteristic::valueSize() const
 {
   if (_local) {
