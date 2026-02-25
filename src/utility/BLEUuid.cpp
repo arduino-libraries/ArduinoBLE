@@ -22,9 +22,9 @@
 
 #include "BLEUuid.h"
 
-BLEUuid::BLEUuid(const char * str) :
-  _str(str)
+BLEUuid::BLEUuid(const char * str)
 {
+  _str = strdup(str);
   char temp[] = {0, 0, 0};
 
   memset(_data, 0x00, sizeof(_data));
@@ -54,6 +54,11 @@ BLEUuid::BLEUuid(const char * str) :
   } else {
     _length = 16;
   }
+}
+
+BLEUuid::~BLEUuid()
+{
+    free(_str);
 }
 
 const char* BLEUuid::str() const
