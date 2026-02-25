@@ -111,7 +111,7 @@ public:
   virtual void writeLK(uint8_t peerAddress[], uint8_t LK[]);
   virtual int tryResolveAddress(uint8_t* BDAddr, uint8_t* address);
 
-  virtual int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, void* data);
+  virtual int sendAclPkt(uint16_t handle, uint8_t cid, uint8_t plen, const void* data);
 
   virtual int disconnect(uint16_t handle);
 
@@ -119,7 +119,7 @@ public:
   virtual void noDebug();
 
   // TODO: Send command be private again & use ATT implementation of send command within ATT.
-  virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, void* parameters = NULL);
+  virtual int sendCommand(uint16_t opcode, uint8_t plen = 0, const void* parameters = nullptr);
   uint8_t remotePublicKeyBuffer[64];
   uint8_t localPublicKeyBuffer[64];
   uint8_t remoteDHKeyCheckBuffer[16];
