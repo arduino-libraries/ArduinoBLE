@@ -6,13 +6,17 @@ Enables Bluetooth® Low Energy connectivity on the Arduino MKR WiFi 1010, Arduin
 
 This library supports creating a Bluetooth® Low Energy peripheral & central mode.
 
-For the Arduino MKR WiFi 1010, Arduino UNO WiFi Rev2, and Arduino Nano 33 IoT boards, it requires the NINA module to be running [Arduino NINA-W102 firmware](https://github.com/arduino/nina-fw) v1.2.0 or later.
-
-For the Arduino UNO R4 WiFi, it requires the ESP32-S3 module to be running [firmware](https://github.com/arduino/uno-r4-wifi-usb-bridge) v0.2.0 or later.
-
-
 For more information about this library please visit us at:
 https://www.arduino.cc/en/Reference/ArduinoBLE
+
+## Firmware compatibility
+
+| Board | Library Version | Required Firmware |
+| :--- | :--- | :--- |
+| **MKR WiFi 1010, UNO WiFi Rev2,<br>Nano 33 IoT, Nano RP2040 Connect** | **v2.0.0 or later** | [NINA-W102](https://github.com/arduino/nina-fw) **v3.0.0+** |
+| **MKR WiFi 1010, UNO WiFi Rev2,<br>Nano 33 IoT, Nano RP2040 Connect** | **Versions prior to v2.0.0** | [NINA-W102](https://github.com/arduino/nina-fw) **v1.2.0 – v2.0.0** |
+| **Arduino UNO R4 WiFi** | All versions | [ESP32-S3](https://github.com/arduino/uno-r4-wifi-usb-bridge) **v0.2.0+** |
+
 
 ## License
 
