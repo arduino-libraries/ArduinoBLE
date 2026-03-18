@@ -22,7 +22,6 @@
 
 #include "HCITransport.h"
 #include "api/RingBuffer.h"
-#include <Arduino_RouterBridge.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>

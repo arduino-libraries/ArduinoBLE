@@ -21,6 +21,10 @@
 
 #include "HCIVirtualTransportRPC.h"
 
+#include <Arduino_RouterBridge.h>
+
+using RouterBridge::HCI;
+
 HCIVirtualTransportRPCClass::HCIVirtualTransportRPCClass() : initialized(false) {
 }
 
