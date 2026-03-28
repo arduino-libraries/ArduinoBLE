@@ -33,12 +33,12 @@ public:
   virtual int advertise(uint8_t* advData, uint8_t advDataLength, uint8_t* scanData, uint8_t scanDataLength);
   virtual void stopAdvertise();
 
-  virtual int scan(bool withDuplicates);
-  virtual int scanForName(String name, bool withDuplicates);
-  virtual int scanForUuid(String uuid, bool withDuplicates);
-  virtual int scanForAddress(String address, bool withDuplicates);
+  virtual int scan(bool withDuplicates, bool activeScan = true);
+  virtual int scanForName(String name, bool withDuplicates, bool activeScan = true);
+  virtual int scanForUuid(String uuid, bool withDuplicates, bool activeScan = true);
+  virtual int scanForAddress(String address, bool withDuplicates, bool activeScan = true);
   virtual void stopScan();
-  virtual BLEDevice available();
+  virtual BLEDevice available(bool includeAdvertised = false);
 
   virtual void setAdvertisingInterval(uint16_t advertisingInterval);
   virtual void setConnectable(bool connectable);
@@ -62,6 +62,7 @@ private:
   bool _connectable;
 
   BLEDeviceEventHandler _discoverEventHandler;
+  BLEDeviceEventHandler _advertiseEventHandler;
   BLELinkedList<BLEDevice*> _discoveredDevices;
 
   String _scanNameFilter;
