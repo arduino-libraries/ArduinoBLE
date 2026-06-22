@@ -54,6 +54,7 @@ public:
 
   uint8_t properties() const;
 
+  bool setValueSize(uint16_t valueSize);
   int valueSize() const;
   const uint8_t* value() const;
   int valueLength() const;
