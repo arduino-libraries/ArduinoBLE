@@ -110,7 +110,7 @@ jobs:
               - name: arduino:zephyr_main
             libraries: ""
             artifact-name-suffix: arduino-zephyr_main-portentah7
-          - fqbn: arduino:zephyr_main:niclasense
+          - fqbn: arduino:zephyr_main:nicla_sense
             platforms: |
               - name: arduino:zephyr_main
             libraries: ""
