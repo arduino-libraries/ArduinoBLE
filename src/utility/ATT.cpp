@@ -1735,7 +1735,7 @@ bool ATTClass::discoverDescriptors(uint16_t connectionHandle, BLERemoteDevice* d
       BLERemoteCharacteristic* nextCharacteristic = (j == (characteristicCount - 1)) ? NULL : service->characteristic(j + 1);
 
       reqStartHandle = characteristic->valueHandle() + 1;
-      reqEndHandle = nextCharacteristic ? nextCharacteristic->valueHandle() : serviceEndHandle;
+      reqEndHandle = nextCharacteristic ? nextCharacteristic->startHandle() - 1 : serviceEndHandle;
 
       if (reqStartHandle > reqEndHandle) {
         continue;
@@ -1749,8 +1749,14 @@ bool ATTClass::discoverDescriptors(uint16_t connectionHandle, BLERemoteDevice* d
         }
 
         if (responseBuffer[0] == ATT_OP_FIND_INFO_RESP) {
-          uint16_t lengthPerDescriptor = responseBuffer[1] * 4;
-          uint8_t uuidLen = 2;
+          uint8_t format = responseBuffer[1];
+
+          if (format != 0x01 && format != 0x02) {
+            return false;
+          }
+
+          uint16_t lengthPerDescriptor = (format == 0x01) ? 4 : 18;
+          uint8_t uuidLen = (format == 0x01) ? 2 : 16;
 
           for (int i = 2; i < respLength; i += lengthPerDescriptor) {
             struct __attribute__ ((packed)) RawDescriptor {
