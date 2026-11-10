@@ -110,7 +110,8 @@ jobs:
               - name: arduino:zephyr_main
             libraries: ""
             artifact-name-suffix: arduino-zephyr_main-portentah7
-          - fqbn: arduino:zephyr_main:nicla_sense
+          # The sketch exceeds the LLEXT heap of the board in dynamic link mode
+          - fqbn: arduino:zephyr_main:nicla_sense:link_mode=static
             platforms: |
               - name: arduino:zephyr_main
             libraries: ""
