@@ -21,10 +21,51 @@
 
 #include "HCIVirtualTransport.h"
 
+// On targets using the new ESP-IDF HCI layer (C5, C6, H2) with NimBLE as host,
+// the esp_vhci_host_* API is not available: talk to the HCI transport directly.
+#if CONFIG_BT_LE_HCI_INTERFACE_USE_RAM && CONFIG_BT_NIMBLE_ENABLED
+#define HCI_ESP_TRANSPORT
+#include "esp_hci_transport.h"
+#include "esp_hci_internal.h"
+#endif
+
 StreamBufferHandle_t rec_buffer;
+
+#if defined(HCI_ESP_TRANSPORT)
+
+static int notify_host_recv(hci_trans_pkt_ind_t type, uint8_t *data, uint16_t len)
+{
+  static uint8_t pkt[1 + 258];
+  uint16_t length;
+
+  (void)len;
+
+  if (type == HCI_EVT_IND) {
+    // Event buffer: event code, parameter length, parameters
+    length = data[1] + 2;
+    memcpy(&pkt[1], data, length);
+    r_ble_hci_trans_buf_free(data);
+  } else if (type == HCI_ACL_IND) {
+    struct os_mbuf *om = (struct os_mbuf *)data;
+    length = OS_MBUF_PKTHDR(om)->omp_len;
+    if (length > sizeof(pkt) - 1) {
+      length = sizeof(pkt) - 1;
+    }
+    os_mbuf_copydata(om, 0, length, &pkt[1]);
+    os_mbuf_free_chain(om);
+  } else {
+    return 0;
+  }
+
+  pkt[0] = type;
+  xStreamBufferSend(rec_buffer, pkt, length + 1, portMAX_DELAY);  // !!!potentially waiting forever
+  return 0;
+}
+
+#else
+
 StreamBufferHandle_t send_buffer;
 TaskHandle_t bleHandle;
-
 
 static void notify_host_send_available(void)
 {
@@ -54,6 +95,8 @@ void bleTask(void *pvParameters)
   }
 }
 
+#endif
+
 
 HCIVirtualTransportClass::HCIVirtualTransportClass()
 {
@@ -68,7 +111,9 @@ int HCIVirtualTransportClass::begin()
   btStarted(); // this somehow stops the arduino ide from initializing bluedroid
 
   rec_buffer = xStreamBufferCreate(258, 1);
+#if !defined(HCI_ESP_TRANSPORT)
   send_buffer = xStreamBufferCreate(258, 1);
+#endif
 
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -88,17 +133,28 @@ int HCIVirtualTransportClass::begin()
   esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
   esp_bt_controller_init(&bt_cfg);
   esp_bt_controller_enable(ESP_BT_MODE_BLE);
+#if defined(HCI_ESP_TRANSPORT)
+  hci_transport_host_callback_register(notify_host_recv);
+#else
   xTaskCreatePinnedToCore(&bleTask, "bleTask", 2048, NULL, 5, &bleHandle, 0);
+#endif
   return 1;
 }
 
 void HCIVirtualTransportClass::end()
 {
+#if defined(HCI_ESP_TRANSPORT)
+  hci_transport_host_callback_register(NULL);
+  vStreamBufferDelete(rec_buffer);
+  esp_bt_controller_disable();
+  esp_bt_controller_deinit();
+#else
   vStreamBufferDelete(rec_buffer);
   vStreamBufferDelete(send_buffer);
   esp_bt_controller_disable();
   esp_bt_controller_deinit();
   vTaskDelete(bleHandle);
+#endif
 }
 
 void HCIVirtualTransportClass::wait(unsigned long timeout)
@@ -133,8 +189,46 @@ int HCIVirtualTransportClass::read()
 
 size_t HCIVirtualTransportClass::write(const uint8_t* data, size_t length)
 {
+#if defined(HCI_ESP_TRANSPORT)
+  // The controller expects packets without the H4 indicator, commands in a
+  // controller allocated buffer and ACL data in an mbuf.
+  if (length < 2) {
+    return 0;
+  }
+
+  if (data[0] == HCI_CMD_IND) {
+    if (length - 1 > HCI_TRANSPORT_CMD_SZ) {
+      return 0;
+    }
+    uint8_t *cmd = r_ble_hci_trans_buf_alloc(ESP_HCI_INTERNAL_BUF_CMD);
+    if (cmd == NULL) {
+      return 0;
+    }
+    memcpy(cmd, &data[1], length - 1);
+    if (hci_transport_host_cmd_tx(cmd, length - 1) != 0) {
+      return 0;
+    }
+  } else if (data[0] == HCI_ACL_IND) {
+    struct os_mbuf *om = os_msys_get_pkthdr(length - 1, ESP_HCI_INTERNAL_ACL_MBUF_LEADINGSPCAE);
+    if (om == NULL) {
+      return 0;
+    }
+    if (os_mbuf_append(om, &data[1], length - 1) != 0) {
+      os_mbuf_free_chain(om);
+      return 0;
+    }
+    if (hci_transport_host_acl_tx((uint8_t *)om, length - 1) != 0) {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+
+  return length;
+#else
   size_t result = xStreamBufferSend(send_buffer,data,length,portMAX_DELAY);
   return result;
+#endif
 }
 
 HCIVirtualTransportClass HCIVirtualTransport;
