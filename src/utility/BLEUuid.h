@@ -34,6 +34,7 @@ public:
   uint8_t length() const;
 
   static const char* uuidToString(const uint8_t* data, uint8_t length);
+  static void addressToString(const uint8_t address[6], char result[18]);
 
 private:
   const char* _str;

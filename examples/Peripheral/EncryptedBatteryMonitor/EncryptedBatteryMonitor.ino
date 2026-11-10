@@ -60,9 +60,11 @@ void setup() {
   BLE.setDisplayCode([](uint32_t confirmCode){
     Serial.println("New device pairing request.");
     Serial.print("Confirm code matches pairing device: ");
-    char code[7];
-    sprintf(code, "%06d", confirmCode);
-    Serial.println(code);
+    // print the 6-digit code, including leading zeros
+    for (uint32_t div = 100000; div > 0; div /= 10) {
+      Serial.print((confirmCode / div) % 10);
+    }
+    Serial.println();
   });
 
   // Callback to allow accepting or rejecting pairing

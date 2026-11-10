@@ -17,16 +17,29 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "BLEUuid.h"
 
+static const char hexChars[] = "0123456789abcdef";
+
+static uint8_t hexDigit(char c)
+{
+  if (c >= '0' && c <= '9') {
+    return c - '0';
+  }
+  if (c >= 'a' && c <= 'f') {
+    return c - 'a' + 10;
+  }
+  if (c >= 'A' && c <= 'F') {
+    return c - 'A' + 10;
+  }
+  return 0;
+}
+
 BLEUuid::BLEUuid(const char * str) :
   _str(str)
 {
-  char temp[] = {0, 0, 0};
-
   memset(_data, 0x00, sizeof(_data));
 
   _length = 0;
@@ -41,10 +54,9 @@ BLEUuid::BLEUuid(const char * str) :
       continue;
     }
 
-    temp[0] = str[i - 1];
-    temp[1] = str[i];
+    uint8_t high = (i > 0) ? hexDigit(str[i - 1]) : 0;
 
-    _data[_length] = strtoul(temp, NULL, 16);
+    _data[_length] = (high << 4) | hexDigit(str[i]);
 
     _length++;
   }
@@ -79,8 +91,8 @@ const char* BLEUuid::uuidToString(const uint8_t* data, uint8_t length)
   for (int i = length - 1; i >= 0; i--) {
     uint8_t b = data[i];
 
-    utoa(b >> 4, c++, 16);
-    utoa(b & 0x0f, c++, 16);
+    *c++ = hexChars[b >> 4];
+    *c++ = hexChars[b & 0x0f];
 
     if (i == 6 || i == 8 || i == 10 || i == 12) {
       *c++ = '-';
@@ -90,4 +102,17 @@ const char* BLEUuid::uuidToString(const uint8_t* data, uint8_t length)
   *c = '\0';
 
   return uuid;
+}
+
+void BLEUuid::addressToString(const uint8_t address[6], char result[18])
+{
+  char* c = result;
+
+  for (int i = 5; i >= 0; i--) {
+    *c++ = hexChars[address[i] >> 4];
+    *c++ = hexChars[address[i] & 0x0f];
+    *c++ = ':';
+  }
+
+  *(c - 1) = '\0';
 }
