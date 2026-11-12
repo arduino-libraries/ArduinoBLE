@@ -77,7 +77,7 @@ bool BLEDevice::disconnect()
 String BLEDevice::address() const
 {
   char result[18];
-  sprintf(result, "%02x:%02x:%02x:%02x:%02x:%02x", _address[5], _address[4], _address[3], _address[2], _address[1], _address[0]);
+  BLEUuid::addressToString(_address, result);
 
   return result;
 }
