@@ -133,22 +133,25 @@ int HCIVirtualTransportZephyrClass::begin() {
   k_fifo_init(&rx_queue);
   bt_enable_raw(__rx_queue);
 
-#if CONFIG_BT_HCI_SETUP
+#if CONFIG_BT_HCI_SETUP || CONFIG_CYW4343W_MURATA_1DX
   const struct device *uart = DEVICE_DT_GET(DT_PARENT(DT_CHOSEN(zephyr_bt_hci)));
   if (!uart) {
     return 0;
   }
 
+#if CONFIG_BT_HCI_SETUP
+  // Deprecated in Zephyr 4.5: drivers now do their own setup in open().
   if (bt_h4_vnd_setup(uart)) {
     return 0;
   }
+#endif /* CONFIG_BT_HCI_SETUP */
 
 #if CONFIG_CYW4343W_MURATA_1DX
   if (cyw4343_download_firmware(uart)) {
     return 0;
   }
 #endif /* CONFIG_CYW4343W_MURATA_1DX */
-#endif /* CONFIG_BT_HCI_SETUP */
+#endif /* CONFIG_BT_HCI_SETUP || CONFIG_CYW4343W_MURATA_1DX */
 
 #if CONFIG_BT_LL_SW_SPLIT
   // Use unique device id for BD addr.
