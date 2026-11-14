@@ -34,7 +34,12 @@ enum BLEDeviceEvent {
 
 class BLEDevice;
 
+#ifdef ARDUINO_ARCH_MBED
+#include <mbed.h>
+typedef mbed::Callback<void (BLEDevice device)> BLEDeviceEventHandler;
+#else
 typedef void (*BLEDeviceEventHandler)(BLEDevice device);
+#endif
 
 class BLEDevice {
 public:
