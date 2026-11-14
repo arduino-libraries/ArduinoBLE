@@ -705,6 +705,9 @@ void ATTClass::mtuReq(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
   for (int i = 0; i < ATT_MAX_PEERS; i++) {
     if (_peers[i].connectionHandle == connectionHandle) {
       _peers[i].mtu = mtu;
+      if (_eventHandlers[BLEMtuChanged]) {
+        _eventHandlers[BLEMtuChanged](BLEDevice(_peers[i].addressType, _peers[i].address));
+      }
       break;
     }
   }
@@ -738,6 +741,9 @@ void ATTClass::mtuResp(uint16_t connectionHandle, uint8_t dlen, uint8_t data[])
   for (int i = 0; i < ATT_MAX_PEERS; i++) {
     if (_peers[i].connectionHandle == connectionHandle) {
       _peers[i].mtu = mtu;
+      // if (_eventHandlers[BLEMtuChanged]) {
+      //   _eventHandlers[BLEMtuChanged](BLEDevice(_peers[i].addressType, _peers[i].address));
+      // }
       break;
     }
   }

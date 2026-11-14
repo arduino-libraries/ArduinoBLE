@@ -47,6 +47,7 @@ public:
   virtual String address() const;
 
   virtual int rssi();
+  virtual uint16_t getMTU();
 
   virtual bool setAdvertisedServiceUuid(const char* advertisedServiceUuid);
   virtual bool setAdvertisedService(const BLEService& service);

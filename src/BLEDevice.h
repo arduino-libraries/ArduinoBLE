@@ -28,6 +28,7 @@ enum BLEDeviceEvent {
   BLEConnected = 0,
   BLEDisconnected = 1,
   BLEDiscovered = 2,
+  BLEMtuChanged = 3,
 
   BLEDeviceLastEvent
 };
@@ -68,6 +69,7 @@ public:
   int manufacturerData(uint8_t value[], int length) const;
 
   virtual int rssi();
+  virtual uint16_t getMTU() const;
 
   bool connect();
   bool discoverAttributes();
