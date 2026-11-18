@@ -37,7 +37,12 @@ enum BLECharacteristicEvent {
 class BLECharacteristic;
 class BLEDevice;
 
+#ifdef ARDUINO_ARCH_MBED
+#include <mbed.h>
+typedef mbed::Callback<void (BLEDevice device, BLECharacteristic characteristic)> BLECharacteristicEventHandler;
+#else
 typedef void (*BLECharacteristicEventHandler)(BLEDevice device, BLECharacteristic characteristic);
+#endif
 
 class BLELocalCharacteristic;
 class BLERemoteCharacteristic;
