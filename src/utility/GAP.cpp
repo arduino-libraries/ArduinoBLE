@@ -33,7 +33,8 @@ GAPClass::GAPClass() :
   _scanning(false),
   _advertisingInterval(160),
   _connectable(true),
-  _discoverEventHandler(NULL)
+  _discoverEventHandler(NULL),
+  _advertiseEventHandler(NULL)
 {
 }
 
@@ -82,7 +83,7 @@ void GAPClass::stopAdvertise()
   HCI.leSetAdvertiseEnable(0x00);
 }
 
-int GAPClass::scan(bool withDuplicates)
+int GAPClass::scan(bool withDuplicates, bool activeScan)
 {
   HCI.leSetScanEnable(false, true);
 
@@ -93,7 +94,7 @@ int GAPClass::scan(bool withDuplicates)
     - scan window: mandatory range from 0x0011 to 0x1000
     - The scan window can only be less than or equal to the scan interval
   */
-  if (HCI.leSetScanParameters(0x01, 0x0020, 0x0020, 0x00, 0x00) != 0) {
+  if (HCI.leSetScanParameters(activeScan ? 0x01 : 0x00, 0x0020, 0x0020, 0x00, 0x00) != 0) {
     return false;
   }
 
@@ -106,31 +107,31 @@ int GAPClass::scan(bool withDuplicates)
   return 1;
 }
 
-int GAPClass::scanForName(String name, bool withDuplicates)
+int GAPClass::scanForName(String name, bool withDuplicates, bool activeScan)
 {
   _scanNameFilter    = name;
   _scanUuidFilter    = "";
   _scanAddressFilter = "";
 
-  return scan(withDuplicates);
+  return scan(withDuplicates, activeScan);
 }
 
-int GAPClass::scanForUuid(String uuid, bool withDuplicates)
+int GAPClass::scanForUuid(String uuid, bool withDuplicates, bool activeScan)
 {
   _scanNameFilter    = "";
   _scanUuidFilter    = uuid;
   _scanAddressFilter = "";
 
-  return scan(withDuplicates);
+  return scan(withDuplicates, activeScan);
 }
 
-int GAPClass::scanForAddress(String address, bool withDuplicates)
+int GAPClass::scanForAddress(String address, bool withDuplicates, bool activeScan)
 {
   _scanNameFilter    = "";
   _scanUuidFilter    = "";
   _scanAddressFilter = address;
 
-  return scan(withDuplicates);
+  return scan(withDuplicates, activeScan);
 }
 
 void GAPClass::stopScan()
@@ -148,12 +149,12 @@ void GAPClass::stopScan()
   _discoveredDevices.clear();
 }
 
-BLEDevice GAPClass::available()
+BLEDevice GAPClass::available(bool includeAdvertised)
 {
   for (unsigned int i = 0; i < _discoveredDevices.size(); i++) {
     BLEDevice* device = _discoveredDevices.get(i);
 
-    if (device->discovered()) {
+    if (device->discovered() || includeAdvertised) {
       BLEDevice result = *device;
 
       _discoveredDevices.remove(i);
@@ -185,6 +186,9 @@ void GAPClass::setEventHandler(BLEDeviceEvent event, BLEDeviceEventHandler event
   if (event == BLEDiscovered) {
     _discoverEventHandler = eventHandler;
   }
+  else if (event == BLEAdvertised) {
+    _advertiseEventHandler = eventHandler;
+  }
 }
 
 void GAPClass::handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint8_t address[6],
@@ -201,6 +205,9 @@ void GAPClass::handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint
     device.setAdvertisementData(type, eirLength, eirData, rssi);
 
     if (matchesScanFilter(device)) {
+      if (_advertiseEventHandler) {
+        _advertiseEventHandler(device);
+      }
       _discoverEventHandler(device);
     }
     return;
@@ -236,6 +243,9 @@ void GAPClass::handleLeAdvertisingReport(uint8_t type, uint8_t addressType, uint
 
   if (type != 0x04) {
     discoveredDevice->setAdvertisementData(type, eirLength, eirData, rssi);
+    if (_advertiseEventHandler && matchesScanFilter(*discoveredDevice)) {
+      _advertiseEventHandler(*discoveredDevice);
+    }
   } else {
     discoveredDevice->setScanResponseData(eirLength, eirData, rssi);
   }
