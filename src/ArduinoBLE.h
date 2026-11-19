@@ -20,6 +20,7 @@
 #ifndef _ARDUINO_BLE_H_
 #define _ARDUINO_BLE_H_
 
+#include "definitions/BLEDefinitions.h"
 #include "local/BLELocalDevice.h"
 #include "BLEProperty.h"
 #include "BLEStringCharacteristic.h"
