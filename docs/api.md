@@ -2650,6 +2650,7 @@ BLELongCharacteristic(uuid, properties)
 BLEUnsignedLongCharacteristic(uuid, properties)
 BLEFloatCharacteristic(uuid, properties)
 BLEDoubleCharacteristic(uuid, properties)
+BLEStringCharacteristic(uuid, properties, valueSize)
 ```
 
 #### Parameters
@@ -2659,6 +2660,8 @@ BLEDoubleCharacteristic(uuid, properties)
 - **valueSize**: (maximum) size of characteristic value
 - **fixedLength**: if true, size of characteristic value is fixed
 - **stringValue**: value as a string
+
+For `BLEStringCharacteristic`, **valueSize** is the maximum number of bytes in the string value. Its `writeValue()` and `setValue()` methods accept an Arduino `String`; `value()` returns a `String`.
 
 #### Returns
 - New **BLECharacteristic** with the specified **UUID** and value
@@ -3568,6 +3571,85 @@ None
   }
 
 
+```
+
+## BLEStringCharacteristic Class
+
+A local characteristic whose value can be read and written as an Arduino `String`. It inherits the other characteristic methods documented under [BLECharacteristic Class](#blecharacteristic-class).
+
+### `BLEStringCharacteristic()`
+
+Create a string characteristic with a maximum value size.
+
+#### Syntax
+
+```
+BLEStringCharacteristic(uuid, properties, valueSize)
+```
+
+#### Parameters
+
+- **uuid**: 16-bit or 128-bit UUID in `String` format
+- **properties**: property mask, such as `BLERead`, `BLEWrite`, or `BLENotify`
+- **valueSize**: maximum size of the value in bytes; a longer value is truncated when written
+
+#### Example
+
+```arduino
+BLEService statusService("19B10000-E8F2-537E-4F6C-D104768A1214");
+BLEStringCharacteristic statusCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify, 20);
+
+statusService.addCharacteristic(statusCharacteristic);
+statusCharacteristic.writeValue(String("ready"));
+```
+
+### `bleStringCharacteristic.writeValue()` and `bleStringCharacteristic.setValue()`
+
+Write an Arduino `String` to the characteristic. `setValue()` is an alias for `writeValue()`. The value is limited to the `valueSize` specified in the constructor.
+
+#### Syntax
+
+```
+bleStringCharacteristic.writeValue(value)
+bleStringCharacteristic.setValue(value)
+```
+
+#### Parameters
+
+- **value**: Arduino `String` to write
+
+#### Returns
+
+- The integer result of the underlying characteristic write; for a local value without notification subscribers, this is the number of bytes stored
+
+#### Example
+
+```arduino
+statusCharacteristic.setValue(String("running"));
+```
+
+### `bleStringCharacteristic.value()`
+
+Read the currently stored bytes as an Arduino `String`.
+
+#### Syntax
+
+```
+bleStringCharacteristic.value()
+```
+
+#### Parameters
+
+None
+
+#### Returns
+
+- Current characteristic value as an Arduino `String`
+
+#### Example
+
+```arduino
+Serial.println(statusCharacteristic.value());
 ```
 
 ## BLEDescriptor Class
